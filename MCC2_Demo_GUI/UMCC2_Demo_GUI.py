@@ -101,25 +101,26 @@ class Kalibrierung_Thread(QThread):
     Kalibrierung_fertig = pyqtSignal()
     Kalibrierung_unterbrochen = pyqtSignal()
     Kalibrierung_Status_Nachricht = pyqtSignal()
-    Stop = False
-    Status = ''
+    stop = False
+    status = ''
+    box = None
 
-    def start(self, Box):
+    def start(self, box):
         super().start()
-        self.Box = Box
-        self.Stop = False
+        self.box = box
+        self.stop = False
 
     def run(self):
-        self.Box.Motoren_kalibrieren(Thread = self)
+        self.box.Motoren_kalibrieren(Thread = self)
 
-        if self.Stop:
-            self.Box.Stop()
+        if self.stop:
+            self.box.Stop()
             self.Kalibrierung_unterbrochen.emit()
         else:
             self.Kalibrierung_fertig.emit()
 
-    def Nachricht(self, Text):
-        self.Status = Text
+    def report(self, text):
+        self.status = text
         self.Kalibrierung_Status_Nachricht.emit()
 
 
@@ -190,7 +191,7 @@ class ExampleApp(QMainWindow):
         # self.horizontalSlider1.paintEvent = paintEvent
 
     def Kalibrierung_Status_zeigen(self):
-        self.StatusBar.showMessage(self.Kal_Thread.Status)
+        self.StatusBar.showMessage(self.Kal_Thread.status)
 
     def Motoren_Namen_laden(self):
         self.MotorCBox.clear()
@@ -200,7 +201,7 @@ class ExampleApp(QMainWindow):
 
     def Motor_wechseln(self):
         if self.MotorCBox.currentText() != '':
-            self.Motor = self.Box.get_Motor(Name=self.MotorCBox.currentText())
+            self.Motor = self.Box.get_motor(Name=self.MotorCBox.currentText())
             self.init_Soft_Limits()
             self.Position_lesen(single_shot=True)
             if self.Motor.ohne_Initiatoren:
@@ -448,7 +449,7 @@ class ExampleApp(QMainWindow):
 
 
         else:
-            self.Kal_Thread.Stop = True
+            self.Kal_Thread.stop = True
 
     def ports_lesen(self):
         self.PortBox.clear()

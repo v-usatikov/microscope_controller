@@ -4,13 +4,16 @@ import serial.tools.list_ports
 from serial import Serial
 import time
 from copy import deepcopy
+from typing import Dict, List, Tuple
 
 import logging
 import ULoggingConfig
 
-
 if __name__ == '__main__':
     ULoggingConfig.init_config()
+
+M_Coord = Tuple[int, int]
+Param_Val = Dict[str, float]
 
 
 def command_format(text: str, bus: int):
@@ -38,7 +41,7 @@ def read_reply(ser: Serial) -> (bool, str):
         raise ReplyError('Fehler bei Antwort_lesen: Unerwartete Antwort! "{}"'.format(reply))
 
 
-def com_list() -> list:
+def com_list() -> List[str]:
     """Gibt eine Liste der verfügbaren COM-Ports"""
     comlist = serial.tools.list_ports.comports()
     n_list = []
@@ -130,13 +133,13 @@ class PBox:
         self.timeout = timeout
         self.report = ""
         self.bus_list = []
-        self.Controller = {}
+        self.controller = {}
 
         self.get_bus_list()
         logging.info(f'Box Objekt erstellt, {len(self.bus_list)} Controller gefunden.')
 
     def __iter__(self):
-        return (Controller for Controller in self.Controller.values())
+        return (c_proxy(controller) for controller in self.controller.values())
 
     # noinspection PyUnboundLocalVariable,PyUnboundLocalVariable
     def get_bus_list(self):
@@ -156,12 +159,12 @@ class PBox:
 
     def make_controllers(self):
         """erstellt Objekten für alle verfügbare Controller"""
-        self.Controller = {}
+        self.controller = {}
         for i in self.bus_list:
-            self.Controller[i] = PController(self, i)
+            self.controller[i] = PController(self, i)
         logging.info('Box hat {} Controller Objekten für Bus {} erstellt.'.format(len(self.bus_list), self.bus_list))
 
-    def command(self, text, bus):
+    def command(self, text: str, bus: int) -> (bool, str):
         """Befehl für die Box ausführen"""
         self.ser.flushInput()
         self.ser.write(command_format(text, bus))
@@ -191,7 +194,7 @@ class PBox:
         self.report = report
         return report
 
-    def initialize_with_config_file(self, config_file='input/Phytron_Motoren_config.csv'):
+    def initialize_with_config_file(self, config_file: str = 'input/Phytron_Motoren_config.csv'):
         """Sucht und macht Objekte für alle verfügbare Controller und Motoren. Gibt ein Bericht zurück."""
         logging.info('Box Initialisierung wurde gestartet.')
 
@@ -199,73 +202,74 @@ class PBox:
         report = ""
         n_motors = 0
         n_controllers = 0
-        self.Controller = {}
+        self.controller = {}
 
         controllers_to_init, motors_to_init, motors_info, motors_parameters = self.read_config_from_file(config_file)
 
         # Controller initialisieren
-        fehlende_bus = []
+        absent_bus = []
         for bus in controllers_to_init:
             if bus in self.bus_list:
-                self.Controller[bus] = PController(self, bus)
+                self.controller[bus] = PController(self, bus)
                 n_controllers += 1
             else:
-                if bus not in fehlende_bus:
-                    fehlende_bus.append(bus)
-        if len(fehlende_bus) > 1:
-            report += f"Controller {fehlende_bus} sind nicht verbunden und wurden nicht initialisiert.\n"
-        elif len(fehlende_bus) == 1:
-            report += f"Controller {fehlende_bus} ist nicht verbunden und wurde nicht initialisiert.\n"
+                if bus not in absent_bus:
+                    absent_bus.append(bus)
+        if len(absent_bus) > 1:
+            report += f"Controller {absent_bus} sind nicht verbunden und wurden nicht initialisiert.\n"
+        elif len(absent_bus) == 1:
+            report += f"Controller {absent_bus} ist nicht verbunden und wurde nicht initialisiert.\n"
 
         # Motoren initialisieren
-        for bus, Axe in motors_to_init:
-            if Axe <= self.Controller[bus].n_axes():
-                self.Controller[bus].Motor[Axe] = PMotor(self.Controller[bus], Axe)
+        for bus, axis in motors_to_init:
+            if axis <= self.controller[bus].n_axes():
+                self.controller[bus].motor[axis] = PMotor(self.controller[bus], axis)
                 n_motors += 1
             else:
-                report += f"Axe {Axe} ist beim Controller {bus} nicht vorhanden, den Motor wurde nicht initialisiert.\n"
+                report += f"Achse {axis} ist beim Controller {bus} nicht vorhanden, " \
+                          f"den Motor wurde nicht initialisiert.\n"
 
-        self.Motoren_info_einstellen(motors_info)
+        self.set_motors_info(motors_info)
         self.config(motors_parameters)
 
         report = f"{n_controllers} Controller und {n_motors} Motoren wurde initialisiert:\n" + report
-        for Controller in self:
-            report += f'Controller {Controller.bus}: '
-            mehr_als_einen = False
-            for Motor in Controller:
-                if mehr_als_einen:
+        for controller in self:
+            report += f'Controller {controller.bus}: '
+            more_then_one = False
+            for motor in controller:
+                if more_then_one:
                     report += ', '
-                report += Motor.Name
-                mehr_als_einen = True
+                report += motor.name
+                more_then_one = True
             report += '\n'
 
         self.report = report
         return report
 
-    def Motoren_info_einstellen(self, Motoren_info):
+    def set_motors_info(self, motors_info: Dict[M_Coord, dict]):
         """Einstellt Name, Initiatoren Status, Anz_Einheiten, AE_in_Schritt der Motoren anhand angegebene Dict"""
-        for Motor_Coord, Motor_info in Motoren_info.items():
-            Motor = self.get_Motor(Motor_Coord)
-            Motor.info_einstellen(Motor_info)
+        for motor_coord, motor_info in motors_info.items():
+            motor = self.get_motor(motor_coord)
+            motor.set_info(motor_info)
 
-    def alle_Motoren_stehen(self, Thread=None):
+    def all_motors_stand(self, thread=None) -> bool:
         """Gibt bool Wert zurück, ob alle Motoren stehen."""
-        if Thread is not None:
-            laufende_Motoren = []
-            for Controller in self:
-                for Motor in Controller:
-                    if not Motor.steht():
-                        laufende_Motoren.append(Motor.Name)
-            if not laufende_Motoren:
+        if thread is not None:
+            running_motors = []
+            for controller in self:
+                for motor in controller:
+                    if not motor.stand():
+                        running_motors.append(motor.name)
+            if not running_motors:
                 return True
             else:
-                Nachricht = getattr(Thread, "Nachricht", None)
-                if Nachricht is not None:
-                    Nachricht(f'Wartet auf Motoren: {", ".join(laufende_Motoren)}')
+                report = getattr(thread, "report", None)
+                if report is not None:
+                    report(f'Wartet auf Motoren: {", ".join(running_motors)}')
                 return False
         else:
-            for Controller in self:
-                if Controller.Motoren_laufen():
+            for controller in self:
+                if controller.Motoren_laufen():
                     return False
             return True
 
@@ -274,155 +278,155 @@ class PBox:
     #     if stop_indicator.has_stop_requested():
     #         return
 
-    def allen_Motoren_Stop_warten(self, Thread=None):
+    def wait_all_motors_stop(self, thread=None) -> None:
         """Haltet die programme, bis alle Motoren stoppen."""
-        while not self.alle_Motoren_stehen(Thread=Thread):
-            if Thread is not None:
-                if getattr(Thread, "Stop", False):
+        while not self.all_motors_stand(thread=thread):
+            if thread is not None:
+                if getattr(thread, "stop", False):
                     return
             time.sleep(0.5)
 
-    def config(self, Motoren_Config):
+    def config(self, motors_config: Dict[M_Coord, Param_Val]):
         """Die Parametern einstellen laut angegebene Dict in Format {(bus, Axe) : Parameterwerte,}"""
         available_motors = self.Motoren_Liste()
-        for motor_coord, Param_Werten in Motoren_Config.items():
+        for motor_coord, param_values in motors_config.items():
             if motor_coord in available_motors:
-                self.get_Motor(motor_coord).config(Param_Werten)
+                self.get_motor(motor_coord).config(param_values)
             else:
                 logging.warning(f"Motor {motor_coord} ist nicht verbunden und kann nicht configuriert werden.")
 
-    def get_config(self):
+    def get_config(self) -> Dict[M_Coord, Param_Val]:
         """Liest die Parametern aus Controller und gibt zurück Dict mit Parameterwerten"""
-        Motoren_Config = {}
+        motors_config = {}
 
-        for Controller in self:
-            for Motor in Controller:
-                Motoren_Config[(Controller.bus, Motor.Axe)] = Motor.get_config()
+        for controller in self:
+            for Motor in controller:
+                motors_config[(controller.bus, Motor.axis)] = Motor.get_config()
 
-        return Motoren_Config
+        return motors_config
 
-    def leer_config_Detei_erstellen(self, address='input/Phytron_Motoren_config.csv'):
+    def make_empty_config_file(self, address: str = 'input/Phytron_Motoren_config.csv'):
         """Erstellt eine Datei mit einer leeren Configurationtabelle"""
         f = open(address, "wt")
 
         separator = ';'
-        Motoren_Config = self.get_config()
 
         # Motor liste schreiben
-        Header = ['Motor Name', 'Bus', 'Axe', 'Mit Initiatoren(0 oder 1)', 'Einheiten', 'Einheiten pro Schritt']
-        for Parameter_Name in self.PARAMETER_NUMBER.keys():
-            Header.append(Parameter_Name)
-        l = len(Header)
-        Header = separator.join(Header)
-        f.write(Header + '\n')
+        header = ['Motor Name', 'Bus', 'Axe', 'Mit Initiatoren(0 oder 1)', 'Einheiten', 'Einheiten pro Schritt']
+        for parameter_name in self.PARAMETER_NUMBER.keys():
+            header.append(parameter_name)
+        header_length = len(header)
+        header = separator.join(header)
+        f.write(header + '\n')
 
-        for Controller in self:
-            for Motor in Controller:
-                Motorline = [''] * l
-                Motorline[0] = Motor.Name
-                Motorline[1] = str(Controller.bus)
-                Motorline[2] = str(Motor.Axe)
-                Motorline = separator.join(Motorline)
-                f.write(Motorline + '\n')
+        for controller in self:
+            for motor in controller:
+                motorline = [''] * header_length
+                motorline[0] = motor.name
+                motorline[1] = str(controller.bus)
+                motorline[2] = str(motor.axis)
+                motorline = separator.join(motorline)
+                f.write(motorline + '\n')
 
         logging.info('Eine Datei mit einer leeren Configurationtabelle wurde erstellt.')
 
-    def read_config_from_file(self, address='input/Phytron_Motoren_config.csv'):
+    def read_config_from_file(self, address: str = 'input/Phytron_Motoren_config.csv') \
+            -> (List[int], List[M_Coord], Dict[M_Coord, dict], Dict[M_Coord, Param_Val]):
         """Liest die Configuration aus Datei"""
 
-        def check_parameters_values(parameters_values):
-            """Prüfen, ob die Parameter erlaubte Werte haben."""
-            pass
+        # def check_parameters_values(parameters_values):
+        #     """Prüfen, ob die Parameter erlaubte Werte haben."""
+        #     pass
 
         f = open(address, "rt")
 
         separator = ';'
 
-        Header = f.readline().rstrip('\n')
-        Header = Header.split(separator)
-        l = len(Header)
+        header = f.readline().rstrip('\n')
+        header = header.split(separator)
+        header_length = len(header)
 
         # Kompatibelität der Datei prüfen
-        if Header[:6] != ['Motor Name', 'Bus', 'Axe', 'Mit Initiatoren(0 oder 1)', 'Einheiten',
+        if header[:6] != ['Motor Name', 'Bus', 'Axe', 'Mit Initiatoren(0 oder 1)', 'Einheiten',
                           'Einheiten pro Schritt']:
             raise ReadConfigError(f'Datei {address} ist inkompatibel und kann nicht gelesen werden.')
-        for Par_Name in Header[6:]:
-            if not Par_Name in self.PARAMETER_NUMBER.keys():
-                raise ReadConfigError(f'Ein unbekanter Parameter: {Par_Name}')
+        for par_name in header[6:]:
+            if par_name not in self.PARAMETER_NUMBER.keys():
+                raise ReadConfigError(f'Ein unbekanter Parameter: {par_name}')
 
         controllers_to_init = []
         motors_to_init = []
         motors_info = {}
         motors_parameters = {}
 
-        for Motorline in f:
-            Motorline = Motorline.rstrip('\n')
-            Motorline = Motorline.split(separator)
-            if len(Motorline) != l:
-                raise ReadConfigError(
-                    f'Datei {address} ist defekt oder inkompatibel und kann nicht gelesen werden. Spaltenahzahl ist nicht konstant.')
+        for motorline in f:
+            motorline = motorline.rstrip('\n')
+            motorline = motorline.split(separator)
+            if len(motorline) != header_length:
+                raise ReadConfigError(f'Datei {address} ist defekt oder inkompatibel und kann nicht gelesen werden. '
+                                      f'Spaltenahzahl ist nicht konstant.')
 
             # Motor info
-            Name = Motorline[0]
+            name = motorline[0]
             try:
-                bus = int(Motorline[1])
+                bus = int(motorline[1])
             except ValueError:
-                raise ReadConfigError(f'Fehler bei Bus von Motor {Name} lesen. ' +
-                                      f'Bus muss ein int Wert zwischen 0 und 5 haben und kein {Motorline[1]}')
+                raise ReadConfigError(f'Fehler bei Bus von Motor {name} lesen. ' +
+                                      f'Bus muss ein int Wert zwischen 0 und 5 haben und kein {motorline[1]}')
             try:
-                Axe = int(Motorline[2])
+                axis = int(motorline[2])
             except ValueError:
-                raise ReadConfigError(f'Fehler bei Axe von Motor {Name} lesen. ' +
-                                      f'Axe muss ein int Wert 1 oder 2 haben und kein {Motorline[2]}')
+                raise ReadConfigError(f'Fehler bei Axe von Motor {name} lesen. ' +
+                                      f'Axe muss ein int Wert 1 oder 2 haben und kein {motorline[2]}')
 
-            if not (bus, Axe) in motors_to_init:
-                motors_to_init.append((bus, Axe))
+            if not (bus, axis) in motors_to_init:
+                motors_to_init.append((bus, axis))
             else:
-                raise ReadConfigError(f'Motor {(bus, Axe)} ist mehrmals in der Datei beschrieben! .')
+                raise ReadConfigError(f'Motor {(bus, axis)} ist mehrmals in der Datei beschrieben! .')
 
-            if not bus in controllers_to_init:
+            if bus not in controllers_to_init:
                 controllers_to_init.append(bus)
 
-            if Motorline[3] == '0':
-                ohne_Initiatoren = True
-            elif Motorline[3] == '1' or Motorline[3] == '':
-                ohne_Initiatoren = False
+            if motorline[3] == '0':
+                without_initiators = True
+            elif motorline[3] == '1' or motorline[3] == '':
+                without_initiators = False
             else:
                 raise ReadConfigError(
-                    f'Motor {Name}: "Mit Initiatoren" muss ein Wert 0 oder 1 haben und kein {Motorline[3]}')
+                    f'Motor {name}: "Mit Initiatoren" muss ein Wert 0 oder 1 haben und kein {motorline[3]}')
 
-            if Motorline[4] != '':
-                Anz_Einheiten = Motorline[4]
-                if Motorline[5] != '':
+            if motorline[4] != '':
+                ind_units = motorline[4]
+                if motorline[5] != '':
                     try:
-                        AE_in_Schritt = float(Motorline[5])
+                        iu_to_steps = float(motorline[5])
                     except ValueError:
                         raise ReadConfigError(
-                            f'Motor {Name}: Einheiten pro Schritt muss ein float Wert haben und kein {Motorline[5]}')
+                            f'Motor {name}: Einheiten pro Schritt muss ein float Wert haben und kein {motorline[5]}')
                 else:
-                    AE_in_Schritt = 1
+                    iu_to_steps = 1
             else:
-                Anz_Einheiten = "Schritte"
-                AE_in_Schritt = 1
+                ind_units = "Schritte"
+                iu_to_steps = 1
 
-            motors_info[(bus, Axe)] = {'Name': Name, 'ohne_Initiatoren': ohne_Initiatoren,
-                                        'Anz_Einheiten': Anz_Einheiten, 'AE_in_Schritt': AE_in_Schritt}
+            motors_info[(bus, axis)] = {'Name': name, 'ohne_Initiatoren': without_initiators,
+                                        'Anz_Einheiten': ind_units, 'AE_in_Schritt': iu_to_steps}
 
             # Parameter lesen
-            Parameter_Werten = {}
-            for i, Par_Wert_str in enumerate(Motorline[6:], 6):
-                if Par_Wert_str != '':
+            parameters_values = {}
+            for i, par_val_str in enumerate(motorline[6:], 6):
+                if par_val_str != '':
                     try:
-                        Parameter_Werten[Header[i]] = int(Par_Wert_str)
+                        parameters_values[header[i]] = int(par_val_str)
                     except ValueError:
                         raise ReadConfigError(
-                            f'Motor {Name}: {Header[i]} muss {self.PARAMETER_DESCRIPTION[Header[i]]} sein und kein {Par_Wert_str}.')
+                            f'Motor {name}: {header[i]} muss {self.PARAMETER_DESCRIPTION[header[i]]} sein und kein {par_val_str}.')
                 else:
-                    Parameter_Werten[Header[i]] = self.PARAMETER_DEFAULT[Header[i]]
+                    parameters_values[header[i]] = self.PARAMETER_DEFAULT[header[i]]
 
-            check_parameters_values(Parameter_Werten)
+            # check_parameters_values(parameters_values)
 
-            motors_parameters[(bus, Axe)] = Parameter_Werten
+            motors_parameters[(bus, axis)] = parameters_values
 
         logging.info(f'Configuration aus Datei {address} wurde erfolgreich gelesen.')
         return controllers_to_init, motors_to_init, motors_info, motors_parameters
@@ -439,8 +443,8 @@ class PBox:
 
         if Motoren_zu_Kalibrierung is None:
             Motoren_zu_Kalibrierung = \
-                [self.Controller[bus].Motor[Axe] for bus, Axe in Liste_zu_Kalibrierung if
-                 not self.Controller[bus].Motor[Axe].ohne_Initiatoren]
+                [self.controller[bus].Motor[Axe] for bus, Axe in Liste_zu_Kalibrierung if
+                 not self.controller[bus].Motor[Axe].ohne_Initiatoren]
 
         # Voreinstellung der Parametern
         for Motor in Motoren_zu_Kalibrierung:
@@ -459,7 +463,7 @@ class PBox:
                     Motor.geh(500000, Kalibrierung=True)
                 st.append(Motor.Initiatoren())
             print(st)
-            self.allen_Motoren_Stop_warten(Thread)
+            self.wait_all_motors_stop(Thread)
             if Thread is not None:
                 if getattr(Thread, "Stop", False):
                     return
@@ -482,7 +486,7 @@ class PBox:
                     Motor.geh(-500000, Kalibrierung=True)
                 st.append(Motor.Initiatoren())
             print(st)
-            self.allen_Motoren_Stop_warten(Thread)
+            self.wait_all_motors_stop(Thread)
             if Thread is not None:
                 if getattr(Thread, "Stop", False):
                     return
@@ -523,11 +527,12 @@ class PBox:
         # Motor liste schreiben
 
         Motoren_Liste = self.Motoren_Liste()
-        for i, Koordinaten in enumerate(Motoren_Liste):
+        Motoren_Liste_str = []
+        for Koordinaten in Motoren_Liste:
             Koordinaten = list(map(str, Koordinaten))
             Koordinaten = ','.join(Koordinaten)
-            Motoren_Liste[i] = Koordinaten
-        f.write(';'.join(Motoren_Liste) + '\n')
+            Motoren_Liste_str.append(Koordinaten)
+        f.write(';'.join(Motoren_Liste_str) + '\n')
 
         # Umrechnungsfaktoren schreiben
 
@@ -592,7 +597,7 @@ class PBox:
         Soft_Limits_Liste = read_soft_limits(address)
 
         for Motor_Coord, Soft_Limits in Soft_Limits_Liste.items():
-            Motor = self.get_Motor(Motor_Coord)
+            Motor = self.get_motor(Motor_Coord)
             Motor.soft_limits = Soft_Limits
 
     def Positionen_lesen(self, address="data/PMotoren_Positionen.txt"):
@@ -632,7 +637,7 @@ class PBox:
 
         for i, Motor_Koord in enumerate(Motoren_Liste_f):
             if Motor_Koord in Motoren_Liste:
-                Motor = self.get_Motor(Motor_Koord)
+                Motor = self.get_motor(Motor_Koord)
                 # Motor.Umrechnungsfaktor_einstellen(Umrechnungsfaktoren[i])
                 Motor.Position_einstellen(Positionen[i])
                 Motor.A_Null_einstellen(A_Nulls[i])
@@ -686,26 +691,15 @@ class PBox:
                     Liste.append((Controller.bus, Motor.Axe))
         return Liste
 
-    def get_Motor(self, Koordinaten=None, Name=None):
+    def get_motor(self, coordinates: (int, int) = None, name: str = None):
         """Gibt den Motor objekt zurück aus Koordinaten in Format (bus, Axe)"""
-
-        if Koordinaten is None and Name is None:
-            raise ValueError("Kein Argument! Die Koordinaten oder der Name des Motors muss gegeben sein. ")
-        elif Koordinaten is not None:
-            bus, Axe = Koordinaten
-            return self.Controller[bus].Motor[Axe]
-        else:
-            for Controller in self:
-                for Motor in Controller:
-                    if Motor.Name == Name:
-                        return Motor
-            raise ValueError(f"Es gibt kein Motor mit solchem Name: {Name}")
+        return get_motor(self, coordinates, name)
 
     def Stop(self):
         """Stoppt alle Axen"""
         Antwort = True
-        for bus in self.Controller:
-            Antwort = Antwort and self.Controller[bus].Stop()
+        for bus in self.controller:
+            Antwort = Antwort and self.controller[bus].Stop()
         return Antwort
 
     def Parametern_in_EPROM_speichern(self):
@@ -731,14 +725,14 @@ class PController:
 
         self.ser = box.ser
         self.bus = bus
-        self.Box = box
-        self.Motor = {}
+        self.box = box
+        self.motor = {}
 
         if self.check_Controller()[0] is False:
             raise ConnectError("Controller #{} antwortet nicht oder ist nicht verbunden!".format(self.bus))
 
     def __iter__(self):
-        return (Motor for Motor in self.Motor.values())
+        return (m_proxy(Motor) for Motor in self.motor.values())
 
     def check_Controller(self):
         """Prüfen, ob der Controller da ist und funktioniert"""
@@ -746,13 +740,13 @@ class PController:
 
     def Befehl(self, text):
         """Befehl für den Contreller ausführen"""
-        return self.Box.command(text, self.bus)
+        return self.box.command(text, self.bus)
 
     def Parametern_in_EPROM_speichern(self):
         """Speichert die aktuelle Parametern in Flash EPROM des Controllers"""
-        self.Box.ser.timeout = 5
+        self.box.ser.timeout = 5
         Antwort = self.Befehl("SA")
-        self.Box.ser.timeout = self.Box.timeout
+        self.box.ser.timeout = self.box.timeout
         if Antwort[0] is False:
             raise ConnectError("Hat nicht geklappt Parametern in Controllerspeicher zu sichern.")
 
@@ -817,9 +811,9 @@ class PController:
     def make_motors(self):
         """erstellt Objekten für alle vervügbare Motoren"""
         n_Axen = self.n_axes()
-        self.Motor = {}
+        self.motor = {}
         for i in range(n_Axen):
-            self.Motor[i + 1] = PMotor(self, i + 1)
+            self.motor[i + 1] = PMotor(self, i + 1)
         logging.info(f'Controller hat {n_Axen} Motor Objekten für alle verfügbare Axen erstellt.')
 
     def n_axes(self):
@@ -854,15 +848,15 @@ class PController:
 class PMotor:
     """Diese Klasse entspricht einem Motor, der mit einem MCC-2 Controller verbunden ist."""
 
-    def __init__(self, controller: PController, Axe: int, ohne_Initiatoren: bool = False):
-        self.Controller = controller
-        self.Box = controller.Box
-        self.Axe = Axe
+    def __init__(self, controller: PController, axis: int, ohne_Initiatoren: bool = False):
+        self.controller = controller
+        self.box = controller.box
+        self.axis = axis
 
         self.A_Null = 0  # Anzeiger Null in Normierte Einheiten
         self.Umrechnungsfaktor = self.Umrechnungsfaktor_lesen()
 
-        self.info_einstellen()
+        self.set_info()
 
         self.soft_limits = (None, None)
 
@@ -874,18 +868,18 @@ class PMotor:
         # Parameter_Werte = {'Lauffrequenz': 4000, 'Stoppstrom': 5, 'Laufstrom': 11, 'Booststrom': 18}
 
         if Parameter_Werte is None:
-            Parameter_Werte = self.Box.PARAMETER_DEFAULT
+            Parameter_Werte = self.box.PARAMETER_DEFAULT
 
         for Name, Wert in Parameter_Werte.items():
-            self.Parameter_schreiben(self.Box.PARAMETER_NUMBER[Name], Wert)
+            self.Parameter_schreiben(self.box.PARAMETER_NUMBER[Name], Wert)
 
-    def info_einstellen(self, Motor_info=None):
+    def set_info(self, Motor_info=None):
         """Einstellt Name, Initiatoren Status, Anz_Einheiten, AE_in_Schritt anhand angegebene Dict"""
         if Motor_info is None:
-            Name = 'Motor' + str(self.Controller.bus) + "." + str(self.Axe)
+            Name = 'Motor' + str(self.controller.bus) + "." + str(self.axis)
             Motor_info = {'Name': Name, 'ohne_Initiatoren': False, 'Anz_Einheiten': 'Schritte', 'AE_in_Schritt': 1}
 
-        self.Name = Motor_info['Name']
+        self.name = Motor_info['Name']
         self.ohne_Initiatoren = Motor_info['ohne_Initiatoren']
         self.Anz_Einheiten = Motor_info['Anz_Einheiten']
         self.AE_in_Schritt = Motor_info['AE_in_Schritt']
@@ -893,7 +887,7 @@ class PMotor:
     def get_config(self):
         """Liest die Parametern aus Controller und gibt zurück Dict mit Parameterwerten"""
         Parameter_Werte = {}
-        for Par_Name, Par_Nummer in self.Box.PARAMETER_NUMBER.items():
+        for Par_Name, Par_Nummer in self.box.PARAMETER_NUMBER.items():
             Par_Wert = self.Parameter_lesen(Par_Nummer)
             Parameter_Werte[Par_Name] = Par_Wert
         return Parameter_Werte
@@ -946,19 +940,19 @@ class PMotor:
         if U_Grenze is not None and O_Grenze is not None:
             if O_Grenze - U_Grenze < 0:
                 logging.error(f'Soft Limits Fehler: Obere Grenze ist kleiner als Untere! '
-                              f'(Motor {self.Axe} beim Controller {self.Controller.bus}:)')
+                              f'(Motor {self.axis} beim Controller {self.controller.bus}:)')
                 return False
 
         Antwort = self.Befehl("A" + str(Ort))
         if Antwort[0] is True:
             logging.info(
-                'Motor {} beim Controller {} wurde zu {} geschickt. Controller antwort ist "{}"'.format(self.Axe,
-                                                                                                        self.Controller.bus,
+                'Motor {} beim Controller {} wurde zu {} geschickt. Controller antwort ist "{}"'.format(self.axis,
+                                                                                                        self.controller.bus,
                                                                                                         Ort, Antwort))
         else:
             logging.error(
-                'Motor {} beim Controller {} wurde zu {} nicht geschickt. Controller antwort ist "{}"'.format(self.Axe,
-                                                                                                              self.Controller.bus,
+                'Motor {} beim Controller {} wurde zu {} nicht geschickt. Controller antwort ist "{}"'.format(self.axis,
+                                                                                                              self.controller.bus,
                                                                                                               Ort,
                                                                                                               Antwort))
         return Antwort[0]
@@ -976,12 +970,12 @@ class PMotor:
         Antwort = self.Befehl(str(Verschiebung))
         if Antwort[0] is True:
             logging.info(
-                'Motor {} beim Controller {} wurde um {} verschoben. Controller antwort ist "{}"'.format(self.Axe,
-                                                                                                         self.Controller.bus,
+                'Motor {} beim Controller {} wurde um {} verschoben. Controller antwort ist "{}"'.format(self.axis,
+                                                                                                         self.controller.bus,
                                                                                                          Verschiebung,
                                                                                                          Antwort))
         else:
-            msg = f'Motor {self.Axe} beim Controller {self.Controller.bus} wurde um {Verschiebung} nicht verschoben. ' \
+            msg = f'Motor {self.axis} beim Controller {self.controller.bus} wurde um {Verschiebung} nicht verschoben. ' \
                   f'Controller antwort ist "{Antwort}"'
             logging.error(msg)
 
@@ -990,12 +984,12 @@ class PMotor:
     def Stop(self):
         """Stoppt die Axe"""
         Antwort = self.Befehl("S")
-        logging.info('Motor {} beim Controller {} wurde gestoppt. Controller antwort ist "{}"'.format(self.Axe,
-                                                                                                      self.Controller.bus,
+        logging.info('Motor {} beim Controller {} wurde gestoppt. Controller antwort ist "{}"'.format(self.axis,
+                                                                                                      self.controller.bus,
                                                                                                       Antwort))
         return Antwort[0]
 
-    def steht(self):
+    def stand(self):
         """Gibt zurück bool Wert ob Motor steht"""
         Antwort = self.Befehl('=H')
         if Antwort[1] == b'E':
@@ -1007,16 +1001,16 @@ class PMotor:
 
     def Befehl(self, text):
         """Befehl für den Motor ausführen"""
-        return self.Controller.Befehl(str(self.Axe) + str(text))
+        return self.controller.Befehl(str(self.axis) + str(text))
 
     def Initiatoren(self, check=True):
         """Gibt zurück der Status der Initiatoren als List von bool Werten in folgende Reihenfolge: -, +"""
-        if self.Axe == 1:
-            status = self.Controller.Initiatoren_Status()[:2]
-        elif self.Axe == 2:
-            status = self.Controller.Initiatoren_Status()[2:]
+        if self.axis == 1:
+            status = self.controller.Initiatoren_Status()[:2]
+        elif self.axis == 2:
+            status = self.controller.Initiatoren_Status()[2:]
         else:
-            raise ValueError('Axenummer ist falsch! "{}"'.format(self.Axe))
+            raise ValueError('Axenummer ist falsch! "{}"'.format(self.axis))
 
         if check:
             if status[0] and status[1]:
@@ -1073,7 +1067,7 @@ class PMotor:
     def kalibrieren(self):
         """Kalibrierung des Motors"""
         logging.info(
-            'Kalibrierung des Motors {} beim Controller {} wurde angefangen.'.format(self.Axe, self.Controller.bus))
+            'Kalibrierung des Motors {} beim Controller {} wurde angefangen.'.format(self.axis, self.controller.bus))
 
         # Voreinstellung der Parametern
         self.Parameter_schreiben(1, 1)
@@ -1083,13 +1077,13 @@ class PMotor:
         # Bis zum Ende laufen
         while not self.Initiatoren()[1]:
             self.geh(100000)
-            self.Controller.Stop_warten()
+            self.controller.Stop_warten()
         Ende = self.Position()
 
         # Bis zum Anfang laufen
         while not self.Initiatoren()[0]:
             self.geh(-100000)
-            self.Controller.Stop_warten()
+            self.controller.Stop_warten()
         Anfang = self.Position()
 
         # Null einstellen und die Skala normieren
@@ -1098,7 +1092,31 @@ class PMotor:
         self.Parameter_schreiben(3, Umrechnungsfaktor)
 
         logging.info(
-            'Kalibrierung des Motors {} beim Controller {} wurde abgeschlossen.'.format(self.Axe, self.Controller.bus))
+            'Kalibrierung des Motors {} beim Controller {} wurde abgeschlossen.'.format(self.axis, self.controller.bus))
+
+
+def get_motor(box: PBox, coordinates: (int, int) = None, name: str = None) -> PMotor:
+    """Gibt den Motor objekt zurück aus Koordinaten in Format (bus, Axe)"""
+
+    if coordinates is None and name is None:
+        raise ValueError("Kein Argument! Die Koordinaten oder der Name des Motors muss gegeben sein. ")
+    elif coordinates is not None:
+        bus, axis = coordinates
+        return box.controller[bus].Motor[axis]
+    else:
+        for Controller in box:
+            for Motor in Controller:
+                if Motor.Name == name:
+                    return Motor
+        raise ValueError(f"Es gibt kein Motor mit solchem Name: {name}")
+
+
+def c_proxy(controller: PController) -> PController:
+    return controller
+
+
+def m_proxy(motor: PMotor) -> PMotor:
+    return motor
 
 
 class SerialError(Exception):
