@@ -368,7 +368,7 @@ class ExampleApp(QMainWindow):
 
         self.verbunden = True
         self.Box = PBox(self.PortBox.currentText())
-        self.Box.Initialisierung_mit_configDatei(config_Datei)
+        self.Box.initialize_with_config_file(config_Datei)
         self.Box.Soft_Limits_lesen()
 
         self.Motoren_Namen_laden()

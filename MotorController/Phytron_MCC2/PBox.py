@@ -42,9 +42,7 @@ class PBox:
     def __iter__(self):
         return (Controller for Controller in self.Controller.values())
 
-    def port_open(self):
-        self.ser = Serial(self.port, 115200, timeout=self.timeout)
-
+    # noinspection PyUnboundLocalVariable,PyUnboundLocalVariable
     def get_bus_list(self):
         """Erstellt eine Liste der verfügbaren Controller in Box."""
         self.bus_list = []
@@ -60,24 +58,23 @@ class PBox:
         if not self.bus_list:
             raise SerialError("Es wurde keine Controller gefunden am COM-Port!")
 
-
-    def make_Controllers(self):
+    def make_controllers(self):
         """erstellt Objekten für alle verfügbare Controller"""
         self.Controller = {}
         for i in self.bus_list:
             self.Controller[i] = PController(self, i)
         logging.info('Box hat {} Controller Objekten für Bus {} erstellt.'.format(len(self.bus_list), self.bus_list))
 
-    def Befehl(self, text, bus):
+    def command(self, text, bus):
         """Befehl für die Box ausführen"""
         self.ser.flushInput()
         self.ser.write(command_format(text, bus))
-        Antwort = read_reply(self.ser)
-        if Antwort[0] is None:
+        reply = read_reply(self.ser)
+        if reply[0] is None:
             raise ConnectError('Controller Antwortet nicht!')
-        return Antwort
+        return reply
 
-    def Initialisierung(self, config_Datei='input/Phytron_Motoren_config.csv'):
+    def initialize(self):
         """Sucht und macht Objekte für alle verfügbare Controller und Motoren. Gibt ein Bericht zurück."""
         logging.info('Box Initialisierung wurde gestartet.')
 
@@ -85,10 +82,10 @@ class PBox:
         report = ""
         n_axes = 0
 
-        self.make_Controllers()
+        self.make_controllers()
         for Controller in self:
-            Controller.make_Motoren()
-            axes_in_controller = Controller.n_Axen()
+            Controller.make_motors()
+            axes_in_controller = Controller.n_axes()
             n_axes += axes_in_controller
 
             report += f"Controller {Controller.bus} ({axes_in_controller} Achsen)\n"
@@ -98,56 +95,56 @@ class PBox:
         self.report = report
         return report
 
-    def Initialisierung_mit_configDatei(self, config_Datei='input/Phytron_Motoren_config.csv'):
+    def initialize_with_config_file(self, config_file='input/Phytron_Motoren_config.csv'):
         """Sucht und macht Objekte für alle verfügbare Controller und Motoren. Gibt ein Bericht zurück."""
         logging.info('Box Initialisierung wurde gestartet.')
 
         self.get_bus_list()
-        Bericht = ""
-        n_Motoren = 0
-        n_Contr = 0
+        report = ""
+        n_motors = 0
+        n_controllers = 0
         self.Controller = {}
 
-        Controller_zu_Init, Motoren_zu_Init, Motoren_info, Motoren_Parameter = self.Config_aus_Datei_lesen(config_Datei)
+        controllers_to_init, motors_to_init, motors_info, motors_parameters = self.read_config_from_file(config_file)
 
         # Controller initialisieren
         fehlende_bus = []
-        for bus in Controller_zu_Init:
+        for bus in controllers_to_init:
             if bus in self.bus_list:
                 self.Controller[bus] = PController(self, bus)
-                n_Contr += 1
+                n_controllers += 1
             else:
-                if not bus in fehlende_bus:
+                if bus not in fehlende_bus:
                     fehlende_bus.append(bus)
         if len(fehlende_bus) > 1:
-            Bericht += f"Controller {bus} sind nicht verbunden und wurden nicht initialisiert.\n"
+            report += f"Controller {fehlende_bus} sind nicht verbunden und wurden nicht initialisiert.\n"
         elif len(fehlende_bus) == 1:
-            Bericht += f"Controller {bus} ist nicht verbunden und wurde nicht initialisiert.\n"
+            report += f"Controller {fehlende_bus} ist nicht verbunden und wurde nicht initialisiert.\n"
 
         # Motoren initialisieren
-        for bus, Axe in Motoren_zu_Init:
-            if Axe <= self.Controller[bus].n_Axen():
+        for bus, Axe in motors_to_init:
+            if Axe <= self.Controller[bus].n_axes():
                 self.Controller[bus].Motor[Axe] = PMotor(self.Controller[bus], Axe)
-                n_Motoren += 1
+                n_motors += 1
             else:
-                Bericht += f"Axe {Axe} ist beim Controller {bus} nicht vorhanden, den Motor wurde nicht initialisiert.\n"
+                report += f"Axe {Axe} ist beim Controller {bus} nicht vorhanden, den Motor wurde nicht initialisiert.\n"
 
-        self.Motoren_info_einstellen(Motoren_info)
-        self.config(Motoren_Parameter)
+        self.Motoren_info_einstellen(motors_info)
+        self.config(motors_parameters)
 
-        Bericht = f"{n_Contr} Controller und {n_Motoren} Motoren wurde initialisiert:\n" + Bericht
+        report = f"{n_controllers} Controller und {n_motors} Motoren wurde initialisiert:\n" + report
         for Controller in self:
-            Bericht += f'Controller {Controller.bus}: '
+            report += f'Controller {Controller.bus}: '
             mehr_als_einen = False
             for Motor in Controller:
                 if mehr_als_einen:
-                    Bericht += ', '
-                Bericht += Motor.Name
+                    report += ', '
+                report += Motor.Name
                 mehr_als_einen = True
-            Bericht += '\n'
+            report += '\n'
 
-        self.report = Bericht
-        return Bericht
+        self.report = report
+        return report
 
     def Motoren_info_einstellen(self, Motoren_info):
         """Einstellt Name, Initiatoren Status, Anz_Einheiten, AE_in_Schritt der Motoren anhand angegebene Dict"""
@@ -163,7 +160,7 @@ class PBox:
                 for Motor in Controller:
                     if not Motor.steht():
                         laufende_Motoren.append(Motor.Name)
-            if laufende_Motoren == []:
+            if not laufende_Motoren:
                 return True
             else:
                 Nachricht = getattr(Thread, "Nachricht", None)
@@ -234,7 +231,7 @@ class PBox:
 
         logging.info('Eine Datei mit einer leeren Configurationtabelle wurde erstellt.')
 
-    def Config_aus_Datei_lesen(self, address='input/Phytron_Motoren_config.csv'):
+    def read_config_from_file(self, address='input/Phytron_Motoren_config.csv'):
         """Liest die Configuration aus Datei"""
 
         def check_parameters_values(parameters_values):
@@ -547,7 +544,7 @@ class PBox:
                 Liste_zu_Kalibrierung.remove(Motor_Koord)
 
         logging.info('Kalibrierungsdaten für  Motoren {} wurde geladen.'.format(Motoren_Liste_f))
-        if Liste_zu_Kalibrierung != []:
+        if Liste_zu_Kalibrierung:
             logging.info('Motoren {} brauchen Kalibrierung.'.format(Liste_zu_Kalibrierung))
 
         return Liste_zu_Kalibrierung

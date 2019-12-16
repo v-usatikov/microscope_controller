@@ -31,7 +31,7 @@ class PController:
 
     def Befehl(self, text):
         """Befehl für den Contreller ausführen"""
-        return self.Box.Befehl(text, self.bus)
+        return self.Box.command(text, self.bus)
 
     def Parametern_in_EPROM_speichern(self):
         """Speichert die aktuelle Parametern in Flash EPROM des Controllers"""
@@ -99,15 +99,15 @@ class PController:
         while self.Motoren_laufen():
             time.sleep(0.5)
 
-    def make_Motoren(self):
+    def make_motors(self):
         """erstellt Objekten für alle vervügbare Motoren"""
-        n_Axen = self.n_Axen()
+        n_Axen = self.n_axes()
         self.Motor = {}
         for i in range(n_Axen):
             self.Motor[i + 1] = PMotor(self, i + 1)
         logging.info(f'Controller hat {n_Axen} Motor Objekten für alle verfügbare Axen erstellt.')
 
-    def n_Axen(self):
+    def n_axes(self):
         """Gibt die Anzahl der verfügbaren Axen zurück"""
         Antwort = self.Befehl('IAR')
 
