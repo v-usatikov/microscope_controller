@@ -60,24 +60,6 @@ class PBox:
         if not self.bus_list:
             raise SerialError("Es wurde keine Controller gefunden am COM-Port!")
 
-    def get_Bus_List2(self):
-        """Erstellt eine Liste der verfügbaren Controller in Box."""
-        self.ser.close()
-        self.bus_list = []
-        for i in range(5):
-            for j in range(4):
-                check = bus_check(i, port=self.port)
-                # print(check)
-                if check[0]:
-                    self.bus_list.append(i)
-                    break
-                else:
-                    logging.error(f'Bei Bus Nummer {i} keinen Kontroller gefunden. COM Antwort:{check[1]}')
-            if not check[0]:
-                logging.error(f'Bei Bus Nummer {i} keinen Kontroller gefunden. COM Antwort:{check[1]}')
-        if self.bus_list == []:
-            raise SerialError("Es wurde keine Controller gefunden am COM-Port!")
-        self.port_open()
 
     def make_Controllers(self):
         """erstellt Objekten für alle verfügbare Controller"""

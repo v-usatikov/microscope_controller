@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="50e87f16-50f1-46d9-a080-91df7dac3cd6" name="Default Changelist" comment="" />
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="DatabaseView">
+    <option name="SHOW_INTERMEDIATE" value="true" />
+    <option name="GROUP_DATA_SOURCES" value="true" />
+    <option name="GROUP_SCHEMA" value="true" />
+    <option name="GROUP_CONTENTS" value="false" />
+    <option name="SORT_POSITIONED" value="false" />
+    <option name="SHOW_EMPTY_GROUPS" value="false" />
+    <option name="AUTO_SCROLL_FROM_SOURCE" value="false" />
+    <option name="HIDDEN_KINDS">
+      <set />
+    </option>
+    <expand />
+    <select />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectId" id="1SKwT1JsQA3n6Ilz5WKqVwbG0Qp" />
+  <component name="PropertiesComponent">
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$USER_HOME$/anaconda3/bin/conda" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.path.for.package.eslint" value="project" />
+    <property name="node.js.path.for.package.tslint" value="project" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager" selected="Python.UMCC2_Demo_GUI">
+    <configuration name="MotorBewegen" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="MotorController" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/MotorBewegen.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="UMCC2Control" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="MotorController" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/UMCC2Control.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="UMCC2_Demo_GUI" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="MotorController" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/UMCC2_Demo_GUI.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="exp" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="MotorController" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/exp.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="exp2" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="MotorController" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/exp2.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.UMCC2_Demo_GUI" />
+        <item itemvalue="Python.UMCC2Control" />
+        <item itemvalue="Python.exp2" />
+        <item itemvalue="Python.exp" />
+        <item itemvalue="Python.MotorBewegen" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="50e87f16-50f1-46d9-a080-91df7dac3cd6" name="Default Changelist" comment="" />
+      <created>1571325598888</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1571325598888</updated>
+      <workItem from="1571325599964" duration="453000" />
+      <workItem from="1571409533030" duration="663000" />
+      <workItem from="1571663395415" duration="1572000" />
+      <workItem from="1571672576522" duration="320000" />
+      <workItem from="1571673052224" duration="69000" />
+      <workItem from="1571673142145" duration="61000" />
+      <workItem from="1571673262077" duration="2439000" />
+      <workItem from="1571742004773" duration="2542000" />
+      <workItem from="1571737623298" duration="116000" />
+      <workItem from="1571751537454" duration="869000" />
+      <workItem from="1571845815604" duration="463000" />
+      <workItem from="1571998283270" duration="56000" />
+      <workItem from="1572012974493" duration="620000" />
+      <workItem from="1572254803687" duration="811000" />
+      <workItem from="1572359500253" duration="465000" />
+      <workItem from="1572450252143" duration="2211000" />
+      <workItem from="1572557013142" duration="194000" />
+      <workItem from="1572619348273" duration="6210000" />
+      <workItem from="1572868494753" duration="19660000" />
+      <workItem from="1572975625169" duration="9783000" />
+      <workItem from="1573052529996" duration="7507000" />
+      <workItem from="1573141792822" duration="10847000" />
+      <workItem from="1573219397354" duration="20953000" />
+      <workItem from="1573250300258" duration="126000" />
+      <workItem from="1573380999226" duration="14431000" />
+      <workItem from="1573482584764" duration="5373000" />
+      <workItem from="1573489390807" duration="768000" />
+      <workItem from="1573490431926" duration="114000" />
+      <workItem from="1573655296380" duration="12717000" />
+      <workItem from="1573750822611" duration="158000" />
+      <workItem from="1573827908011" duration="11900000" />
+      <workItem from="1574091338146" duration="19700000" />
+      <workItem from="1574117935458" duration="789000" />
+      <workItem from="1574167357359" duration="2462000" />
+      <workItem from="1574171470769" duration="193000" />
+      <workItem from="1574171941139" duration="15000" />
+      <workItem from="1574172052286" duration="798000" />
+      <workItem from="1574173733820" duration="137000" />
+      <workItem from="1574173956016" duration="247000" />
+      <workItem from="1574174332143" duration="220000" />
+      <workItem from="1574174633208" duration="217000" />
+      <workItem from="1574174960580" duration="888000" />
+      <workItem from="1574175871966" duration="335000" />
+      <workItem from="1574176244323" duration="649000" />
+      <workItem from="1574176906945" duration="255000" />
+      <workItem from="1574177183257" duration="1399000" />
+      <workItem from="1574178697584" duration="2592000" />
+      <workItem from="1574184974730" duration="509000" />
+      <workItem from="1574185501609" duration="287000" />
+      <workItem from="1574186029354" duration="20424000" />
+      <workItem from="1574348172719" duration="1786000" />
+      <workItem from="1574352044164" duration="90000" />
+      <workItem from="1574352213593" duration="8000" />
+      <workItem from="1574355729384" duration="561000" />
+      <workItem from="1574360956845" duration="745000" />
+      <workItem from="1574432773852" duration="440000" />
+      <workItem from="1574436454109" duration="33000" />
+      <workItem from="1574436509564" duration="1825000" />
+      <workItem from="1574438384596" duration="8997000" />
+      <workItem from="1574448836847" duration="4516000" />
+      <workItem from="1574453326142" duration="2462000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="XDebuggerManager">
+    <watches-manager>
+      <configuration name="PythonConfigurationType">
+        <watch expression="not (self.alle_Motoren_stehen() or getattr(t, &quot;Stop&quot;, False))" language="Python" />
+        <watch expression="getattr(t, &quot;Stop&quot;, False)" language="Python" />
+        <watch expression="Antwort[0]" language="Python" />
+        <watch expression="Antwort[-1]" language="Python" />
+      </configuration>
+    </watches-manager>
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/MotorController$read.coverage" NAME="read Coverage Results" MODIFIED="1571675058294" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MotorController$log_test.coverage" NAME="log_test Coverage Results" MODIFIED="1572985168174" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MotorController$UMCC2Control.coverage" NAME="UMCC2Control Coverage Results" MODIFIED="1574440957937" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MotorController$MCFehler.coverage" NAME="MCFehler Coverage Results" MODIFIED="1572878457752" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MotorController$ULoggingConfig.coverage" NAME="ULoggingConfig Coverage Results" MODIFIED="1572982179762" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MotorController$XP.coverage" NAME="XP Coverage Results" MODIFIED="1572984659477" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MotorController$UMCC2_Demo_GUI.coverage" NAME="UMCC2_Demo_GUI Coverage Results" MODIFIED="1574456460340" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MotorController$ComListLesen.coverage" NAME="ComListLesen Coverage Results" MODIFIED="1573052554104" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MotorController$exp.coverage" NAME="exp Coverage Results" MODIFIED="1574193582177" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MotorController$exp2.coverage" NAME="exp2 Coverage Results" MODIFIED="1574198788953" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MotorController$MotorEXP.coverage" NAME="MotorEXP Coverage Results" MODIFIED="1572881649544" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/MotorController$MotorBewegen.coverage" NAME="MotorBewegen Coverage Results" MODIFIED="1574185557447" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+  </component>
+</project>
