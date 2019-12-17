@@ -114,7 +114,7 @@ class Kalibrierung_Thread(QThread):
         self.box.calibrate_motors(thread= self)
 
         if self.stop:
-            self.box.Stop()
+            self.box.stop()
             self.Kalibrierung_unterbrochen.emit()
         else:
             self.Kalibrierung_fertig.emit()
@@ -195,7 +195,7 @@ class ExampleApp(QMainWindow):
 
     def Motoren_Namen_laden(self):
         self.MotorCBox.clear()
-        Namen = self.Box.Motoren_Namen_Liste()
+        Namen = self.Box.motors_names_list()
         for Name in Namen:
             self.MotorCBox.addItem(Name)
 
@@ -332,15 +332,15 @@ class ExampleApp(QMainWindow):
             self.horizontalSlider1.setValue(Val)
 
     def Plus1(self):
-        self.Motor.geh(float(self.SchrittEdit1.text()),self.EinheitenBox1.checkState())
+        self.Motor.go(float(self.SchrittEdit1.text()), self.EinheitenBox1.checkState())
         self.set_HSlider_tr(self.Position + float(self.SchrittEdit1.text()))
 
     def Minus1(self):
-        self.Motor.geh(-float(self.SchrittEdit1.text()),self.EinheitenBox1.checkState())
+        self.Motor.go(-float(self.SchrittEdit1.text()), self.EinheitenBox1.checkState())
         self.set_HSlider_tr(self.Position - float(self.SchrittEdit1.text()))
 
     def Stop(self):
-        self.Box.Stop()
+        self.Box.stop()
         self.set_HSlider(self.Position_NE)
 
     def Schieber_geh_zu(self):
@@ -351,7 +351,7 @@ class ExampleApp(QMainWindow):
             self.GeheZuEdit1.setText(str(self.horizontalSlider1.value()))
 
     def Null_einstellen(self):
-        self.Motor.A_Null_einstellen()
+        self.Motor.set_display_null()
         self.Soft_Limits_Lines_Einheiten_anpassen()
 
     def Config(self):
@@ -365,12 +365,12 @@ class ExampleApp(QMainWindow):
 
     def Verbinden(self, arg=None, config_Datei='input/Phytron_Motoren_config.csv'):
         if self.verbunden:
-            self.Box.close(ohne_EPROM=True)
+            self.Box.close(without_eprom=True)
 
         self.verbunden = True
         self.Box = PBox(self.PortBox.currentText())
         self.Box.initialize_with_config_file(config_Datei)
-        self.Box.Soft_Limits_lesen()
+        self.Box.read_soft_limits()
 
         self.Motoren_Namen_laden()
         self.KalibrBtn.setEnabled(True)
@@ -380,7 +380,7 @@ class ExampleApp(QMainWindow):
         self.Motorlabel.setEnabled(True)
         self.Position_lesen()
         if round(self.Position, 4) == 0.0:
-            self.Box.Positionen_lesen()
+            self.Box.read_saved_positions()
 
         self.set_HSlider(int(self.Position))
         self.Motor1Box.setTitle(self.Motor.name)
@@ -389,8 +389,8 @@ class ExampleApp(QMainWindow):
 
     def Position_lesen(self, single_shot = False):
         if self.Position_erneuern:
-            self.Position = self.Motor.Position(AE = self.EinheitenBox1.checkState())
-            self.Position_NE = self.Motor.Position()
+            self.Position = self.Motor.position(AE = self.EinheitenBox1.checkState())
+            self.Position_NE = self.Motor.position()
             # print(Position)
             self.AktPosEdit1.setText(str(round(self.Position,4)))
             if not self.Motor.without_initiators:
