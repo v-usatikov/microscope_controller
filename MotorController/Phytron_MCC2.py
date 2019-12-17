@@ -420,7 +420,8 @@ class PBox:
                         parameters_values[header[i]] = int(par_val_str)
                     except ValueError:
                         raise ReadConfigError(
-                            f'Motor {name}: {header[i]} muss {self.PARAMETER_DESCRIPTION[header[i]]} sein und kein {par_val_str}.')
+                            f'Motor {name}: {header[i]} muss {self.PARAMETER_DESCRIPTION[header[i]]} sein '
+                            f'und kein {par_val_str}.')
                 else:
                     parameters_values[header[i]] = self.PARAMETER_DEFAULT[header[i]]
 
@@ -430,6 +431,17 @@ class PBox:
 
         logging.info(f'Configuration aus Datei {address} wurde erfolgreich gelesen.')
         return controllers_to_init, motors_to_init, motors_info, motors_parameters
+
+    def initiators(self, motors_list: Tuple[int, int] = None) -> List[Tuple[bool, bool]]:
+        """Gibt zurück eine Liste mit Status von den Initiatoren von allen Motoren"""
+        if motors_list is None:
+            motors_list = self.Motoren_Liste()
+
+        status_list = []
+        for motor_coord in motors_list:
+            motor = self.get_motor(motor_coord)
+            status_list.append(motor.initiators())
+        return status_list
 
     def Motoren_kalibrieren(self, Liste_zu_Kalibrierung=None, Motoren_zu_Kalibrierung=None, Thread=None):
         """Kalibrierung von den gegebenen Motoren"""
@@ -443,8 +455,8 @@ class PBox:
 
         if Motoren_zu_Kalibrierung is None:
             Motoren_zu_Kalibrierung = \
-                [self.controller[bus].Motor[Axe] for bus, Axe in Liste_zu_Kalibrierung if
-                 not self.controller[bus].Motor[Axe].ohne_Initiatoren]
+                [self.controller[bus].motor[Axe] for bus, Axe in Liste_zu_Kalibrierung if
+                 not self.controller[bus].motor[Axe].ohne_Initiatoren]
 
         # Voreinstellung der Parametern
         for Motor in Motoren_zu_Kalibrierung:
@@ -455,17 +467,15 @@ class PBox:
         # Bis zum Ende laufen
         while True:
             alle_sind_am_Ende = True
-            st = []
             for Motor in Motoren_zu_Kalibrierung:
-                am_Ende = Motor.Initiatoren()[1]
+                am_Ende = Motor.initiators()[1]
                 if not am_Ende:
                     alle_sind_am_Ende = False
                     Motor.geh(500000, Kalibrierung=True)
-                st.append(Motor.Initiatoren())
-            print(st)
+            print(self.initiators(Liste_zu_Kalibrierung))
             self.wait_all_motors_stop(Thread)
             if Thread is not None:
-                if getattr(Thread, "Stop", False):
+                if getattr(Thread, "stop", False):
                     return
 
             if alle_sind_am_Ende:
@@ -478,17 +488,15 @@ class PBox:
         # Bis zum Anfang laufen
         while True:
             alle_sind_am_Anfang = True
-            st = []
             for Motor in Motoren_zu_Kalibrierung:
-                am_Anfang = Motor.Initiatoren()[0]
+                am_Anfang = Motor.initiators()[0]
                 if not am_Anfang:
                     alle_sind_am_Anfang = False
                     Motor.geh(-500000, Kalibrierung=True)
-                st.append(Motor.Initiatoren())
-            print(st)
+            print(self.initiators(Liste_zu_Kalibrierung))
             self.wait_all_motors_stop(Thread)
             if Thread is not None:
-                if getattr(Thread, "Stop", False):
+                if getattr(Thread, "stop", False):
                     return
 
             if alle_sind_am_Anfang:
@@ -577,12 +585,12 @@ class PBox:
         f = open(address, "wt")
 
         # Motor liste schreiben
-        for Controller in self:
-            for Motor in Controller:
-                if Motor.soft_limits != (None, None):
-                    U_Grenze = Motor.soft_limits[0] if Motor.soft_limits[0] is not None else ''
-                    O_Grenze = Motor.soft_limits[1] if Motor.soft_limits[1] is not None else ''
-                    row = f"{Controller.bus},{Motor.Axe},{U_Grenze},{O_Grenze}\n"
+        for controller in self:
+            for motor in controller:
+                if motor.soft_limits != (None, None):
+                    U_Grenze = motor.soft_limits[0] if motor.soft_limits[0] is not None else ''
+                    O_Grenze = motor.soft_limits[1] if motor.soft_limits[1] is not None else ''
+                    row = f"{controller.bus},{motor.axis},{U_Grenze},{O_Grenze}\n"
                     f.write(row)
 
         if not ohne_lesen:
@@ -653,9 +661,9 @@ class PBox:
     def Motoren_Liste(self):
         """Gibt zurück eine Liste der allen Motoren in Format: [(bus, Axe), …]"""
         Liste = []
-        for Controller in self:
-            for Motor in Controller:
-                Liste.append((Controller.bus, Motor.Axe))
+        for controller in self:
+            for motor in controller:
+                Liste.append((controller.bus, motor.axis))
         return Liste
 
     def Motoren_Namen_Liste(self):
@@ -663,7 +671,7 @@ class PBox:
         Namen = []
         for Controller in self:
             for Motor in Controller:
-                Namen.append(Motor.Name)
+                Namen.append(Motor.name)
         return Namen
 
     def Controller_Liste(self):
@@ -676,19 +684,19 @@ class PBox:
     def Motoren_ohne_Init_Liste(self):
         """Gibt zurück eine Liste der allen Motoren ohne Initiatoren in Format: [(bus, Axe), …]"""
         Liste = []
-        for Controller in self:
-            for Motor in Controller:
-                if Motor.ohne_Initiatoren:
-                    Liste.append((Controller.bus, Motor.Axe))
+        for controller in self:
+            for motor in controller:
+                if motor.ohne_Initiatoren:
+                    Liste.append((controller.bus, motor.axis))
         return Liste
 
     def Motoren_mit_Init_Liste(self):
         """Gibt zurück eine Liste der allen Motoren ohne Initiatoren in Format: [(bus, Axe), …]"""
         Liste = []
-        for Controller in self:
-            for Motor in Controller:
-                if not Motor.ohne_Initiatoren:
-                    Liste.append((Controller.bus, Motor.Axe))
+        for controller in self:
+            for motor in controller:
+                if not motor.ohne_Initiatoren:
+                    Liste.append((controller.bus, motor.axis))
         return Liste
 
     def get_motor(self, coordinates: (int, int) = None, name: str = None):
@@ -1003,7 +1011,7 @@ class PMotor:
         """Befehl für den Motor ausführen"""
         return self.controller.Befehl(str(self.axis) + str(text))
 
-    def Initiatoren(self, check=True):
+    def initiators(self, check: bool = True) -> (bool, bool):
         """Gibt zurück der Status der Initiatoren als List von bool Werten in folgende Reihenfolge: -, +"""
         if self.axis == 1:
             status = self.controller.Initiatoren_Status()[:2]
@@ -1016,7 +1024,7 @@ class PMotor:
             if status[0] and status[1]:
                 raise MotorError("Beider Initiatoren sind Aktiviert. Motor ist falsch configuruert oder kaputt!")
 
-        return status
+        return status[0], status[1]
 
     def Parameter_lesen(self, N):
         """Liest einen Parameter Nummer N für die Axe"""
@@ -1075,13 +1083,13 @@ class PMotor:
         self.Parameter_schreiben(3, 1)
 
         # Bis zum Ende laufen
-        while not self.Initiatoren()[1]:
+        while not self.initiators()[1]:
             self.geh(100000)
             self.controller.Stop_warten()
         Ende = self.Position()
 
         # Bis zum Anfang laufen
-        while not self.Initiatoren()[0]:
+        while not self.initiators()[0]:
             self.geh(-100000)
             self.controller.Stop_warten()
         Anfang = self.Position()
@@ -1102,11 +1110,11 @@ def get_motor(box: PBox, coordinates: (int, int) = None, name: str = None) -> PM
         raise ValueError("Kein Argument! Die Koordinaten oder der Name des Motors muss gegeben sein. ")
     elif coordinates is not None:
         bus, axis = coordinates
-        return box.controller[bus].Motor[axis]
+        return box.controller[bus].motor[axis]
     else:
         for Controller in box:
             for Motor in Controller:
-                if Motor.Name == name:
+                if Motor.name == name:
                     return Motor
         raise ValueError(f"Es gibt kein Motor mit solchem Name: {name}")
 

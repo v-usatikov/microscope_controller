@@ -201,18 +201,18 @@ class ExampleApp(QMainWindow):
 
     def Motor_wechseln(self):
         if self.MotorCBox.currentText() != '':
-            self.Motor = self.Box.get_motor(Name=self.MotorCBox.currentText())
+            self.Motor = self.Box.get_motor(name=self.MotorCBox.currentText())
             self.init_Soft_Limits()
             self.Position_lesen(single_shot=True)
             if self.Motor.ohne_Initiatoren:
                 self.horizontalSlider1.setEnabled(False)
                 self.horizontalScrollBar1.setValue(0)
                 self.horizontalSlider1.setValue(0)
-                self.Motor1Box.setTitle(self.Motor.Name)
+                self.Motor1Box.setTitle(self.Motor.name)
             else:
                 self.horizontalSlider1.setEnabled(True)
                 self.set_HSlider_tr(int(self.Position))
-                self.Motor1Box.setTitle(self.Motor.Name)
+                self.Motor1Box.setTitle(self.Motor.name)
             self.Motor1Box.setEnabled(True)
         else:
             self.Motor1Box.setEnabled(False)
@@ -383,7 +383,7 @@ class ExampleApp(QMainWindow):
             self.Box.Positionen_lesen()
 
         self.set_HSlider(int(self.Position))
-        self.Motor1Box.setTitle(self.Motor.Name)
+        self.Motor1Box.setTitle(self.Motor.name)
         QMessageBox.information(self, "Verbindung abgeschlossen!",
                                 self.Box.report)
 

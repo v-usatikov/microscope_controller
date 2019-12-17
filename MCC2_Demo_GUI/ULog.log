@@ -36,3 +36,75 @@
 2019-12-16 21:55:13,350  Phytron_MCC2  Stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt. Controller antwort ist "(True, None)"
 2019-12-16 21:55:13,352  Phytron_MCC2  Stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt. Controller antwort ist "(True, None)"
 2019-12-16 21:55:13,382  Phytron_MCC2  Positionen_sichern  [INFO]  Kalibrierungsdaten für  Motoren [(0, 1), (1, 1), (1, 2), (2, 1), (2, 2)] wurde gespeichert.
+2019-12-17 00:55:28,508  Phytron_MCC2  __init__  [INFO]  Box Objekt erstellt, 5 Controller gefunden.
+2019-12-17 00:55:28,509  Phytron_MCC2  initialize_with_config_file  [INFO]  Box Initialisierung wurde gestartet.
+2019-12-17 00:55:28,532  Phytron_MCC2  read_config_from_file  [INFO]  Configuration aus Datei input/Phytron_Motoren_config.csv wurde erfolgreich gelesen.
+2019-12-17 00:58:47,965  Phytron_MCC2  __init__  [INFO]  Box Objekt erstellt, 5 Controller gefunden.
+2019-12-17 00:58:47,966  Phytron_MCC2  initialize_with_config_file  [INFO]  Box Initialisierung wurde gestartet.
+2019-12-17 00:58:47,990  Phytron_MCC2  read_config_from_file  [INFO]  Configuration aus Datei input/Phytron_Motoren_config.csv wurde erfolgreich gelesen.
+2019-12-17 01:00:54,246  Phytron_MCC2  __init__  [INFO]  Box Objekt erstellt, 5 Controller gefunden.
+2019-12-17 01:00:54,247  Phytron_MCC2  initialize_with_config_file  [INFO]  Box Initialisierung wurde gestartet.
+2019-12-17 01:00:54,267  Phytron_MCC2  read_config_from_file  [INFO]  Configuration aus Datei input/Phytron_Motoren_config.csv wurde erfolgreich gelesen.
+2019-12-17 01:02:09,626  Phytron_MCC2  __init__  [INFO]  Box Objekt erstellt, 5 Controller gefunden.
+2019-12-17 01:02:09,626  Phytron_MCC2  initialize_with_config_file  [INFO]  Box Initialisierung wurde gestartet.
+2019-12-17 01:02:09,649  Phytron_MCC2  read_config_from_file  [INFO]  Configuration aus Datei input/Phytron_Motoren_config.csv wurde erfolgreich gelesen.
+2019-12-17 01:02:09,813  Phytron_MCC2  Position_einstellen  [INFO]  Position wurde eingestellt. (0.0)
+2019-12-17 01:02:09,819  Phytron_MCC2  Position_einstellen  [INFO]  Position wurde eingestellt. (-22531.0)
+2019-12-17 01:02:09,825  Phytron_MCC2  Position_einstellen  [INFO]  Position wurde eingestellt. (-93577.0)
+2019-12-17 01:02:09,831  Phytron_MCC2  Position_einstellen  [INFO]  Position wurde eingestellt. (137.9971211522)
+2019-12-17 01:02:09,838  Phytron_MCC2  Position_einstellen  [INFO]  Position wurde eingestellt. (321.993054079)
+2019-12-17 01:02:09,838  Phytron_MCC2  Positionen_lesen  [INFO]  Kalibrierungsdaten für  Motoren [(0, 1), (1, 1), (1, 2), (2, 1), (2, 2)] wurde geladen.
+2019-12-17 01:02:13,101  Phytron_MCC2  geh_zu  [INFO]  Motor 1 beim Controller 0 wurde zu 12.0 geschickt. Controller antwort ist "(True, None)"
+2019-12-17 01:02:15,800  Phytron_MCC2  geh_zu  [INFO]  Motor 1 beim Controller 0 wurde zu 79.0 geschickt. Controller antwort ist "(True, None)"
+2019-12-17 01:02:21,708  Phytron_MCC2  geh_zu  [INFO]  Motor 1 beim Controller 2 wurde zu 238.0 geschickt. Controller antwort ist "(True, None)"
+2019-12-17 01:02:28,232  Phytron_MCC2  geh_zu  [INFO]  Motor 2 beim Controller 2 wurde zu 252.0 geschickt. Controller antwort ist "(True, None)"
+2019-12-17 01:02:35,815  Phytron_MCC2  Motoren_kalibrieren  [INFO]  Kalibrierung von allen Motoren wurde angefangen.
+2019-12-17 01:02:35,835  Phytron_MCC2  geh  [INFO]  Motor 1 beim Controller 0 wurde um 500000.0 verschoben. Controller antwort ist "(True, None)"
+2019-12-17 01:05:47,835  Phytron_MCC2  __init__  [INFO]  Box Objekt erstellt, 5 Controller gefunden.
+2019-12-17 01:05:47,835  Phytron_MCC2  initialize_with_config_file  [INFO]  Box Initialisierung wurde gestartet.
+2019-12-17 01:05:47,858  Phytron_MCC2  read_config_from_file  [INFO]  Configuration aus Datei input/Phytron_Motoren_config.csv wurde erfolgreich gelesen.
+2019-12-17 01:05:50,319  Phytron_MCC2  Motoren_kalibrieren  [INFO]  Kalibrierung von allen Motoren wurde angefangen.
+2019-12-17 01:05:50,341  Phytron_MCC2  geh  [INFO]  Motor 1 beim Controller 2 wurde um 500000.0 verschoben. Controller antwort ist "(True, None)"
+2019-12-17 01:05:56,009  Phytron_MCC2  Stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt. Controller antwort ist "(True, None)"
+2019-12-17 01:05:56,011  Phytron_MCC2  Stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt. Controller antwort ist "(True, None)"
+2019-12-17 01:05:56,013  Phytron_MCC2  Stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt. Controller antwort ist "(True, None)"
+2019-12-17 01:05:56,016  Phytron_MCC2  Stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt. Controller antwort ist "(True, None)"
+2019-12-17 01:05:56,018  Phytron_MCC2  Stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt. Controller antwort ist "(True, None)"
+2019-12-17 01:05:57,632  Phytron_MCC2  Motoren_kalibrieren  [INFO]  Kalibrierung von allen Motoren wurde angefangen.
+2019-12-17 01:05:57,655  Phytron_MCC2  geh  [INFO]  Motor 1 beim Controller 2 wurde um 500000.0 verschoben. Controller antwort ist "(True, None)"
+2019-12-17 01:06:39,324  Phytron_MCC2  geh  [INFO]  Motor 2 beim Controller 2 wurde um 500000.0 verschoben. Controller antwort ist "(True, None)"
+2019-12-17 01:06:48,112  Phytron_MCC2  geh  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. Controller antwort ist "(True, None)"
+2019-12-17 01:07:30,753  Phytron_MCC2  geh  [INFO]  Motor 1 beim Controller 2 wurde um -500000.0 verschoben. Controller antwort ist "(True, None)"
+2019-12-17 01:08:06,150  Phytron_MCC2  Stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt. Controller antwort ist "(True, None)"
+2019-12-17 01:08:06,151  Phytron_MCC2  Stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt. Controller antwort ist "(True, None)"
+2019-12-17 01:08:06,153  Phytron_MCC2  Stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt. Controller antwort ist "(True, None)"
+2019-12-17 01:08:06,155  Phytron_MCC2  Stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt. Controller antwort ist "(True, None)"
+2019-12-17 01:08:06,157  Phytron_MCC2  Stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt. Controller antwort ist "(True, None)"
+2019-12-17 01:08:09,682  Phytron_MCC2  Stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt. Controller antwort ist "(True, None)"
+2019-12-17 01:08:09,684  Phytron_MCC2  Stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt. Controller antwort ist "(True, None)"
+2019-12-17 01:08:09,685  Phytron_MCC2  Stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt. Controller antwort ist "(True, None)"
+2019-12-17 01:08:09,687  Phytron_MCC2  Stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt. Controller antwort ist "(True, None)"
+2019-12-17 01:08:09,689  Phytron_MCC2  Stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt. Controller antwort ist "(True, None)"
+2019-12-17 01:08:09,711  Phytron_MCC2  Positionen_sichern  [INFO]  Kalibrierungsdaten für  Motoren [(0, 1), (1, 1), (1, 2), (2, 1), (2, 2)] wurde gespeichert.
+2019-12-17 01:08:21,918  Phytron_MCC2  __init__  [INFO]  Box Objekt erstellt, 5 Controller gefunden.
+2019-12-17 01:08:21,918  Phytron_MCC2  initialize_with_config_file  [INFO]  Box Initialisierung wurde gestartet.
+2019-12-17 01:08:21,940  Phytron_MCC2  read_config_from_file  [INFO]  Configuration aus Datei input/Phytron_Motoren_config.csv wurde erfolgreich gelesen.
+2019-12-17 01:08:25,843  Phytron_MCC2  Motoren_kalibrieren  [INFO]  Kalibrierung von allen Motoren wurde angefangen.
+2019-12-17 01:08:25,862  Phytron_MCC2  geh  [INFO]  Motor 1 beim Controller 0 wurde um 500000.0 verschoben. Controller antwort ist "(True, None)"
+2019-12-17 01:08:25,867  Phytron_MCC2  geh  [INFO]  Motor 1 beim Controller 2 wurde um 500000.0 verschoben. Controller antwort ist "(True, None)"
+2019-12-17 01:09:08,552  Phytron_MCC2  geh  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. Controller antwort ist "(True, None)"
+2019-12-17 01:09:08,557  Phytron_MCC2  geh  [INFO]  Motor 1 beim Controller 2 wurde um -500000.0 verschoben. Controller antwort ist "(True, None)"
+2019-12-17 01:09:08,562  Phytron_MCC2  geh  [INFO]  Motor 2 beim Controller 2 wurde um -500000.0 verschoben. Controller antwort ist "(True, None)"
+2019-12-17 01:09:19,891  Phytron_MCC2  geh  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. Controller antwort ist "(True, None)"
+2019-12-17 01:09:19,896  Phytron_MCC2  geh  [INFO]  Motor 1 beim Controller 2 wurde um -500000.0 verschoben. Controller antwort ist "(True, None)"
+2019-12-17 01:10:21,627  Phytron_MCC2  Motoren_kalibrieren  [INFO]  Kalibrierung von allen Motoren wurde abgeschlossen.
+2019-12-17 01:10:49,340  Phytron_MCC2  geh_zu  [INFO]  Motor 1 beim Controller 0 wurde zu 76.0 geschickt. Controller antwort ist "(True, None)"
+2019-12-17 01:10:54,401  Phytron_MCC2  geh_zu  [INFO]  Motor 1 beim Controller 2 wurde zu 60.0 geschickt. Controller antwort ist "(True, None)"
+2019-12-17 01:11:00,612  Phytron_MCC2  geh_zu  [INFO]  Motor 2 beim Controller 2 wurde zu 200.0 geschickt. Controller antwort ist "(True, None)"
+2019-12-17 01:11:08,791  Phytron_MCC2  geh_zu  [INFO]  Motor 2 beim Controller 2 wurde zu 252.0 geschickt. Controller antwort ist "(True, None)"
+2019-12-17 01:11:11,723  Phytron_MCC2  Stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt. Controller antwort ist "(True, None)"
+2019-12-17 01:11:11,724  Phytron_MCC2  Stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt. Controller antwort ist "(True, None)"
+2019-12-17 01:11:11,726  Phytron_MCC2  Stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt. Controller antwort ist "(True, None)"
+2019-12-17 01:11:11,727  Phytron_MCC2  Stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt. Controller antwort ist "(True, None)"
+2019-12-17 01:11:11,729  Phytron_MCC2  Stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt. Controller antwort ist "(True, None)"
+2019-12-17 01:11:11,758  Phytron_MCC2  Positionen_sichern  [INFO]  Kalibrierungsdaten für  Motoren [(0, 1), (1, 1), (1, 2), (2, 1), (2, 2)] wurde gespeichert.
