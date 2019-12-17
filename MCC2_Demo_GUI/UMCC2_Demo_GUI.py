@@ -111,7 +111,7 @@ class Kalibrierung_Thread(QThread):
         self.stop = False
 
     def run(self):
-        self.box.Motoren_kalibrieren(Thread = self)
+        self.box.calibrate_motors(thread= self)
 
         if self.stop:
             self.box.Stop()
@@ -204,7 +204,7 @@ class ExampleApp(QMainWindow):
             self.Motor = self.Box.get_motor(name=self.MotorCBox.currentText())
             self.init_Soft_Limits()
             self.Position_lesen(single_shot=True)
-            if self.Motor.ohne_Initiatoren:
+            if self.Motor.without_initiators:
                 self.horizontalSlider1.setEnabled(False)
                 self.horizontalScrollBar1.setValue(0)
                 self.horizontalSlider1.setValue(0)
@@ -328,7 +328,7 @@ class ExampleApp(QMainWindow):
             self.set_HSlider(Val)
 
     def set_HSlider(self,Val):
-        if not self.Motor.ohne_Initiatoren:
+        if not self.Motor.without_initiators:
             self.horizontalSlider1.setValue(Val)
 
     def Plus1(self):
@@ -393,7 +393,7 @@ class ExampleApp(QMainWindow):
             self.Position_NE = self.Motor.Position()
             # print(Position)
             self.AktPosEdit1.setText(str(round(self.Position,4)))
-            if not self.Motor.ohne_Initiatoren:
+            if not self.Motor.without_initiators:
                 self.horizontalScrollBar1.setValue(int(self.Position_NE))
         if not single_shot:
             QtCore.QTimer.singleShot(100, self.Position_lesen)
@@ -405,7 +405,7 @@ class ExampleApp(QMainWindow):
         self.Motorlabel.setEnabled(False)
 
         # self.Box.alle_Motoren_kalibrieren()
-        self.Box.Motoren_kalibrieren()
+        self.Box.calibrate_motors()
 
         self.KalibrBtn.setEnabled(True)
         self.Motor1Box.setEnabled(True)
