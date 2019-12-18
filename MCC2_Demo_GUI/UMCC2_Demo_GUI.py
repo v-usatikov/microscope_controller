@@ -1,5 +1,7 @@
 # coding= utf-8
 import logging
+from typing import List
+
 from PyQt5 import QtGui, QtCore
 from PyQt5.QtWidgets import QFileDialog, QMessageBox, QMainWindow, QApplication, QScrollBar, QStatusBar
 from PyQt5.QtGui import QPainter, QPen
@@ -9,7 +11,7 @@ import sys
 import serial, serial.tools.list_ports
 # import pyqtgraph
 from PyQt5.uic import loadUi
-from MotorController.Phytron_MCC2 import PBox
+from MotorController.Phytron_MCC2 import PBox, StopIndicator, WaitReporter
 import ULoggingConfig
 
 if __name__ == '__main__':
@@ -87,15 +89,14 @@ class AktPositionSlider(QScrollBar):
         self.update()
 
 
-
-
         # M_d = 10.5
         # size = self.frameGeometry().width()
         # self.U_x = size - U_x * size / 1000
         # self.O_x = size - O_x * size / 1000
         # self.update()
 
-class Kalibrierung_Thread(QThread):
+
+class KalibrierungThread(QThread):
     """Thread für Kalibrierung der Motoren"""
     Kalibrierung_gestartet = pyqtSignal()
     Kalibrierung_fertig = pyqtSignal()
@@ -111,7 +112,9 @@ class Kalibrierung_Thread(QThread):
         self.stop = False
 
     def run(self):
-        self.box.calibrate_motors(thread= self)
+        wait_reporter = GuiWaitReporter(self)
+        stop_indicator = GuiStopIndicator(self)
+        self.box.calibrate_motors(stop_indicator=stop_indicator, wait_reporter=wait_reporter)
 
         if self.stop:
             self.box.stop()
@@ -124,6 +127,26 @@ class Kalibrierung_Thread(QThread):
         self.Kalibrierung_Status_Nachricht.emit()
 
 
+class GuiWaitReporter(WaitReporter):
+    """Durch dieses Objekt kann man während eine Kalibrierung die Liste der im Moment laufenden Motoren bekommen.
+            Es wird als argument für PBox.calibrate_motors() verwendet."""
+    def __init__(self, kal_thread: KalibrierungThread):
+        self.kal_thread = kal_thread
+
+    def report(self, motors_list: List[str]):
+        report = f'Wartet auf Motoren: {", ".join(motors_list)}'
+        self.kal_thread.report(report)
+
+
+class GuiStopIndicator(StopIndicator):
+    """Durch dieses Objekt kann man Kalibrierung abbrechen.
+    Es wird als argument für PBox.calibrate_motors() verwendet."""
+    def __init__(self, kal_thread: KalibrierungThread):
+        self.kal_thread = kal_thread
+
+    def has_stop_requested(self) -> bool:
+        return self.kal_thread.stop
+
 
 class ExampleApp(QMainWindow):
     def __init__(self, parent=None):
@@ -135,7 +158,7 @@ class ExampleApp(QMainWindow):
         self.setStatusBar(self.StatusBar)
 
 
-        self.Kal_Thread = Kalibrierung_Thread()
+        self.Kal_Thread = KalibrierungThread()
         self.Kal_Thread.Kalibrierung_unterbrochen.connect(self.Kalibrierung_unterbrochen)
         self.Kal_Thread.Kalibrierung_fertig.connect(self.Kalibrierung_fertig)
         self.Kal_Thread.Kalibrierung_Status_Nachricht.connect(self.Kalibrierung_Status_zeigen)
@@ -397,20 +420,6 @@ class ExampleApp(QMainWindow):
                 self.horizontalScrollBar1.setValue(int(self.Position_NE))
         if not single_shot:
             QtCore.QTimer.singleShot(100, self.Position_lesen)
-
-    def Kalibrierung0(self):
-        self.KalibrBtn.setEnabled(False)
-        self.Motor1Box.setEnabled(False)
-        self.MotorCBox.setEnabled(False)
-        self.Motorlabel.setEnabled(False)
-
-        # self.Box.alle_Motoren_kalibrieren()
-        self.Box.calibrate_motors()
-
-        self.KalibrBtn.setEnabled(True)
-        self.Motor1Box.setEnabled(True)
-        self.Position_lesen()
-        self.set_HSlider(int(self.Position))
 
     def Kalibrierung_fertig(self):
         self.Motor1Box.setEnabled(True)

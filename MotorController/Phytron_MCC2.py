@@ -112,6 +112,20 @@ def read_soft_limits(address="PSoft_Limits.txt"):
     return soft_limits_list
 
 
+class StopIndicator:
+    """Durch dieses Objekt kann man Erwartung von dem Stop von allen Motoren abbrechen.
+    Es wird als argument für PBox.wait_all_motors_stop() verwendet."""
+    def has_stop_requested(self) -> bool:
+        raise NotImplementedError
+
+
+class WaitReporter:
+    """Durch dieses Objekt kann man die Liste der im Moment laufenden Motoren bekommen.
+        Es wird als argument für PBox.wait_all_motors_stop() verwendet."""
+    def report(self, motors_list: List[str]):
+        raise NotImplementedError
+
+
 class PMotor:
     """Diese Klasse entspricht einem Motor, der mit einem MCC-2 Controller verbunden ist."""
 
@@ -606,38 +620,36 @@ class PBox:
             motor = self.get_motor(motor_coord)
             motor.set_info(motor_info)
 
-    def all_motors_stand(self, thread=None) -> bool:
+    def all_motors_stand(self) -> bool:
         """Gibt bool Wert zurück, ob alle Motoren stehen."""
-        if thread is not None:
-            running_motors = []
-            for controller in self:
-                for motor in controller:
-                    if not motor.stand():
-                        running_motors.append(motor.name)
-            if not running_motors:
-                return True
-            else:
-                report = getattr(thread, "report", None)
-                if report is not None:
-                    report(f'Wartet auf Motoren: {", ".join(running_motors)}')
+        for controller in self:
+            if controller.motors_running():
                 return False
-        else:
-            for controller in self:
-                if controller.motors_running():
-                    return False
-            return True
+        return True
+
+    def names_from_running_motors(self):
+        """Gibt eine Liste der Namen von den im Moment laufenden Motoren zurück."""
+        running_motors = []
+        for controller in self:
+            for motor in controller:
+                if not motor.stand():
+                    running_motors.append(motor.name)
+        return running_motors
 
     # def allStop(self, stop_indicator: StopIndicator = None) -> bool:
     #
     #     if stop_indicator.has_stop_requested():
     #         return
 
-    def wait_all_motors_stop(self, thread=None) -> None:
+    def wait_all_motors_stop(self, stop_indicator: Union[StopIndicator, None] = None,
+                             reporter: Union[WaitReporter, None] = None):
         """Haltet die programme, bis alle Motoren stoppen."""
-        while not self.all_motors_stand(thread=thread):
-            if thread is not None:
-                if getattr(thread, "stop", False):
+        while not self.all_motors_stand():
+            if stop_indicator is not None:
+                if stop_indicator.has_stop_requested():
                     return
+            if reporter is not None:
+                reporter.report(self.names_from_running_motors())
             time.sleep(0.5)
 
     def config(self, motors_config: Dict[M_Coord, Param_Val]):
@@ -799,7 +811,8 @@ class PBox:
 
     def calibrate_motors(self, list_to_calibration: List[M_Coord] = None,
                          motors_to_calibration: List[PMotor] = None,
-                         thread=None):
+                         stop_indicator: StopIndicator = None,
+                         reporter: WaitReporter = None):
         """Kalibrierung von den gegebenen Motoren"""
         logging.info('Kalibrierung von allen Motoren wurde angefangen.')
 
@@ -829,9 +842,9 @@ class PBox:
                     all_at_the_end = False
                     motor.go(500000, calibrate=True)
             print(self.initiators(list_to_calibration))
-            self.wait_all_motors_stop(thread)
-            if thread is not None:
-                if getattr(thread, "stop", False):
+            self.wait_all_motors_stop(stop_indicator, reporter)
+            if stop_indicator is not None:
+                if stop_indicator.has_stop_requested():
                     return
 
             if all_at_the_end:
@@ -850,11 +863,10 @@ class PBox:
                     all_at_the_beginning = False
                     motor.go(-500000, calibrate=True)
             print(self.initiators(list_to_calibration))
-            self.wait_all_motors_stop(thread)
-            if thread is not None:
-                if getattr(thread, "stop", False):
+            self.wait_all_motors_stop(stop_indicator, reporter)
+            if stop_indicator is not None:
+                if stop_indicator.has_stop_requested():
                     return
-
             if all_at_the_beginning:
                 break
 
