@@ -226,11 +226,11 @@ class ExampleApp(QMainWindow):
 
         if U_Grenze is not None:
             if self.EinheitenBox1.checkState():
-                U_Grenze = Motor.AE_aus_NE(U_Grenze)
+                U_Grenze = Motor.displ_from_norm(U_Grenze)
             self.SL_U_Edit.setText(str(round(U_Grenze,4)))
         if O_Grenze is not None:
             if self.EinheitenBox1.checkState():
-                O_Grenze = Motor.AE_aus_NE(O_Grenze)
+                O_Grenze = Motor.displ_from_norm(O_Grenze)
             self.SL_O_Edit.setText(str(round(O_Grenze,4)))
 
 
@@ -256,8 +256,8 @@ class ExampleApp(QMainWindow):
 
         if self.EinheitenBox1.checkState():
             pass
-            U_Grenze = Motor.NE_aus_AE(float(U_Grenze)) if U_Grenze != '' else None
-            O_Grenze = Motor.NE_aus_AE(float(O_Grenze)) if O_Grenze != '' else None
+            U_Grenze = Motor.norm_from_displ(float(U_Grenze)) if U_Grenze != '' else None
+            O_Grenze = Motor.norm_from_displ(float(O_Grenze)) if O_Grenze != '' else None
         else:
             U_Grenze = float(U_Grenze) if U_Grenze != '' else None
             O_Grenze = float(O_Grenze) if O_Grenze != '' else None
@@ -291,13 +291,13 @@ class ExampleApp(QMainWindow):
 
         if U_Grenze is not None:
             if self.EinheitenBox1.checkState():
-                U_Grenze = Motor.AE_aus_NE(U_Grenze)
+                U_Grenze = Motor.displ_from_norm(U_Grenze)
             self.SL_U_Edit.setText(str(round(U_Grenze, 4)))
         else:
             self.SL_U_Edit.setText('')
         if O_Grenze is not None:
             if self.EinheitenBox1.checkState():
-                O_Grenze = Motor.AE_aus_NE(O_Grenze)
+                O_Grenze = Motor.displ_from_norm(O_Grenze)
             self.SL_O_Edit.setText(str(round(O_Grenze, 4)))
         else:
             self.SL_O_Edit.setText('')
@@ -315,11 +315,11 @@ class ExampleApp(QMainWindow):
 
 
     def geh_zu(self):
-        self.Motor.geh_zu(float(self.GeheZuEdit1.text()), self.EinheitenBox1.checkState())
+        self.Motor.go_to(float(self.GeheZuEdit1.text()), self.EinheitenBox1.checkState())
         self.set_HSlider_tr(int(float(self.GeheZuEdit1.text())))
 
     def NE_aus_AE(self, AE):
-        return self.Motor.NE_aus_AE(AE)
+        return self.Motor.norm_from_displ(AE)
 
     def set_HSlider_tr(self,Val):
         if self.EinheitenBox1.checkState():
@@ -344,9 +344,9 @@ class ExampleApp(QMainWindow):
         self.set_HSlider(self.Position_NE)
 
     def Schieber_geh_zu(self):
-        self.Motor.geh_zu(self.horizontalSlider1.value())
+        self.Motor.go_to(self.horizontalSlider1.value())
         if self.EinheitenBox1.checkState():
-            self.GeheZuEdit1.setText(str(round(self.Motor.AE_aus_NE(self.horizontalSlider1.value()),4)))
+            self.GeheZuEdit1.setText(str(round(self.Motor.displ_from_norm(self.horizontalSlider1.value()), 4)))
         else:
             self.GeheZuEdit1.setText(str(self.horizontalSlider1.value()))
 
@@ -389,9 +389,9 @@ class ExampleApp(QMainWindow):
 
     def Position_lesen(self, single_shot = False):
         if self.Position_erneuern:
-            self.Position = self.Motor.position(AE = self.EinheitenBox1.checkState())
+            self.Position = self.Motor.position(displ_u= self.EinheitenBox1.checkState())
             self.Position_NE = self.Motor.position()
-            # print(Position)
+            # print(position)
             self.AktPosEdit1.setText(str(round(self.Position,4)))
             if not self.Motor.without_initiators:
                 self.horizontalScrollBar1.setValue(int(self.Position_NE))

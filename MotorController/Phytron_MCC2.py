@@ -4,7 +4,7 @@ import serial.tools.list_ports
 from serial import Serial
 import time
 from copy import deepcopy
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Union
 
 import logging
 import ULoggingConfig
@@ -120,27 +120,28 @@ class PMotor:
         self.box = controller.box
         self.axis = axis
 
-        self.A_Null = 0  # Anzeiger Null in Normierte Einheiten
+        self.displ_null = 0  # Anzeiger Null in Normierte Einheiten
         self.conversion_factor = self.read_conversion_factors()
 
         self.set_info()
 
-        self.soft_limits = (None, None)
+        self.soft_limits: Tuple[Union[None, float], Union[None, float]] = (None, None)
 
         self.without_initiators = without_initiators
         self.config()
 
-    def config(self, Parameter_Werte=None):
+    def config(self, parameters_values: Dict[str, float] = None):
         """Die Parametern einstellen laut angegebene Dict mit Parameterwerten"""
         # Parameter_Werte = {'Lauffrequenz': 4000, 'Stoppstrom': 5, 'Laufstrom': 11, 'Booststrom': 18}
 
-        if Parameter_Werte is None:
-            Parameter_Werte = self.box.PARAMETER_DEFAULT
+        if parameters_values is None:
+            parameters_values = self.box.PARAMETER_DEFAULT
 
-        for Name, Wert in Parameter_Werte.items():
-            self.set_parameter(self.box.PARAMETER_NUMBER[Name], Wert)
+        for name, value in parameters_values.items():
+            self.set_parameter(self.box.PARAMETER_NUMBER[name], value)
 
-    def set_info(self, motor_info=None):
+    # noinspection PyAttributeOutsideInit
+    def set_info(self, motor_info: dict = None):
         """Einstellt Name, Initiatoren Status, Anz_Einheiten, AE_in_Schritt anhand angegebene Dict"""
         if motor_info is None:
             name = 'Motor' + str(self.controller.bus) + "." + str(self.axis)
@@ -151,122 +152,114 @@ class PMotor:
         self.Anz_Einheiten = motor_info['Anz_Einheiten']
         self.AE_in_Schritt = motor_info['AE_in_Schritt']
 
-    def get_config(self):
+    def get_config(self) -> Dict[str, float]:
         """Liest die Parametern aus Controller und gibt zurück Dict mit Parameterwerten"""
-        Parameter_Werte = {}
-        for Par_Name, Par_Nummer in self.box.PARAMETER_NUMBER.items():
-            Par_Wert = self.Parameter_lesen(Par_Nummer)
-            Parameter_Werte[Par_Name] = Par_Wert
-        return Parameter_Werte
+        parameters_values = {}
+        for par_name, par_number in self.box.PARAMETER_NUMBER.items():
+            parameter_value = self.read_parameter(par_number)
+            parameters_values[par_name] = parameter_value
+        return parameters_values
 
-    def AE_aus_NE(self, NE):
+    def displ_from_norm(self, norm: float) -> float:
         """Transformiert einen Wert in normierte Einheiten zum Wert in Anzeige Einheiten"""
-        NE_relativ = NE - self.A_Null
-        Schritte = NE_relativ / self.conversion_factor
-        return self.AE_in_Schritt * Schritte
+        norm_relative = norm - self.displ_null
+        steps = norm_relative / self.conversion_factor
+        return self.AE_in_Schritt * steps
 
-    def NE_aus_AE(self, AE):
+    def norm_from_displ(self, displ: float):
         """Transformiert einen Wert in Anzeige Einheiten zum Wert in normierte Einheiten"""
-        Schritte = AE / self.AE_in_Schritt
-        NE_relativ = Schritte * self.conversion_factor
-        return NE_relativ + self.A_Null
+        steps = displ / self.AE_in_Schritt
+        norm_relative = steps * self.conversion_factor
+        return norm_relative + self.displ_null
 
-    def NE_aus_AE_rel(self, AE):
+    def norm_from_displ_rel(self, displ: float) -> float:
         """Transformiert einen Wert in Anzeige Einheiten zum Wert in normierte Einheiten ohne Null zu wechselln"""
-        Schritte = AE / self.AE_in_Schritt
-        NE_relativ = Schritte * self.conversion_factor
-        return NE_relativ
+        steps = displ / self.AE_in_Schritt
+        norm_relative = steps * self.conversion_factor
+        return norm_relative
 
-    def set_display_null(self, A_Null=None):
+    def set_display_null(self, displ_null: float = None):
         """Anzeiger Null in Normierte Einheiten einstellen"""
-        if A_Null is None:
-            self.A_Null = self.position()
+        if displ_null is None:
+            self.displ_null = self.position()
         else:
-            self.A_Null = A_Null
+            self.displ_null = displ_null
 
-    def soft_limits_einstellen(self, soft_limits, AE=False):
+    def soft_limits_einstellen(self, soft_limits, displ_u: bool = False):
         """soft limits einstellen"""
-        if AE:
-            self.soft_limits = tuple(map(self.NE_aus_AE_rel, soft_limits))
+        if displ_u:
+            self.soft_limits = tuple(map(self.norm_from_displ_rel, soft_limits))
         else:
             self.soft_limits = soft_limits
 
-    def geh_zu(self, Ort, AE=False):
-        """Bewegt den motor zur absoluten Position, die als Ort gegeben wird."""
-        Ort = float(Ort)
-        if AE:
-            Ort = self.NE_aus_AE(Ort)
+    def go_to(self, destination, displ=False):
+        """Bewegt den motor zur absoluten position, die als destination gegeben wird."""
+        destination = float(destination)
+        if displ:
+            destination = self.norm_from_displ(destination)
 
-        U_Grenze, O_Grenze = self.soft_limits
-        if U_Grenze is not None:
-            if Ort < U_Grenze:
-                Ort = U_Grenze
-        if O_Grenze is not None:
-            if Ort > O_Grenze:
-                Ort = O_Grenze
-        if U_Grenze is not None and O_Grenze is not None:
-            if O_Grenze - U_Grenze < 0:
+        bottom, top = self.soft_limits
+        if bottom is not None:
+            if destination < bottom:
+                destination = bottom
+        if top is not None:
+            if destination > top:
+                destination = top
+        if bottom is not None and top is not None:
+            if top - bottom < 0:
                 logging.error(f'Soft Limits Fehler: Obere Grenze ist kleiner als Untere! '
                               f'(Motor {self.axis} beim Controller {self.controller.bus}:)')
                 return False
 
-        Antwort = self.Befehl("A" + str(Ort))
-        if Antwort[0] is True:
-            logging.info(
-                'Motor {} beim Controller {} wurde zu {} geschickt. Controller antwort ist "{}"'.format(self.axis,
-                                                                                                        self.controller.bus,
-                                                                                                        Ort, Antwort))
+        reply = self.command("A" + str(destination))
+        if reply[0] is True:
+            logging.info(f'Motor {self.axis} beim Controller {self.controller.bus} wurde zu {destination} geschickt. '
+                         f'Controller antwort ist "{reply}"')
         else:
             logging.error(
-                'Motor {} beim Controller {} wurde zu {} nicht geschickt. Controller antwort ist "{}"'.format(self.axis,
-                                                                                                              self.controller.bus,
-                                                                                                              Ort,
-                                                                                                              Antwort))
-        return Antwort[0]
+                f'Motor {self.axis} beim Controller {self.controller.bus} wurde zu {destination} nicht geschickt. '
+                f'Controller antwort ist "{reply}"')
+        return reply[0]
 
-    def go(self, Verschiebung, AE=False, calibrate=False):
+    def go(self, shift: float, displ_u: bool = False, calibrate: bool = False):
         """Bewegt den motor relativ um gegebener Verschiebung."""
-        Verschiebung = float(Verschiebung)
-        if AE:
-            Verschiebung = self.NE_aus_AE_rel(Verschiebung)
+        shift = float(shift)
+        if displ_u:
+            shift = self.norm_from_displ_rel(shift)
         if self.soft_limits != (None, None) and not calibrate:
-            Position = self.position()
-            Ort = Position + Verschiebung
-            return self.geh_zu(Ort)
+            position = self.position()
+            destination = position + shift
+            return self.go_to(destination)
 
-        Antwort = self.Befehl(str(Verschiebung))
-        if Antwort[0] is True:
-            logging.info(
-                'Motor {} beim Controller {} wurde um {} verschoben. Controller antwort ist "{}"'.format(self.axis,
-                                                                                                         self.controller.bus,
-                                                                                                         Verschiebung,
-                                                                                                         Antwort))
+        reply = self.command(str(shift))
+        if reply[0] is True:
+            logging.info(f'Motor {self.axis} beim Controller {self.controller.bus} wurde um {shift} verschoben. '
+                         f'Controller antwort ist "{reply}"')
         else:
-            msg = f'Motor {self.axis} beim Controller {self.controller.bus} wurde um {Verschiebung} nicht verschoben. ' \
-                  f'Controller antwort ist "{Antwort}"'
+            msg = f'Motor {self.axis} beim Controller {self.controller.bus} wurde um {shift} nicht verschoben. ' \
+                  f'Controller antwort ist "{reply}"'
             logging.error(msg)
 
-        return Antwort[0]
+        return reply[0]
 
-    def Stop(self):
+    def stop(self):
         """Stoppt die Axe"""
-        Antwort = self.Befehl("S")
-        logging.info('Motor {} beim Controller {} wurde gestoppt. Controller antwort ist "{}"'.format(self.axis,
-                                                                                                      self.controller.bus,
-                                                                                                      Antwort))
-        return Antwort[0]
+        reply = self.command("S")
+        logging.info(f'Motor {self.axis} beim Controller {self.controller.bus} wurde gestoppt. '
+                     f'Controller antwort ist "{reply}"')
+        return reply[0]
 
     def stand(self):
         """Gibt zurück bool Wert ob Motor steht"""
-        Antwort = self.Befehl('=H')
-        if Antwort[1] == b'E':
+        reply = self.command('=H')
+        if reply[1] == b'E':
             return True
-        elif Antwort[1] == b'N':
+        elif reply[1] == b'number':
             return False
         else:
             raise ReplyError('Unerwartete Antwort vom Controller!')
 
-    def Befehl(self, text):
+    def command(self, text):
         """Befehl für den Motor ausführen"""
         return self.controller.Befehl(str(self.axis) + str(text))
 
@@ -285,51 +278,45 @@ class PMotor:
 
         return status[0], status[1]
 
-    def Parameter_lesen(self, N):
-        """Liest einen Parameter Nummer N für die Axe"""
-        Antwort = self.Befehl("P" + str(N) + "R")
-        if Antwort[0] is False:
-            raise ConnectError(f"Hat nicht geklappt einen Parameter zu lesen. Controller Antwort ist: {Antwort}")
-        return float(Antwort[1])
+    def read_parameter(self, number) -> float:
+        """Liest einen Parameter Nummer number für die Axe"""
+        reply = self.command("P" + str(number) + "R")
+        if reply[0] is False:
+            raise ConnectError(f"Hat nicht geklappt einen Parameter zu lesen. Controller Antwort ist: {reply}")
+        return float(reply[1])
 
-    def set_parameter(self, N, neuer_Wert):
-        """Ändert einen Parameter Nummer N für die Axe"""
-        Antwort = self.Befehl("P" + str(N) + "S" + str(neuer_Wert))
-        if Antwort[0] is False:
+    def set_parameter(self, number: int, new_value: float) -> (bool, str):
+        """Ändert einen Parameter Nummer number für die Axe"""
+        reply = self.command("P" + str(number) + "S" + str(new_value))
+        if reply[0] is False:
             raise ConnectError("Hat nicht geklappt einen Parameter zu ändern.")
+        return reply[0]
 
-        return Antwort[0]
-
-    def position(self, AE=False):
-        """Gibt die aktuelle Position zurück"""
-        Position = self.Parameter_lesen(20)
-        if AE:
-            return self.AE_aus_NE(Position)
+    def position(self, displ_u: bool = False) -> float:
+        """Gibt die aktuelle position zurück"""
+        position = self.read_parameter(20)
+        if displ_u:
+            return self.displ_from_norm(position)
         else:
-            return Position
+            return position
 
-    def Position21(self):
-        """Gibt die aktuelle Position zurück"""
-        return self.Parameter_lesen(21)
-
-    def set_position(self, Position):
+    def set_position(self, position: float):
         """Ändern die Zähler der aktuelle position zu angegebenen Wert"""
-        self.set_parameter(21, Position)
-        self.set_parameter(20, Position)
-        logging.info('Position wurde eingestellt. ({})'.format(Position))
+        position = float(position)
+        self.set_parameter(20, position)
+        logging.info('position wurde eingestellt. ({})'.format(position))
 
-    def Null_einstellen(self):
-        """Einstellt die aktuele Position als null"""
-        self.set_parameter(21, 0)
+    def set_null(self):
+        """Einstellt die aktuele position als null"""
         self.set_parameter(20, 0)
 
-    def read_conversion_factors(self):
-        self.conversion_factor = self.Parameter_lesen(3)
+    def read_conversion_factors(self) -> float:
+        self.conversion_factor = self.read_parameter(3)
         return self.conversion_factor
 
-    def Umrechnungsfaktor_einstellen(self, Umrechnungsfaktor):
-        self.set_parameter(3, Umrechnungsfaktor)
-        self.conversion_factor = Umrechnungsfaktor
+    def set_conversion_factor(self, conversion_factor: float):
+        self.set_parameter(3, conversion_factor)
+        self.conversion_factor = conversion_factor
 
     def kalibrieren(self):
         """Kalibrierung des Motors"""
@@ -345,21 +332,20 @@ class PMotor:
         while not self.initiators()[1]:
             self.go(100000)
             self.controller.Stop_warten()
-        Ende = self.position()
+        end = self.position()
 
         # Bis zum Anfang laufen
         while not self.initiators()[0]:
             self.go(-100000)
             self.controller.Stop_warten()
-        Anfang = self.position()
+        beginning = self.position()
 
         # Null einstellen und die Skala normieren
-        self.Null_einstellen()
-        Umrechnungsfaktor = 1000 / (Ende - Anfang)
-        self.set_parameter(3, Umrechnungsfaktor)
+        self.set_null()
+        conversion_factor = 1000 / (end - beginning)
+        self.set_parameter(3, conversion_factor)
 
-        logging.info(
-            'Kalibrierung des Motors {} beim Controller {} wurde abgeschlossen.'.format(self.axis, self.controller.bus))
+        logging.info(f'Kalibrierung des Motors {self.axis} beim Controller {self.controller.bus} wurde abgeschlossen.')
 
 
 class PController:
@@ -442,7 +428,7 @@ class PController:
         Antwort = self.Befehl("SH")
         if Antwort[1] == b'E':
             return False
-        elif Antwort[1] == b'N':
+        elif Antwort[1] == b'number':
             return True
         else:
             raise ReplyError('Unerwartete Antwort vom Controller!')
@@ -475,9 +461,9 @@ class PController:
         """Gibt die Liste der fehlenden Motoren zurück"""
         fehlende_Axen = []
         I_Status = self.Initiatoren_Status()
-        if (I_Status[0] and I_Status[1]):
+        if I_Status[0] and I_Status[1]:
             fehlende_Axen.append(1)
-        if (I_Status[2] and I_Status[3]):
+        if I_Status[2] and I_Status[3]:
             fehlende_Axen.append(2)
         return fehlende_Axen
 
@@ -485,7 +471,7 @@ class PController:
         """Stoppt alle Axen des Controllers"""
         Antwort = True
         for Motor in self:
-            Antwort = Antwort and Motor.Stop()
+            Antwort = Antwort and Motor.stop()
         return Antwort
 
 
@@ -887,7 +873,7 @@ class PBox:
 
         # Null einstellen
         for motor in motors_to_calibration:
-            motor.Null_einstellen()
+            motor.set_null()
 
         # Skala normieren
         thousand = np.array([1000] * len(beginning))
@@ -932,7 +918,7 @@ class PBox:
         display_null = []
         for controller in self:
             for motor in controller:
-                display_null.append(motor.A_Null)
+                display_null.append(motor.displ_null)
         row = list(map(str, display_null))
         f.write(';'.join(row) + '\n')
 
