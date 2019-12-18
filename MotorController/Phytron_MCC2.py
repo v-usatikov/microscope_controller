@@ -173,7 +173,7 @@ class PMotor:
         return norm_relative + self.displ_null
 
     def norm_from_displ_rel(self, displ: float) -> float:
-        """Transformiert einen Wert in Anzeige Einheiten zum Wert in normierte Einheiten ohne Null zu wechselln"""
+        """Transformiert einen Wert in Anzeige Einheiten zum Wert in normierte Einheiten ohne Null zu wechseln"""
         steps = displ / self.AE_in_Schritt
         norm_relative = steps * self.conversion_factor
         return norm_relative
@@ -243,7 +243,7 @@ class PMotor:
         return reply[0]
 
     def stop(self):
-        """Stoppt die Axe"""
+        """Stoppt die Achse"""
         reply = self.command("S")
         logging.info(f'Motor {self.axis} beim Controller {self.controller.bus} wurde gestoppt. '
                      f'Controller antwort ist "{reply}"')
@@ -261,32 +261,32 @@ class PMotor:
 
     def command(self, text):
         """Befehl für den Motor ausführen"""
-        return self.controller.Befehl(str(self.axis) + str(text))
+        return self.controller.command(str(self.axis) + str(text))
 
     def initiators(self, check: bool = True) -> (bool, bool):
         """Gibt zurück der Status der Initiatoren als List von bool Werten in folgende Reihenfolge: -, +"""
         if self.axis == 1:
-            status = self.controller.Initiatoren_Status()[:2]
+            status = self.controller.initiators_status()[:2]
         elif self.axis == 2:
-            status = self.controller.Initiatoren_Status()[2:]
+            status = self.controller.initiators_status()[2:]
         else:
-            raise ValueError('Axenummer ist falsch! "{}"'.format(self.axis))
+            raise ValueError(f'Achsnummer ist falsch! "{self.axis}"')
 
         if check:
             if status[0] and status[1]:
-                raise MotorError("Beider Initiatoren sind Aktiviert. Motor ist falsch configuruert oder kaputt!")
+                raise MotorError("Beider Initiatoren sind Aktiviert. Motor ist falsch konfiguriert oder kaputt!")
 
         return status[0], status[1]
 
     def read_parameter(self, number) -> float:
-        """Liest einen Parameter Nummer number für die Axe"""
+        """Liest einen Parameter Nummer number für die Achse"""
         reply = self.command("P" + str(number) + "R")
         if reply[0] is False:
             raise ConnectError(f"Hat nicht geklappt einen Parameter zu lesen. Controller Antwort ist: {reply}")
         return float(reply[1])
 
     def set_parameter(self, number: int, new_value: float) -> (bool, str):
-        """Ändert einen Parameter Nummer number für die Axe"""
+        """Ändert einen Parameter Nummer number für die Achse"""
         reply = self.command("P" + str(number) + "S" + str(new_value))
         if reply[0] is False:
             raise ConnectError("Hat nicht geklappt einen Parameter zu ändern.")
@@ -307,7 +307,7 @@ class PMotor:
         logging.info('position wurde eingestellt. ({})'.format(position))
 
     def set_null(self):
-        """Einstellt die aktuele position als null"""
+        """Einstellt die aktuelle position als null"""
         self.set_parameter(20, 0)
 
     def read_conversion_factors(self) -> float:
@@ -331,13 +331,13 @@ class PMotor:
         # Bis zum Ende laufen
         while not self.initiators()[1]:
             self.go(100000)
-            self.controller.Stop_warten()
+            self.controller.wait_stop()
         end = self.position()
 
         # Bis zum Anfang laufen
         while not self.initiators()[0]:
             self.go(-100000)
-            self.controller.Stop_warten()
+            self.controller.wait_stop()
         beginning = self.position()
 
         # Null einstellen und die Skala normieren
@@ -358,121 +358,112 @@ class PController:
         self.bus = bus
         self.motor: Dict[int, PMotor] = {}
 
-        if self.check_Controller()[0] is False:
+        if self.check_controller()[0] is False:
             raise ConnectError("Controller #{} antwortet nicht oder ist nicht verbunden!".format(self.bus))
 
     def __iter__(self):
         return (motor for motor in self.motor.values())
 
-    def check_Controller(self):
+    def check_controller(self):
         """Prüfen, ob der Controller da ist und funktioniert"""
         return bus_check(self.bus, ser=self.ser)
 
-    def Befehl(self, text):
-        """Befehl für den Contreller ausführen"""
+    def command(self, text):
+        """Befehl für den Controller ausführen"""
         return self.box.command(text, self.bus)
 
-    def Parametern_in_EPROM_speichern(self):
+    def save_parameters_in_eprom(self):
         """Speichert die aktuelle Parametern in Flash EPROM des Controllers"""
         self.box.ser.timeout = 5
-        Antwort = self.Befehl("SA")
+        reply = self.command("SA")
         self.box.ser.timeout = self.box.timeout
-        if Antwort[0] is False:
-            raise ConnectError("Hat nicht geklappt Parametern in Controllerspeicher zu sichern.")
+        if reply[0] is False:
+            raise ConnectError("Hat nicht geklappt Parametern in Controller-Speicher zu sichern.")
 
-    def Initiatoren_Status(self):
-        """Gibt zurück der Status der Initiatoren für beide Axen als List von bool Werten
+    def initiators_status(self) -> List[bool, bool, bool, bool]:
+        """Gibt zurück der Status der Initiatoren für beide Achsen als List von bool Werten
         in folgende Reihenfolge: X-, X+, Y-, Y+ """
-        Antwort = self.Befehl("SUI")
-        I_Status = [False] * 4
+        reply = self.command("SUI")
+        i_status = [False] * 4
 
-        if Antwort[0] is True:
-            Antwort_str = Antwort[1].decode()
+        if reply[0] is True:
+            reply_str = reply[1].decode()
             # print(Antwort_str)
 
-            # für X Axe
-            if Antwort_str[2] == "-":
-                I_Status[0] = True
-            elif Antwort_str[2] == "+":
-                I_Status[1] = True
-            elif Antwort_str[2] == "2":
-                I_Status[0] = True
-                I_Status[1] = True
-            elif Antwort_str[2] == "0":
-                I_Status[0] = False
-                I_Status[1] = False
+            # für X Achse
+            if reply_str[2] == "-":
+                i_status[0] = True
+            elif reply_str[2] == "+":
+                i_status[1] = True
+            elif reply_str[2] == "2":
+                i_status[0] = True
+                i_status[1] = True
+            elif reply_str[2] == "0":
+                i_status[0] = False
+                i_status[1] = False
             else:
-                raise ReplyError('Fehler: Unerwartete Antwort vom Controller. "{}"" '.format(Antwort_str))
+                raise ReplyError(f'Fehler: Unerwartete Antwort vom Controller. "{reply_str}"')
 
-            # für Y Axe
-            if Antwort_str[3] == "-":
-                I_Status[2] = True
-            elif Antwort_str[3] == "+":
-                I_Status[3] = True
-            elif Antwort_str[3] == "2":
-                I_Status[2] = True
-                I_Status[3] = True
-            elif Antwort_str[3] == "0":
-                I_Status[2] = False
-                I_Status[3] = False
+            # für Y Achse
+            if reply_str[3] == "-":
+                i_status[2] = True
+            elif reply_str[3] == "+":
+                i_status[3] = True
+            elif reply_str[3] == "2":
+                i_status[2] = True
+                i_status[3] = True
+            elif reply_str[3] == "0":
+                i_status[2] = False
+                i_status[3] = False
             else:
-                raise ReplyError('Fehler: Unerwartete Antwort vom Controller. "{}"" '.format(Antwort_str))
+                raise ReplyError(f'Fehler: Unerwartete Antwort vom Controller. "{reply_str}"')
 
-            return I_Status
+            return i_status
 
         else:
-            raise ConnectError("Controller #{} antwortet nicht oder ist nicht verbunden!".format(self.bus))
+            raise ConnectError(f"Controller #{self.bus} antwortet nicht oder ist nicht verbunden!")
 
-    def Motoren_laufen(self):
+    def motors_running(self) -> bool:
         """Gibt zurück der Status der Motoren, ob die Motoren in Lauf sind."""
-        Antwort = self.Befehl("SH")
-        if Antwort[1] == b'E':
+        reply = self.command("SH")
+        if reply[1] == b'E':
             return False
-        elif Antwort[1] == b'number':
+        elif reply[1] == b'number':
             return True
         else:
             raise ReplyError('Unerwartete Antwort vom Controller!')
 
-    def Stop_warten(self):
+    def wait_stop(self):
         """Haltet die programme, bis die Motoren stoppen."""
-        while self.Motoren_laufen():
+        while self.motors_running():
             time.sleep(0.5)
 
     def make_motors(self):
-        """erstellt Objekten für alle vervügbare Motoren"""
-        n_Axen = self.n_axes()
+        """erstellt Objekten für alle verfügbare Motoren"""
+        n_axes = self.n_axes()
         self.motor = {}
-        for i in range(n_Axen):
+        for i in range(n_axes):
             self.motor[i + 1] = PMotor(self, i + 1)
-        logging.info(f'Controller hat {n_Axen} Motor Objekten für alle verfügbare Axen erstellt.')
+        logging.info(f'Controller hat {n_axes} Motor Objekten für alle verfügbare Achsen erstellt.')
 
     def n_axes(self):
-        """Gibt die Anzahl der verfügbaren Axen zurück"""
-        Antwort = self.Befehl('IAR')
+        """Gibt die Anzahl der verfügbaren Achsen zurück"""
+        reply = self.command('IAR')
 
-        if Antwort[0] is True:
-            n_Axen = int(Antwort[1])
-            return n_Axen
+        if reply[0] is True:
+            n_axes = int(reply[1])
+            return n_axes
         else:
             raise ControllerError(
-                f'Lesen der Axen anzahl des Controllers {self.bus} ist fehlgeschlagen. Antwort des Controllers:{Antwort}')
+                f'Lesen der Achsen anzahl des Controllers {self.bus} ist fehlgeschlagen. '
+                f'Antwort des Controllers:{reply}')
 
-    def fehlende_Motoren(self):
-        """Gibt die Liste der fehlenden Motoren zurück"""
-        fehlende_Axen = []
-        I_Status = self.Initiatoren_Status()
-        if I_Status[0] and I_Status[1]:
-            fehlende_Axen.append(1)
-        if I_Status[2] and I_Status[3]:
-            fehlende_Axen.append(2)
-        return fehlende_Axen
-
-    def Stop(self):
-        """Stoppt alle Axen des Controllers"""
-        Antwort = True
+    def stop(self):
+        """Stoppt alle Achsen des Controllers"""
+        reply = True
         for Motor in self:
-            Antwort = Antwort and Motor.stop()
-        return Antwort
+            reply = reply and Motor.stop()
+        return reply
 
 
 class PBox:
@@ -632,7 +623,7 @@ class PBox:
                 return False
         else:
             for controller in self:
-                if controller.Motoren_laufen():
+                if controller.motors_running():
                     return False
             return True
 
@@ -650,13 +641,13 @@ class PBox:
             time.sleep(0.5)
 
     def config(self, motors_config: Dict[M_Coord, Param_Val]):
-        """Die Parametern einstellen laut angegebene Dict in Format {(bus, Axe) : Parameterwerte,}"""
+        """Die Parametern einstellen laut angegebene Dict in Format {(bus, Achse) : Parameterwerte,}"""
         available_motors = self.motors_list()
         for motor_coord, param_values in motors_config.items():
             if motor_coord in available_motors:
                 self.get_motor(motor_coord).config(param_values)
             else:
-                logging.warning(f"Motor {motor_coord} ist nicht verbunden und kann nicht configuriert werden.")
+                logging.warning(f"Motor {motor_coord} ist nicht verbunden und kann nicht konfiguriert werden.")
 
     def get_config(self) -> Dict[M_Coord, Param_Val]:
         """Liest die Parametern aus Controller und gibt zurück Dict mit Parameterwerten"""
@@ -669,7 +660,7 @@ class PBox:
         return motors_config
 
     def make_empty_config_file(self, address: str = 'input/Phytron_Motoren_config.csv'):
-        """Erstellt eine Datei mit einer leeren Configurationtabelle"""
+        """Erstellt eine Datei mit einer leeren Konfigurationstabelle"""
         f = open(address, "wt")
 
         separator = ';'
@@ -691,7 +682,7 @@ class PBox:
                 motorline = separator.join(motorline)
                 f.write(motorline + '\n')
 
-        logging.info('Eine Datei mit einer leeren Configurationtabelle wurde erstellt.')
+        logging.info('Eine Datei mit einer leeren Konfigurationstabelle wurde erstellt.')
 
     def read_config_from_file(self, address: str = 'input/Phytron_Motoren_config.csv') \
             -> (List[int], List[M_Coord], Dict[M_Coord, dict], Dict[M_Coord, Param_Val]):
@@ -709,13 +700,13 @@ class PBox:
         header = header.split(separator)
         header_length = len(header)
 
-        # Kompatibelität der Datei prüfen
+        # Kompatibilität der Datei prüfen
         if header[:6] != ['Motor Name', 'Bus', 'Axe', 'Mit Initiatoren(0 oder 1)', 'Einheiten',
                           'Einheiten pro Schritt']:
             raise ReadConfigError(f'Datei {address} ist inkompatibel und kann nicht gelesen werden.')
         for par_name in header[6:]:
             if par_name not in self.PARAMETER_NUMBER.keys():
-                raise ReadConfigError(f'Ein unbekanter Parameter: {par_name}')
+                raise ReadConfigError(f'Ein unbekannter Parameter: {par_name}')
 
         controllers_to_init = []
         motors_to_init = []
@@ -727,7 +718,7 @@ class PBox:
             motorline = motorline.split(separator)
             if len(motorline) != header_length:
                 raise ReadConfigError(f'Datei {address} ist defekt oder inkompatibel und kann nicht gelesen werden. '
-                                      f'Spaltenahzahl ist nicht konstant.')
+                                      f'Spaltenanzahl ist nicht konstant.')
 
             # Motor info
             name = motorline[0]
@@ -739,8 +730,8 @@ class PBox:
             try:
                 axis = int(motorline[2])
             except ValueError:
-                raise ReadConfigError(f'Fehler bei Axe von Motor {name} lesen. ' +
-                                      f'Axe muss ein int Wert 1 oder 2 haben und kein {motorline[2]}')
+                raise ReadConfigError(f'Fehler bei Achse von Motor {name} lesen. ' +
+                                      f'Achse muss ein int Wert 1 oder 2 haben und kein {motorline[2]}')
 
             if not (bus, axis) in motors_to_init:
                 motors_to_init.append((bus, axis))
@@ -1008,7 +999,7 @@ class PBox:
         return list_to_calibration
 
     def motors_list(self) -> List[M_Coord]:
-        """Gibt zurück eine Liste der allen Motoren in Format: [(bus, Axe), …]"""
+        """Gibt zurück eine Liste der allen Motoren in Format: [(bus, Achse), …]"""
         m_list = []
         for controller in self:
             for motor in controller:
@@ -1031,7 +1022,7 @@ class PBox:
         return controllers_list
 
     def motors_without_initiators(self) -> List[M_Coord]:
-        """Gibt zurück eine Liste der allen Motoren ohne Initiatoren in Format: [(bus, Axe), …]"""
+        """Gibt zurück eine Liste der allen Motoren ohne Initiatoren in Format: [(bus, Achse), …]"""
         motors_list = []
         for controller in self:
             for motor in controller:
@@ -1040,7 +1031,7 @@ class PBox:
         return motors_list
 
     def motors_with_initiators(self) -> List[M_Coord]:
-        """Gibt zurück eine Liste der allen Motoren ohne Initiatoren in Format: [(bus, Axe), …]"""
+        """Gibt zurück eine Liste der allen Motoren ohne Initiatoren in Format: [(bus, Achse), …]"""
         motors_list = []
         for controller in self:
             for motor in controller:
@@ -1049,7 +1040,7 @@ class PBox:
         return motors_list
 
     def get_motor(self, coordinates: (int, int) = None, name: str = None) -> PMotor:
-        """Gibt den Motor objekt zurück aus Koordinaten in Format (bus, Axe)"""
+        """Gibt den Motor objekt zurück aus Koordinaten in Format (bus, Achse)"""
 
         if coordinates is None and name is None:
             raise ValueError("Kein Argument! Die Koordinaten oder der Name des Motors muss gegeben sein. ")
@@ -1064,16 +1055,16 @@ class PBox:
             raise ValueError(f"Es gibt kein Motor mit solchem Name: {name}")
 
     def stop(self):
-        """Stoppt alle Axen"""
+        """Stoppt alle Achsen"""
         reply = True
         for bus in self.controller:
-            reply = reply and self.controller[bus].Stop()
+            reply = reply and self.controller[bus].stop()
         return reply
 
     def save_parameters_in_eprom(self):
         """Speichert die aktuelle Parametern in Flash EPROM bei alle Controllern"""
         for Controller in self:
-            Controller.Parametern_in_EPROM_speichern()
+            Controller.save_parameters_in_eprom()
 
     def close(self, without_eprom: bool = False, data_folder: str = 'data/'):
         """Alle nötige am Ende der Arbeit Operationen ausführen."""
@@ -1123,7 +1114,7 @@ class NoMotorError(MotorError):
 
 
 class FileReadError(Exception):
-    """Grundklasse für alle Fehler mit der Detei"""
+    """Grundklasse für alle Fehler mit der Datei"""
 
 
 class PlantError(FileReadError):
@@ -1131,4 +1122,4 @@ class PlantError(FileReadError):
 
 
 class ReadConfigError(Exception):
-    """Grundklasse für alle Fehler mit Lesen der Configuration aus Detei"""
+    """Grundklasse für alle Fehler mit Lesen der Configuration aus Datei"""

@@ -1,15 +1,23 @@
 <component name="ProjectDictionaryState">
   <dictionary name="prouser">
     <words>
+      <w>achsnummer</w>
       <w>booststrom</w>
       <w>comlist</w>
+      <w>displ</w>
+      <w>grundklasse</w>
       <w>hcenter</w>
       <w>initiatortyp</w>
+      <w>kalibrierungsdaten</w>
       <w>lauffrequenz</w>
       <w>laufstrom</w>
       <w>mainwindow</w>
+      <w>minilog</w>
+      <w>motorline</w>
       <w>parameterwerte</w>
+      <w>parameterwerten</w>
       <w>phytron</w>
+      <w>spaltenanzahl</w>
       <w>stoppstrom</w>
     </words>
   </dictionary>
