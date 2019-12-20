@@ -330,7 +330,7 @@ class ExampleApp(QMainWindow):
 
     def Einheiten_wechseln(self):
         if self.EinheitenBox1.checkState():
-            self.Einheit_label.setText(self.Motor.Anz_Einheiten)
+            self.Einheit_label.setText(self.Motor.display_units)
         else:
             self.Einheit_label.setText('NE')
         self.NullBtn1.setEnabled(self.EinheitenBox1.checkState())

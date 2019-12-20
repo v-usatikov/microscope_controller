@@ -1,4 +1,6 @@
 # coding= utf-8
+import csv
+
 import numpy as np
 import serial.tools.list_ports
 from serial import Serial
@@ -112,6 +114,188 @@ def read_soft_limits(address="PSoft_Limits.txt"):
     return soft_limits_list
 
 
+def read_csv(address: str, delimiter: str = ';') -> List[dict]:
+    """Liest CSV-Datei, und gibt die Liste von Dicts für jede Reihe."""
+    with open(address, newline='') as config_file:
+        csv.register_dialect('my', delimiter=delimiter)
+        data_from_file = list(csv.DictReader(config_file, dialect='my'))
+
+    # Datei prüfen
+    defect_error = FileReadError('Die CSV-Datei ist defekt und kann nicht gelesen werden!')
+    if None in list(file_row.values() for file_row in data_from_file):
+        raise defect_error
+
+    n_columns = len(data_from_file[0])
+    for file_row in data_from_file:
+        if len(file_row) != n_columns:
+            raise defect_error
+
+    return data_from_file
+
+
+def transform_raw_config_data(raw_config_data: List[dict]) -> List[dict]:
+    for motor_line in raw_config_data:
+
+        if motor_line['Ohne Initiatoren(0 oder 1)'] != '':
+            motor_line['Ohne Initiatoren(0 oder 1)'] = bool(int(motor_line['Ohne Initiatoren(0 oder 1)']))
+        else:
+            motor_line['Ohne Initiatoren(0 oder 1)'] = PMotor.DEFAULT_MOTOR_INFO['without_initiators']
+
+        if motor_line['Einheiten'] != '':
+            motor_line['Einheiten'] = motor_line['Einheiten']
+        else:
+            motor_line['Einheiten'] = PMotor.DEFAULT_MOTOR_INFO['display_units']
+
+        if motor_line['Einheiten pro Schritt'] != '':
+            motor_line['Einheiten pro Schritt'] = float(motor_line['Einheiten pro Schritt'])
+        else:
+            motor_line['Einheiten pro Schritt'] = PMotor.DEFAULT_MOTOR_INFO['display_u_per_step']
+
+        for parameter_name in PBox.PARAMETER_NUMBER.keys():
+            if motor_line[parameter_name] != '':
+                motor_line[parameter_name] = float(motor_line[parameter_name])
+            else:
+                motor_line[parameter_name] = PBox.PARAMETER_DEFAULT[parameter_name]
+    return raw_config_data
+
+def read_config_from_file0(address: str = 'input/Phytron_Motoren_config.csv') \
+        -> (List[int], List[M_Coord], Dict[M_Coord, dict], Dict[M_Coord, Param_Val]):
+    """Liest die Configuration aus Datei"""
+
+    # def check_parameters_values(parameters_values):
+    #     """Prüfen, ob die Parameter erlaubte Werte haben."""
+    #     pass
+
+    f = open(address, "rt")
+
+    separator = ';'
+
+    header = f.readline().rstrip('\n')
+    header = header.split(separator)
+    header_length = len(header)
+
+    # Kompatibilität der Datei prüfen
+    if header[:6] != ['Motor Name', 'Bus', 'Achse', 'Ohne Initiatoren(0 oder 1)', 'Einheiten',
+                      'Einheiten pro Schritt']:
+        raise ReadConfigError(f'Datei {address} ist inkompatibel und kann nicht gelesen werden.')
+    for par_name in header[6:]:
+        if par_name not in PBox.PARAMETER_NUMBER.keys():
+            raise ReadConfigError(f'Ein unbekannter Parameter: {par_name}')
+
+    controllers_to_init = []
+    motors_to_init = []
+    motors_info = {}
+    motors_parameters = {}
+
+    for motorline in f:
+        motorline = motorline.rstrip('\n')
+        motorline = motorline.split(separator)
+        if len(motorline) != header_length:
+            raise ReadConfigError(f'Datei {address} ist defekt oder inkompatibel und kann nicht gelesen werden. '
+                                  f'Spaltenanzahl ist nicht konstant.')
+
+        # Motor info
+        name = motorline[0]
+        try:
+            bus = int(motorline[1])
+        except ValueError:
+            raise ReadConfigError(f'Fehler bei Bus von Motor {name} lesen. ' +
+                                  f'Bus muss ein int Wert zwischen 0 und 5 haben und kein {motorline[1]}')
+        try:
+            axis = int(motorline[2])
+        except ValueError:
+            raise ReadConfigError(f'Fehler bei Achse von Motor {name} lesen. ' +
+                                  f'Achse muss ein int Wert 1 oder 2 haben und kein {motorline[2]}')
+
+        if not (bus, axis) in motors_to_init:
+            motors_to_init.append((bus, axis))
+        else:
+            raise ReadConfigError(f'Motor {(bus, axis)} ist mehrmals in der Datei beschrieben! .')
+
+        if bus not in controllers_to_init:
+            controllers_to_init.append(bus)
+
+        if motorline[3] == '1':
+            without_initiators = True
+        elif motorline[3] == '0' or motorline[3] == '':
+            without_initiators = False
+        else:
+            raise ReadConfigError(
+                f'Motor {name}: "Mit Initiatoren" muss ein Wert 0 oder 1 haben und kein {motorline[3]}')
+
+        if motorline[4] != '':
+            ind_units = motorline[4]
+            if motorline[5] != '':
+                try:
+                    iu_to_steps = float(motorline[5])
+                except ValueError:
+                    raise ReadConfigError(
+                        f'Motor {name}: Einheiten pro Schritt muss ein float Wert haben und kein {motorline[5]}')
+            else:
+                iu_to_steps = 1
+        else:
+            ind_units = "Schritte"
+            iu_to_steps = 1
+
+        motors_info[(bus, axis)] = {'name': name, 'without_initiators': without_initiators,
+                                    'display_units': ind_units, 'display_u_per_step': iu_to_steps}
+
+        # Parameter lesen
+        parameters_values = {}
+        for i, par_val_str in enumerate(motorline[6:], 6):
+            if par_val_str != '':
+                try:
+                    parameters_values[header[i]] = int(par_val_str)
+                except ValueError:
+                    raise ReadConfigError(
+                        f'Motor {name}: {header[i]} muss {PBox.PARAMETER_DESCRIPTION[header[i]]} sein '
+                        f'und kein {par_val_str}.')
+            else:
+                parameters_values[header[i]] = PBox.PARAMETER_DEFAULT[header[i]]
+
+        # check_parameters_values(parameters_values)
+
+        motors_parameters[(bus, axis)] = parameters_values
+
+    logging.info(f'Configuration aus Datei {address} wurde erfolgreich gelesen.')
+    return controllers_to_init, motors_to_init, motors_info, motors_parameters
+
+
+def read_config_from_file(address: str = 'input/Phytron_Motoren_config.csv') \
+        -> (List[int], List[M_Coord], Dict[M_Coord, dict], Dict[M_Coord, Param_Val]):
+
+    raw_config_data = read_csv(address)
+    config_data = transform_raw_config_data(raw_config_data)
+
+    # for row in config_data:
+    #     print(row.keys(), row.values())
+
+    controllers_to_init = []
+    motors_to_init = []
+    motors_info = {}
+    motors_parameters = {}
+
+    for motor_line in config_data:
+        motor_coord = (int(motor_line['Bus']), int(motor_line['Achse']))
+        motors_to_init.append(motor_coord)
+
+        if motor_coord[0] not in controllers_to_init:
+            controllers_to_init.append(motor_coord[0])
+
+        motor_info = {'name': motor_line['Motor Name'],
+                      'without_initiators': motor_line['Ohne Initiatoren(0 oder 1)'],
+                      'display_units': motor_line['Einheiten'],
+                      'display_u_per_step': motor_line['Einheiten pro Schritt']}
+        motors_info[motor_coord] = motor_info
+
+        motor_parameters = {}
+        for parameter_name in PBox.PARAMETER_NUMBER.keys():
+            motor_parameters[parameter_name] = motor_line[parameter_name]
+        motors_parameters[motor_coord] = motor_parameters
+
+    return controllers_to_init, motors_to_init, motors_info, motors_parameters
+
+
 class StopIndicator:
     """Durch dieses Objekt kann man Erwartung von dem Stop von allen Motoren abbrechen.
     Es wird als argument für PBox.wait_all_motors_stop() verwendet."""
@@ -128,10 +312,11 @@ class WaitReporter:
 
 class PMotor:
     """Diese Klasse entspricht einem Motor, der mit einem MCC-2 Controller verbunden ist."""
+    DEFAULT_MOTOR_INFO = {'name': "", 'without_initiators': False, 'display_units': 'Schritte', 'display_u_per_step': 1}
 
     def __init__(self, controller, axis: int, without_initiators: bool = False):
         self.controller = c_proxy(controller)
-        self.box = controller.box
+        self.box = self.controller.box
         self.axis = axis
 
         self.displ_null = 0  # Anzeiger Null in Normierte Einheiten
@@ -156,17 +341,18 @@ class PMotor:
 
     # noinspection PyAttributeOutsideInit
     def set_info(self, motor_info: dict = None):
-        """Einstellt Name, Initiatoren Status, Anz_Einheiten, AE_in_Schritt anhand angegebene Dict"""
+        """Einstellt Name, Initiatoren Status, display_units, display_u_per_step anhand angegebene Dict"""
         if motor_info is None:
             name = 'Motor' + str(self.controller.bus) + "." + str(self.axis)
-            motor_info = {'Name': name, 'ohne_Initiatoren': False, 'Anz_Einheiten': 'Schritte', 'AE_in_Schritt': 1}
+            motor_info = self.DEFAULT_MOTOR_INFO
+            motor_info['name'] = name
 
-        self.name = motor_info['Name']
-        self.without_initiators = motor_info['ohne_Initiatoren']
-        self.Anz_Einheiten = motor_info['Anz_Einheiten']
-        self.AE_in_Schritt = motor_info['AE_in_Schritt']
+        self.name = motor_info['name']
+        self.without_initiators = motor_info['without_initiators']
+        self.display_units = motor_info['display_units']
+        self.display_u_per_step = motor_info['display_u_per_step']
 
-    def get_config(self) -> Dict[str, float]:
+    def get_parameters(self) -> Dict[str, float]:
         """Liest die Parametern aus Controller und gibt zurück Dict mit Parameterwerten"""
         parameters_values = {}
         for par_name, par_number in self.box.PARAMETER_NUMBER.items():
@@ -178,17 +364,17 @@ class PMotor:
         """Transformiert einen Wert in normierte Einheiten zum Wert in Anzeige Einheiten"""
         norm_relative = norm - self.displ_null
         steps = norm_relative / self.conversion_factor
-        return self.AE_in_Schritt * steps
+        return self.display_u_per_step * steps
 
     def norm_from_displ(self, displ: float):
         """Transformiert einen Wert in Anzeige Einheiten zum Wert in normierte Einheiten"""
-        steps = displ / self.AE_in_Schritt
+        steps = displ / self.display_u_per_step
         norm_relative = steps * self.conversion_factor
         return norm_relative + self.displ_null
 
     def norm_from_displ_rel(self, displ: float) -> float:
         """Transformiert einen Wert in Anzeige Einheiten zum Wert in normierte Einheiten ohne Null zu wechseln"""
-        steps = displ / self.AE_in_Schritt
+        steps = displ / self.display_u_per_step
         norm_relative = steps * self.conversion_factor
         return norm_relative
 
@@ -332,34 +518,9 @@ class PMotor:
         self.set_parameter(3, conversion_factor)
         self.conversion_factor = conversion_factor
 
-    def kalibrieren(self):
+    def calibrate(self, stop_indicator: StopIndicator = None, reporter: WaitReporter = None):
         """Kalibrierung des Motors"""
-        logging.info(
-            'Kalibrierung des Motors {} beim Controller {} wurde angefangen.'.format(self.axis, self.controller.bus))
-
-        # Voreinstellung der Parametern
-        self.set_parameter(1, 1)
-        self.set_parameter(2, 1)
-        self.set_parameter(3, 1)
-
-        # Bis zum Ende laufen
-        while not self.initiators()[1]:
-            self.go(100000)
-            self.controller.wait_stop()
-        end = self.position()
-
-        # Bis zum Anfang laufen
-        while not self.initiators()[0]:
-            self.go(-100000)
-            self.controller.wait_stop()
-        beginning = self.position()
-
-        # Null einstellen und die Skala normieren
-        self.set_null()
-        conversion_factor = 1000 / (end - beginning)
-        self.set_parameter(3, conversion_factor)
-
-        logging.info(f'Kalibrierung des Motors {self.axis} beim Controller {self.controller.bus} wurde abgeschlossen.')
+        self.box.calibrate_motors(motors_to_calibration=[self], stop_indicator=stop_indicator, reporter=reporter)
 
 
 class PController:
@@ -394,8 +555,8 @@ class PController:
         if reply[0] is False:
             raise ConnectError("Hat nicht geklappt Parametern in Controller-Speicher zu sichern.")
 
-    def initiators_status(self) -> List[bool, bool, bool, bool]:
-        """Gibt zurück der Status der Initiatoren für beide Achsen als List von bool Werten
+    def initiators_status(self) -> (bool, bool, bool, bool):
+        """Gibt zurück der Status der Initiatoren für beide Achsen als 4 bool Werten
         in folgende Reihenfolge: X-, X+, Y-, Y+ """
         reply = self.command("SUI")
         i_status = [False] * 4
@@ -432,7 +593,7 @@ class PController:
             else:
                 raise ReplyError(f'Fehler: Unerwartete Antwort vom Controller. "{reply_str}"')
 
-            return i_status
+            return tuple(i_status)
 
         else:
             raise ConnectError(f"Controller #{self.bus} antwortet nicht oder ist nicht verbunden!")
@@ -572,7 +733,7 @@ class PBox:
         n_controllers = 0
         self.controller = {}
 
-        controllers_to_init, motors_to_init, motors_info, motors_parameters = self.read_config_from_file(config_file)
+        controllers_to_init, motors_to_init, motors_info, motors_parameters = read_config_from_file(config_file)
 
         # Controller initialisieren
         absent_bus = []
@@ -598,7 +759,7 @@ class PBox:
                           f"den Motor wurde nicht initialisiert.\n"
 
         self.set_motors_info(motors_info)
-        self.config(motors_parameters)
+        self.set_parameters(motors_parameters)
 
         report = f"{n_controllers} Controller und {n_motors} Motoren wurde initialisiert:\n" + report
         for controller in self:
@@ -615,7 +776,7 @@ class PBox:
         return report
 
     def set_motors_info(self, motors_info: Dict[M_Coord, dict]):
-        """Einstellt Name, Initiatoren Status, Anz_Einheiten, AE_in_Schritt der Motoren anhand angegebene Dict"""
+        """Einstellt Name, Initiatoren Status, display_units, AE_in_Schritt der Motoren anhand angegebene Dict"""
         for motor_coord, motor_info in motors_info.items():
             motor = self.get_motor(motor_coord)
             motor.set_info(motor_info)
@@ -652,7 +813,7 @@ class PBox:
                 reporter.report(self.names_from_running_motors())
             time.sleep(0.5)
 
-    def config(self, motors_config: Dict[M_Coord, Param_Val]):
+    def set_parameters(self, motors_config: Dict[M_Coord, Param_Val]):
         """Die Parametern einstellen laut angegebene Dict in Format {(bus, Achse) : Parameterwerte,}"""
         available_motors = self.motors_list()
         for motor_coord, param_values in motors_config.items():
@@ -661,15 +822,15 @@ class PBox:
             else:
                 logging.warning(f"Motor {motor_coord} ist nicht verbunden und kann nicht konfiguriert werden.")
 
-    def get_config(self) -> Dict[M_Coord, Param_Val]:
+    def get_parameters(self) -> Dict[M_Coord, Param_Val]:
         """Liest die Parametern aus Controller und gibt zurück Dict mit Parameterwerten"""
-        motors_config = {}
+        motors_parameters = {}
 
         for controller in self:
             for Motor in controller:
-                motors_config[(controller.bus, Motor.axis)] = Motor.get_config()
+                motors_parameters[(controller.bus, Motor.axis)] = Motor.get_parameters()
 
-        return motors_config
+        return motors_parameters
 
     def make_empty_config_file(self, address: str = 'input/Phytron_Motoren_config.csv'):
         """Erstellt eine Datei mit einer leeren Konfigurationstabelle"""
@@ -678,7 +839,7 @@ class PBox:
         separator = ';'
 
         # Motor liste schreiben
-        header = ['Motor Name', 'Bus', 'Axe', 'Mit Initiatoren(0 oder 1)', 'Einheiten', 'Einheiten pro Schritt']
+        header = ['Motor Name', 'Bus', 'Achse', 'Mit Initiatoren(0 oder 1)', 'Einheiten', 'Einheiten pro Schritt']
         for parameter_name in self.PARAMETER_NUMBER.keys():
             header.append(parameter_name)
         header_length = len(header)
@@ -695,108 +856,6 @@ class PBox:
                 f.write(motorline + '\n')
 
         logging.info('Eine Datei mit einer leeren Konfigurationstabelle wurde erstellt.')
-
-    def read_config_from_file(self, address: str = 'input/Phytron_Motoren_config.csv') \
-            -> (List[int], List[M_Coord], Dict[M_Coord, dict], Dict[M_Coord, Param_Val]):
-        """Liest die Configuration aus Datei"""
-
-        # def check_parameters_values(parameters_values):
-        #     """Prüfen, ob die Parameter erlaubte Werte haben."""
-        #     pass
-
-        f = open(address, "rt")
-
-        separator = ';'
-
-        header = f.readline().rstrip('\n')
-        header = header.split(separator)
-        header_length = len(header)
-
-        # Kompatibilität der Datei prüfen
-        if header[:6] != ['Motor Name', 'Bus', 'Axe', 'Mit Initiatoren(0 oder 1)', 'Einheiten',
-                          'Einheiten pro Schritt']:
-            raise ReadConfigError(f'Datei {address} ist inkompatibel und kann nicht gelesen werden.')
-        for par_name in header[6:]:
-            if par_name not in self.PARAMETER_NUMBER.keys():
-                raise ReadConfigError(f'Ein unbekannter Parameter: {par_name}')
-
-        controllers_to_init = []
-        motors_to_init = []
-        motors_info = {}
-        motors_parameters = {}
-
-        for motorline in f:
-            motorline = motorline.rstrip('\n')
-            motorline = motorline.split(separator)
-            if len(motorline) != header_length:
-                raise ReadConfigError(f'Datei {address} ist defekt oder inkompatibel und kann nicht gelesen werden. '
-                                      f'Spaltenanzahl ist nicht konstant.')
-
-            # Motor info
-            name = motorline[0]
-            try:
-                bus = int(motorline[1])
-            except ValueError:
-                raise ReadConfigError(f'Fehler bei Bus von Motor {name} lesen. ' +
-                                      f'Bus muss ein int Wert zwischen 0 und 5 haben und kein {motorline[1]}')
-            try:
-                axis = int(motorline[2])
-            except ValueError:
-                raise ReadConfigError(f'Fehler bei Achse von Motor {name} lesen. ' +
-                                      f'Achse muss ein int Wert 1 oder 2 haben und kein {motorline[2]}')
-
-            if not (bus, axis) in motors_to_init:
-                motors_to_init.append((bus, axis))
-            else:
-                raise ReadConfigError(f'Motor {(bus, axis)} ist mehrmals in der Datei beschrieben! .')
-
-            if bus not in controllers_to_init:
-                controllers_to_init.append(bus)
-
-            if motorline[3] == '0':
-                without_initiators = True
-            elif motorline[3] == '1' or motorline[3] == '':
-                without_initiators = False
-            else:
-                raise ReadConfigError(
-                    f'Motor {name}: "Mit Initiatoren" muss ein Wert 0 oder 1 haben und kein {motorline[3]}')
-
-            if motorline[4] != '':
-                ind_units = motorline[4]
-                if motorline[5] != '':
-                    try:
-                        iu_to_steps = float(motorline[5])
-                    except ValueError:
-                        raise ReadConfigError(
-                            f'Motor {name}: Einheiten pro Schritt muss ein float Wert haben und kein {motorline[5]}')
-                else:
-                    iu_to_steps = 1
-            else:
-                ind_units = "Schritte"
-                iu_to_steps = 1
-
-            motors_info[(bus, axis)] = {'Name': name, 'ohne_Initiatoren': without_initiators,
-                                        'Anz_Einheiten': ind_units, 'AE_in_Schritt': iu_to_steps}
-
-            # Parameter lesen
-            parameters_values = {}
-            for i, par_val_str in enumerate(motorline[6:], 6):
-                if par_val_str != '':
-                    try:
-                        parameters_values[header[i]] = int(par_val_str)
-                    except ValueError:
-                        raise ReadConfigError(
-                            f'Motor {name}: {header[i]} muss {self.PARAMETER_DESCRIPTION[header[i]]} sein '
-                            f'und kein {par_val_str}.')
-                else:
-                    parameters_values[header[i]] = self.PARAMETER_DEFAULT[header[i]]
-
-            # check_parameters_values(parameters_values)
-
-            motors_parameters[(bus, axis)] = parameters_values
-
-        logging.info(f'Configuration aus Datei {address} wurde erfolgreich gelesen.')
-        return controllers_to_init, motors_to_init, motors_info, motors_parameters
 
     def initiators(self, motors_list: List[M_Coord] = None) -> List[Tuple[bool, bool]]:
         """Gibt zurück eine Liste mit Status von den Initiatoren von allen Motoren"""
@@ -1135,3 +1194,12 @@ class PlantError(FileReadError):
 
 class ReadConfigError(Exception):
     """Grundklasse für alle Fehler mit Lesen der Configuration aus Datei"""
+
+
+if __name__ == '__main__':
+    config0 = read_config_from_file0('/Users/prouser/Dropbox/Proging/Python_Projects/MikroskopController/MCC2_Demo_GUI/input/Phytron_Motoren_config.csv')
+    config = read_config_from_file('/Users/prouser/Dropbox/Proging/Python_Projects/MikroskopController/MCC2_Demo_GUI/input/Phytron_Motoren_config.csv')
+    for i in range(len(config)):
+        print(i, config[i] == config0[i])
+    print(config0[2])
+    print(config[2])

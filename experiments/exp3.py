@@ -1,5 +1,6 @@
+d = {'a':1, 'b':2, 'c':3}
 
-def f(a: str):
-    return 'Hi!'
+ind = ['a', 'c']
+# print(d['a', 'c'])
 
-print(f(3))
+print(bool(2))
