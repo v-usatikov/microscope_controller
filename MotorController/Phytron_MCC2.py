@@ -1,18 +1,15 @@
 # coding= utf-8
+import concurrent.futures
 import csv
+import logging
+import time
+from copy import deepcopy
 
 import numpy as np
 import serial.tools.list_ports
-from serial import Serial
-import time
-from copy import deepcopy
-from typing import Dict, List, Tuple, Union
-import asyncio
-import concurrent.futures
-from MotorController.MotorControllerInterface import *
 
-import logging
 import ULoggingConfig
+from MotorController.MotorControllerInterface import *
 
 if __name__ == '__main__':
     ULoggingConfig.init_config()
