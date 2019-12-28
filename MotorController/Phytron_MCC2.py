@@ -502,6 +502,14 @@ class PMotor:
         else:
             raise ReplyError('Unerwartete Antwort vom Controller!')
 
+    def wait_motor_stop(self, stop_indicator: Union[StopIndicator, None] = None):
+        """Haltet die programme, bis alle Motoren stoppen."""
+        while not self.stand():
+            if stop_indicator is not None:
+                if stop_indicator.has_stop_requested():
+                    return
+            time.sleep(0.5)
+
     def command(self, text):
         """Befehl für den Motor ausführen"""
         return self.controller.command(str(self.axis) + str(text))
@@ -543,6 +551,14 @@ class PMotor:
         else:
             return position
 
+    def at_the_end(self):
+        """Gibt zurück einen bool Wert, ob der End-Initiator aktiviert ist."""
+        return self.initiators()[1]
+
+    def at_the_beginning(self):
+        """Gibt zurück einen bool Wert, ob der Anfang-Initiator aktiviert ist."""
+        return self.initiators()[0]
+
     def set_position(self, position: float):
         """Ändern die Zähler der aktuelle position zu angegebenen Wert"""
         position = float(position)
@@ -561,9 +577,42 @@ class PMotor:
         self.set_parameter(3, conversion_factor)
         self.conversion_factor = conversion_factor
 
-    def calibrate(self, stop_indicator: StopIndicator = None, reporter: WaitReporter = None):
-        """Kalibrierung des Motors"""
-        self.box.calibrate_motors(motors_to_calibration=[self], stop_indicator=stop_indicator, reporter=reporter)
+    async def calibrate(self, stop_indicator: StopIndicator = None):
+        """Kalibrierung von den gegebenen Motoren"""
+        logging.info(f'Kalibrierung vom Motor {self.name} wurde angefangen.')
+
+        motor = self
+
+        # Voreinstellung der Parametern
+        motor.set_parameter(1, 1)
+        motor.set_parameter(2, 1)
+        motor.set_parameter(3, 1)
+
+        # Bis zum Ende laufen
+        while not self.at_the_end():
+            motor.go(500000, calibrate=True)
+            self.wait_motor_stop(stop_indicator)
+            if stop_indicator is not None:
+                if stop_indicator.has_stop_requested():
+                    return
+        end = motor.position()
+
+        # Bis zum Anfang laufen
+        while not self.at_the_beginning():
+            motor.go(-500000, calibrate=True)
+            self.wait_motor_stop(stop_indicator)
+            if stop_indicator is not None:
+                if stop_indicator.has_stop_requested():
+                    return
+        beginning = motor.position()
+
+        # Null einstellen
+        motor.set_null()
+
+        # Skala normieren
+        self.conversion_factor = 1000 / (end - beginning)
+
+        logging.info(f'Kalibrierung von Motor {self.name} wurde abgeschlossen.')
 
 
 class PController:
