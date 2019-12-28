@@ -7,6 +7,8 @@ from serial import Serial
 import time
 from copy import deepcopy
 from typing import Dict, List, Tuple, Union
+import asyncio
+import concurrent.futures
 
 import logging
 import ULoggingConfig
@@ -577,7 +579,7 @@ class PMotor:
         self.set_parameter(3, conversion_factor)
         self.conversion_factor = conversion_factor
 
-    async def calibrate(self, stop_indicator: StopIndicator = None):
+    def calibrate(self, stop_indicator: StopIndicator = None):
         """Kalibrierung von den gegebenen Motoren"""
         if not self.without_initiators:
             logging.info(f'Kalibrierung vom Motor {self.name} wurde angefangen.')
@@ -966,9 +968,14 @@ class PBox:
                          motors_to_calibration: List[PMotor] = None,
                          stop_indicator: StopIndicator = None,
                          reporter: WaitReporter = None):
-        for controller in self:
-            for motor in controller:
-                motor.calibrate(stop_indicator)
+
+        motors_to_calibration = [self.controller[bus].motor[axis] for bus, axis in self.motors_with_initiators()]
+
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            results = executor.map(lambda motor: motor.calibrate(), motors_to_calibration)
+
+            for result in results:
+                print(result)
 
     def calibrate_motors(self, list_to_calibration: List[M_Coord] = None,
                          motors_to_calibration: List[PMotor] = None,
@@ -1304,4 +1311,9 @@ if __name__ == '__main__':
     box1 = PBox(comlist[2])
 
     box1.initialize_with_config_file('/Users/prouser/Dropbox/Proging/Python_Projects/MikroskopController/MCC2_Demo_GUI/input/Phytron_Motoren_config.csv')
-    print(box1.save_parameters_in_eprom_fast())
+    # print(box1.save_parameters_in_eprom_fast())
+
+
+    # asyncio.run(box1.get_motor((2, 2)).calibrate())
+    box1.calibrate_motors2()
+
