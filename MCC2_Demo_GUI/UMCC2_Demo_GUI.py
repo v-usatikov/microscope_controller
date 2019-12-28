@@ -1,5 +1,6 @@
 # coding= utf-8
 import logging
+import time
 from typing import List
 
 from PyQt5 import QtGui, QtCore
@@ -114,7 +115,7 @@ class KalibrierungThread(QThread):
     def run(self):
         wait_reporter = GuiWaitReporter(self)
         stop_indicator = GuiStopIndicator(self)
-        self.box.calibrate_motors(stop_indicator=stop_indicator, wait_reporter=wait_reporter)
+        self.box.calibrate_motors(stop_indicator=stop_indicator, reporter=wait_reporter)
 
         if self.stop:
             self.box.stop()
@@ -387,6 +388,7 @@ class ExampleApp(QMainWindow):
         self.Verbinden(config_Datei = fileName[0])
 
     def Verbinden(self, arg=None, config_Datei='input/Phytron_Motoren_config.csv'):
+
         if self.verbunden:
             self.Box.close(without_eprom=True)
 

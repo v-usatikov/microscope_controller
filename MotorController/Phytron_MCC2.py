@@ -24,23 +24,31 @@ def command_format(text: str, bus: int):
         raise TypeError('Befehl_Format: "bus" muss int sein, kein {}'.format(type(bus)))
     elif bus < 0 or bus > 9:
         raise ValueError('Befehl_Format: "bus" muss ein Wert zwischen 0 und 9 haben und kein {}'.format(bus))
-    # print(b"\x02" + str(bus).encode() + text.encode() + b"\x03")
+    print(b"\x02" + str(bus).encode() + text.encode() + b"\x03")
     return b"\x02" + str(bus).encode() + text.encode() + b"\x03"
 
 
-def read_reply(ser: Serial) -> (bool, str):
+def read_reply(ser: Serial, timeout: float = None) -> (bool, bytes):
     """Antwort lesen, der nach einem Befehl erscheint."""
+    if timeout is not None:
+        timeout0 = ser.timeout
+        ser.timeout = timeout
     reply = ser.read_until(b'\x03')
     if reply == b'\x02\x06\x03':
-        return True, None
+        result = (True, None)
     elif reply == b'\x02\x15\x03':
-        return False, None
+        result = (False, None)
     elif reply == b'':
-        return None, None
+        result = None, None
     elif reply[0] == 2 and reply[-1] == 3:
-        return True, reply[2:-1]
+        result = (True, reply[2:-1])
     else:
+        if timeout is not None:
+            ser.timeout = timeout0
         raise ReplyError('Fehler bei Antwort_lesen: Unerwartete Antwort! "{}"'.format(reply))
+    if timeout is not None:
+        ser.timeout = timeout0
+    return result
 
 
 def com_list() -> List[str]:
@@ -52,7 +60,7 @@ def com_list() -> List[str]:
     return n_list
 
 
-def bus_check(bus: int, port: str = None, ser: Serial = None) -> (bool, str):
+def bus_check(bus: int, port: str = None, ser: Serial = None, timeout: float = None) -> (bool, str):
     """Prüft ob es bei dem Bus-Nummer ein Controller gibt, und gibt die Version davon zurück."""
     if ser is None:
         if port is not None:
@@ -65,7 +73,7 @@ def bus_check(bus: int, port: str = None, ser: Serial = None) -> (bool, str):
     ser.flushInput()
     ser.write(command_format("IVR", bus))
     try:
-        com_reply = read_reply(ser)
+        com_reply = read_reply(ser, timeout)
     except ReplyError as err:
         logging.error(str(err))
         return False, str(err)
@@ -133,7 +141,32 @@ def read_csv(address: str, delimiter: str = ';') -> List[dict]:
     return data_from_file
 
 
-def transform_raw_config_data(raw_config_data: List[dict]) -> List[dict]:
+def __check_raw_config_data(raw_config_data: List[dict]) -> (bool, str):
+
+    for motor_line in raw_config_data:
+
+        init_status = motor_line['Ohne Initiatoren(0 oder 1)']
+        message = f'"Ohne Initiatoren" muss 0 oder 1 sein, und kein "{init_status}"'
+        if init_status != '':
+            try:
+                init_status = bool(int(motor_line['Ohne Initiatoren(0 oder 1)']))
+            except ValueError:
+                return False, message
+            if init_status not in (0, 1):
+                return False, message
+
+        units_per_step = motor_line['Einheiten pro Schritt']
+        message = f'"Einheiten pro Schritt" muss ein float Wert haben, und kein "{units_per_step}"'
+        if units_per_step != '':
+            try:
+                float(motor_line['Ohne Initiatoren(0 oder 1)'])
+            except ValueError:
+                return False, message
+
+    return True, ""
+
+
+def __transform_raw_config_data(raw_config_data: List[dict]) -> List[dict]:
     for motor_line in raw_config_data:
 
         if motor_line['Ohne Initiatoren(0 oder 1)'] != '':
@@ -157,6 +190,7 @@ def transform_raw_config_data(raw_config_data: List[dict]) -> List[dict]:
             else:
                 motor_line[parameter_name] = PBox.PARAMETER_DEFAULT[parameter_name]
     return raw_config_data
+
 
 def read_config_from_file0(address: str = 'input/Phytron_Motoren_config.csv') \
         -> (List[int], List[M_Coord], Dict[M_Coord, dict], Dict[M_Coord, Param_Val]):
@@ -265,7 +299,12 @@ def read_config_from_file(address: str = 'input/Phytron_Motoren_config.csv') \
         -> (List[int], List[M_Coord], Dict[M_Coord, dict], Dict[M_Coord, Param_Val]):
 
     raw_config_data = read_csv(address)
-    config_data = transform_raw_config_data(raw_config_data)
+
+    correct, message = __check_raw_config_data(raw_config_data)
+    if not correct:
+        raise ReadConfigError("Datei hat inkorrekte Data. " + message)
+
+    config_data = __transform_raw_config_data(raw_config_data)
 
     # for row in config_data:
     #     print(row.keys(), row.values())
@@ -296,6 +335,10 @@ def read_config_from_file(address: str = 'input/Phytron_Motoren_config.csv') \
     return controllers_to_init, motors_to_init, motors_info, motors_parameters
 
 
+class PTranslator:
+    """Diese Klasse beschreibt die Sprache, die man braucht^ um mit MCC2 Controller zu kommunizieren."""
+    
+
 class StopIndicator:
     """Durch dieses Objekt kann man Erwartung von dem Stop von allen Motoren abbrechen.
     Es wird als argument für PBox.wait_all_motors_stop() verwendet."""
@@ -315,7 +358,7 @@ class PMotor:
     DEFAULT_MOTOR_INFO = {'name': "", 'without_initiators': False, 'display_units': 'Schritte', 'display_u_per_step': 1}
 
     def __init__(self, controller, axis: int, without_initiators: bool = False):
-        self.controller = c_proxy(controller)
+        self.controller: PController = controller
         self.box = self.controller.box
         self.axis = axis
 
@@ -454,7 +497,7 @@ class PMotor:
         reply = self.command('=H')
         if reply[1] == b'E':
             return True
-        elif reply[1] == b'number':
+        elif reply[1] == b'N':
             return False
         else:
             raise ReplyError('Unerwartete Antwort vom Controller!')
@@ -528,7 +571,7 @@ class PController:
 
     def __init__(self, box, bus: int):
 
-        self.box = b_proxy(box)
+        self.box: PBox = box
         self.ser = self.box.ser
         self.bus = bus
         self.motor: Dict[int, PMotor] = {}
@@ -543,9 +586,9 @@ class PController:
         """Prüfen, ob der Controller da ist und funktioniert"""
         return bus_check(self.bus, ser=self.ser)
 
-    def command(self, text):
+    def command(self, text: str, with_reply: bool = True, timeout: float = None) -> (bool, bytes):
         """Befehl für den Controller ausführen"""
-        return self.box.command(text, self.bus)
+        return self.box.command(text, self.bus, with_reply, timeout)
 
     def save_parameters_in_eprom(self):
         """Speichert die aktuelle Parametern in Flash EPROM des Controllers"""
@@ -603,10 +646,10 @@ class PController:
         reply = self.command("SH")
         if reply[1] == b'E':
             return False
-        elif reply[1] == b'number':
+        elif reply[1] == b'N':
             return True
         else:
-            raise ReplyError('Unerwartete Antwort vom Controller!')
+            raise ReplyError(f'Unerwartete Antwort vom Controller! "{reply[1]}"')
 
     def wait_stop(self):
         """Haltet die programme, bis die Motoren stoppen."""
@@ -677,7 +720,7 @@ class PBox:
         for i in range(5):
             for j in range(3):
                 check = bus_check(i, ser=self.ser)
-                # print(check)
+                print(check)
                 if check[0]:
                     self.bus_list.append(i)
                     break
@@ -693,14 +736,18 @@ class PBox:
             self.controller[i] = PController(self, i)
         logging.info('Box hat {} Controller Objekten für Bus {} erstellt.'.format(len(self.bus_list), self.bus_list))
 
-    def command(self, text: str, bus: int) -> (bool, str):
+    def command(self, text: str, bus: int, with_reply: bool = True, timeout: float = None) \
+            -> Union[Tuple[bool, bytes], None]:
         """Befehl für die Box ausführen"""
         self.ser.flushInput()
         self.ser.write(command_format(text, bus))
-        reply = read_reply(self.ser)
-        if reply[0] is None:
-            raise ConnectError('Controller Antwortet nicht!')
-        return reply
+        if with_reply:
+            reply = read_reply(self.ser, timeout)
+            if reply[0] is None:
+                raise ConnectError('Controller Antwortet nicht!')
+            return reply
+        else:
+            return None
 
     def initialize(self):
         """Sucht und macht Objekte für alle verfügbare Controller und Motoren. Gibt ein Bericht zurück."""
@@ -1137,6 +1184,12 @@ class PBox:
         for Controller in self:
             Controller.save_parameters_in_eprom()
 
+    def save_parameters_in_eprom_fast(self):
+        """Speichert die aktuelle Parametern in Flash EPROM bei alle Controllern"""
+        for Controller in self:
+            Controller.command("SA", with_reply=False, timeout=5)
+        return read_reply(self.ser)
+
     def close(self, without_eprom: bool = False, data_folder: str = 'data/'):
         """Alle nötige am Ende der Arbeit Operationen ausführen."""
         self.stop()
@@ -1146,18 +1199,6 @@ class PBox:
         if not without_eprom:
             self.save_parameters_in_eprom()
         del self
-
-
-def c_proxy(controller: PController) -> PController:
-    return controller
-
-
-def m_proxy(motor: PMotor) -> PMotor:
-    return motor
-
-
-def b_proxy(box: PBox) -> PBox:
-    return box
 
 
 class SerialError(Exception):
@@ -1197,9 +1238,15 @@ class ReadConfigError(Exception):
 
 
 if __name__ == '__main__':
-    config0 = read_config_from_file0('/Users/prouser/Dropbox/Proging/Python_Projects/MikroskopController/MCC2_Demo_GUI/input/Phytron_Motoren_config.csv')
-    config = read_config_from_file('/Users/prouser/Dropbox/Proging/Python_Projects/MikroskopController/MCC2_Demo_GUI/input/Phytron_Motoren_config.csv')
-    for i in range(len(config)):
-        print(i, config[i] == config0[i])
-    print(config0[2])
-    print(config[2])
+    # config0 = read_config_from_file0('/Users/prouser/Dropbox/Proging/Python_Projects/MikroskopController/MCC2_Demo_GUI/input/Phytron_Motoren_config.csv')
+    # config = read_config_from_file('/Users/prouser/Dropbox/Proging/Python_Projects/MikroskopController/MCC2_Demo_GUI/input/Phytron_Motoren_config.csv')
+    # print(config == config0)
+
+    comlist = serial.tools.list_ports.comports()
+    comlist = [com.device for com in comlist]
+    print(comlist)
+
+    box1 = PBox(comlist[2])
+
+    box1.initialize_with_config_file('/Users/prouser/Dropbox/Proging/Python_Projects/MikroskopController/MCC2_Demo_GUI/input/Phytron_Motoren_config.csv')
+    print(box1.save_parameters_in_eprom_fast())
