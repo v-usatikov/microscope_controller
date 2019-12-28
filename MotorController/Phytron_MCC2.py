@@ -9,6 +9,7 @@ from copy import deepcopy
 from typing import Dict, List, Tuple, Union
 import asyncio
 import concurrent.futures
+from MotorController.MotorControllerInterface import *
 
 import logging
 import ULoggingConfig
@@ -26,16 +27,20 @@ def command_format(text: str, bus: int):
         raise TypeError('Befehl_Format: "bus" muss int sein, kein {}'.format(type(bus)))
     elif bus < 0 or bus > 9:
         raise ValueError('Befehl_Format: "bus" muss ein Wert zwischen 0 und 9 haben und kein {}'.format(bus))
-    print(b"\x02" + str(bus).encode() + text.encode() + b"\x03")
+    # print(b"\x02" + str(bus).encode() + text.encode() + b"\x03")
     return b"\x02" + str(bus).encode() + text.encode() + b"\x03"
 
 
-def read_reply(ser: Serial, timeout: float = None) -> (bool, bytes):
+def read_reply(connector: Connector, timeout: float = None) -> (bool, bytes):
     """Antwort lesen, der nach einem Befehl erscheint."""
     if timeout is not None:
-        timeout0 = ser.timeout
-        ser.timeout = timeout
-    reply = ser.read_until(b'\x03')
+        timeout0 = connector.get_timeout()
+        connector.set_timeout(timeout)
+        reply = connector.read(b'\x03')
+        connector.set_timeout(timeout0)
+    else:
+        reply = connector.read(b'\x03')
+
     if reply == b'\x02\x06\x03':
         result = (True, None)
     elif reply == b'\x02\x15\x03':
@@ -45,44 +50,21 @@ def read_reply(ser: Serial, timeout: float = None) -> (bool, bytes):
     elif reply[0] == 2 and reply[-1] == 3:
         result = (True, reply[2:-1])
     else:
-        if timeout is not None:
-            ser.timeout = timeout0
         raise ReplyError('Fehler bei Antwort_lesen: Unerwartete Antwort! "{}"'.format(reply))
-    if timeout is not None:
-        ser.timeout = timeout0
     return result
 
 
-def com_list() -> List[str]:
-    """Gibt eine Liste der verfügbaren COM-Ports"""
-    comlist = serial.tools.list_ports.comports()
-    n_list = []
-    for element in comlist:
-        n_list.append(element.device)
-    return n_list
-
-
-def bus_check(bus: int, port: str = None, ser: Serial = None, timeout: float = None) -> (bool, str):
+def bus_check(bus: int, connector: Connector, timeout: float = None) -> (bool, str):
     """Prüft ob es bei dem Bus-Nummer ein Controller gibt, und gibt die Version davon zurück."""
-    if ser is None:
-        if port is not None:
-            ser = serial.Serial(port, 115200, timeout=1)
-        else:
-            raise TypeError("Bus_check: Es gibt kein Argument! port oder ser muss gegeben sein!")
-    else:
-        port = None
 
-    ser.flushInput()
-    ser.write(command_format("IVR", bus))
+    connector.clear_buffer()
+    connector.send(command_format("IVR", bus))
     try:
-        com_reply = read_reply(ser, timeout)
+        com_reply = read_reply(connector, timeout)
     except ReplyError as err:
         logging.error(str(err))
         return False, str(err)
     # print(COM_Antwort)
-
-    if port is not None:
-        ser.close()
 
     if com_reply[0] is None:
         return False, None
@@ -94,12 +76,12 @@ def bus_check(bus: int, port: str = None, ser: Serial = None, timeout: float = N
         return False, com_reply[1]
 
 
-def com_check(port: str) -> (bool, str):
+def check_connection(connector: Connector) -> (bool, str):
     """Prüft ob es bei dem Com-Port tatsächlich ein Controller gibt, und gibt die Version davon zurück."""
     check = False
     for i in range(10):
         for j in range(4):
-            check = bus_check(i, port)
+            check = bus_check(i, connector)
             # print(check)
             if check[0]:
                 return check
@@ -626,7 +608,7 @@ class PController:
     def __init__(self, box, bus: int):
 
         self.box: PBox = box
-        self.ser = self.box.ser
+        self.connector = self.box.connector
         self.bus = bus
         self.motor: Dict[int, PMotor] = {}
 
@@ -638,7 +620,7 @@ class PController:
 
     def check_controller(self):
         """Prüfen, ob der Controller da ist und funktioniert"""
-        return bus_check(self.bus, ser=self.ser)
+        return bus_check(self.bus, self.connector)
 
     def command(self, text: str, with_reply: bool = True, timeout: float = None) -> (bool, bytes):
         """Befehl für den Controller ausführen"""
@@ -646,9 +628,7 @@ class PController:
 
     def save_parameters_in_eprom(self):
         """Speichert die aktuelle Parametern in Flash EPROM des Controllers"""
-        self.box.ser.timeout = 5
-        reply = self.command("SA")
-        self.box.ser.timeout = self.box.timeout
+        reply = self.command("SA", timeout=5)
         if reply[0] is False:
             raise ConnectError("Hat nicht geklappt Parametern in Controller-Speicher zu sichern.")
 
@@ -752,10 +732,9 @@ class PBox:
     # Dict, mit den Defaultwerten der Parametern.
     PARAMETER_DEFAULT = {'Lauffrequenz': 400, 'Stoppstrom': 2, 'Laufstrom': 2, 'Booststrom': 2, 'Initiatortyp': 0}
 
-    def __init__(self, port: str, timeout: float = 0.2):
-        self.ser = Serial(port, 115200, timeout=timeout)
+    def __init__(self, connector: Connector, timeout: float = 0.2):
+        self.connector = connector
 
-        self.port = port
         self.timeout = timeout
         self.report = ""
         self.bus_list = []
@@ -773,8 +752,8 @@ class PBox:
         self.bus_list = []
         for i in range(5):
             for j in range(3):
-                check = bus_check(i, ser=self.ser)
-                print(check)
+                check = bus_check(i, self.connector)
+                # print(check)
                 if check[0]:
                     self.bus_list.append(i)
                     break
@@ -793,10 +772,10 @@ class PBox:
     def command(self, text: str, bus: int, with_reply: bool = True, timeout: float = None) \
             -> Union[Tuple[bool, bytes], None]:
         """Befehl für die Box ausführen"""
-        self.ser.flushInput()
-        self.ser.write(command_format(text, bus))
+        self.connector.clear_buffer()
+        self.connector.send(command_format(text, bus))
         if with_reply:
-            reply = read_reply(self.ser, timeout)
+            reply = read_reply(self.connector, timeout)
             if reply[0] is None:
                 raise ConnectError('Controller Antwortet nicht!')
             return reply
@@ -1250,7 +1229,7 @@ class PBox:
         """Speichert die aktuelle Parametern in Flash EPROM bei alle Controllern"""
         for Controller in self:
             Controller.command("SA", with_reply=False, timeout=5)
-        return read_reply(self.ser)
+        return read_reply(self.connector)
 
     def close(self, without_eprom: bool = False, data_folder: str = 'data/'):
         """Alle nötige am Ende der Arbeit Operationen ausführen."""
@@ -1308,12 +1287,13 @@ if __name__ == '__main__':
     comlist = [com.device for com in comlist]
     print(comlist)
 
-    box1 = PBox(comlist[2])
+    connector1 = SerialConnector(comlist[2])
+    box1 = PBox(connector1)
 
     box1.initialize_with_config_file('/Users/prouser/Dropbox/Proging/Python_Projects/MikroskopController/MCC2_Demo_GUI/input/Phytron_Motoren_config.csv')
     # print(box1.save_parameters_in_eprom_fast())
 
 
     # asyncio.run(box1.get_motor((2, 2)).calibrate())
-    box1.calibrate_motors2()
+    # box1.calibrate_motors2()
 

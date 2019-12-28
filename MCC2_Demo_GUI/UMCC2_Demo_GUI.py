@@ -12,6 +12,8 @@ import sys
 import serial, serial.tools.list_ports
 # import pyqtgraph
 from PyQt5.uic import loadUi
+
+from MotorController.MotorControllerInterface import SerialConnector
 from MotorController.Phytron_MCC2 import PBox, StopIndicator, WaitReporter
 import ULoggingConfig
 
@@ -393,7 +395,8 @@ class ExampleApp(QMainWindow):
             self.Box.close(without_eprom=True)
 
         self.verbunden = True
-        self.Box = PBox(self.PortBox.currentText())
+        connector = SerialConnector(self.PortBox.currentText())
+        self.Box = PBox(connector)
         self.Box.initialize_with_config_file(config_Datei)
         self.Box.read_soft_limits()
 

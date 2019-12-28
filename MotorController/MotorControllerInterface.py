@@ -1,6 +1,8 @@
 import socket
 
 from serial import Serial
+from typing import Dict, List, Tuple, Union
+import serial.tools.list_ports
 
 
 class Connector:
@@ -9,13 +11,31 @@ class Connector:
         """Schickt ein Nachricht zum Controller."""
         raise NotImplementedError
 
-    # def read(self, n_bytes: int) -> bytes:
-    #     """Liest eine bestimmte anzahl von Bytes von dem Controller und gibt das zurück."""
-    #     raise NotImplementedError
-    #
-    # def read_until(self, end_symbol: bytes):
-    #     """Liest ein Nachricht von dem Controller bis zum bestimmten End-Symbol und gibt das zurück."""
-    #     raise NotImplementedError
+    def read(self, end_symbol: bytes = None, max_bytes: int = 1024) -> bytes:
+        """Liest ein Nachricht von dem Controller bis zum bestimmten End-Symbol oder bis zum maximale Anzahl von Bytes
+         und gibt das zurück."""
+        raise NotImplementedError
+
+    def clear_buffer(self):
+        """Löscht alle vorher empfangene information aus Buffer"""
+        raise NotImplementedError
+
+    def set_timeout(self, timeout: float):
+        """Einstellt das Time-out"""
+        raise NotImplementedError
+
+    def get_timeout(self) -> float:
+        """Einstellt das Time-out"""
+        raise NotImplementedError
+
+
+def com_list() -> List[str]:
+    """Gibt eine Liste der verfügbaren COM-Ports"""
+    comlist = serial.tools.list_ports.comports()
+    n_list = []
+    for element in comlist:
+        n_list.append(element.device)
+    return n_list
 
 
 class SerialConnector(Connector):
@@ -28,9 +48,21 @@ class SerialConnector(Connector):
         """Schickt ein Nachricht zum Controller."""
         self.ser.write(message)
 
-    def read_until(self, end_symbol: bytes):
+    def read(self, end_symbol: bytes = None, max_bytes: int = 1024) -> bytes:
         """Liest ein Nachricht von dem Controller bis zum bestimmten End-Symbol und gibt das zurück."""
-        return self.ser.read_until(end_symbol)
+        return self.ser.read_until(end_symbol, max_bytes)
+
+    def clear_buffer(self):
+        """Löscht alle vorher empfangene information aus Buffer"""
+        self.ser.flushInput()
+
+    def set_timeout(self, timeout: float):
+        """Einstellt das Time-out"""
+        self.ser.timeout = timeout
+
+    def get_timeout(self) -> float:
+        """Gibt den Wert des Time-outs zurück"""
+        return self.ser.timeout
 
 
 class EthernetConnector(Connector):
@@ -45,6 +77,6 @@ class EthernetConnector(Connector):
         """Schickt ein Nachricht zum Controller."""
         self.socket.send(message)
 
-    def read(self, max_size: int = 1024):
-        """Liest ein Nachricht von dem Controller bis zum bestimmten End-Symbol und gibt das zurück."""
-        return self.socket.recv(max_size)
+    def read(self, end_symbol: bytes = None, max_bytes: int = 1024) -> bytes:
+        """Liest ein Nachricht von dem Controller und gibt das zurück."""
+        return self.socket.recv(max_bytes)
