@@ -65,18 +65,45 @@ class SerialConnector(Connector):
         return self.ser.timeout
 
 
-class EthernetConnector(Connector):
-    """Connector Objekt für eine Verbindung durch Ethernet."""
+# class EthernetConnector(Connector):
+#     """Connector Objekt für eine Verbindung durch Ethernet."""
+#
+#     def __init__(self, ip: str, port: str, timeout: float = 1):
+#         self.socket = socket.socket()
+#         self.socket.connect((ip, port))
+#         self.socket.settimeout(timeout)
+#
+#     def send(self, message: bytes):
+#         """Schickt ein Nachricht zum Controller."""
+#         self.socket.send(message)
+#
+#     def read(self, end_symbol: bytes = None, max_bytes: int = 1024) -> bytes:
+#         """Liest ein Nachricht von dem Controller und gibt das zurück."""
+#         return self.socket.recv(max_bytes)
 
-    def __init__(self, ip: str, port: str, timeout: float = 1):
-        self.socket = socket.socket()
-        self.socket.connect((ip, port))
-        self.socket.settimeout(timeout)
 
-    def send(self, message: bytes):
-        """Schickt ein Nachricht zum Controller."""
-        self.socket.send(message)
+class ContrTranslator:
+    """Diese Klasse beschreibt die Sprache, die man braucht, um mit MCC2 Controller zu kommunizieren."""
+    def go_command(self, bus: int, axis: int, shift: float) -> bytes:
+        raise NotImplementedError
 
-    def read(self, end_symbol: bytes = None, max_bytes: int = 1024) -> bytes:
-        """Liest ein Nachricht von dem Controller und gibt das zurück."""
-        return self.socket.recv(max_bytes)
+    def go_to_command(self, bus: int, axis: int, destination: float) -> bytes:
+        raise NotImplementedError
+
+    def stop_command(self, bus: int, axis: int, destination: float) -> bytes:
+        raise NotImplementedError
+
+    def get_position_command(self, bus: int, axis: int) -> float:
+        raise NotImplementedError
+
+    def set_position_command(self, bus: int, axis: int) -> float:
+        raise NotImplementedError
+
+    def get_parameter_command(self, bus: int, axis: int, parameter_name: str) -> float:
+        raise NotImplementedError
+
+    def set_parameter_command(self, bus: int, axis: int, parameter_name: str, neu_value: float) -> bytes:
+        raise NotImplementedError
+
+
+

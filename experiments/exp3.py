@@ -1,7 +1,7 @@
-from serial import Serial
-import serial.tools.list_ports
-import MotorController.Phytron_MCC2 as MCC2
-import time
+# from serial import Serial
+# import serial.tools.list_ports
+# import MotorController.Phytron_MCC2 as MCC2
+# import time
 
 # comlist = serial.tools.list_ports.comports()
 # comlist = [com.device for com in comlist]
@@ -24,5 +24,8 @@ import time
 #
 # print(MCC2.read_reply(ser))
 # # print(ser.read_until(b'\x03'))
-controller = 2
-motor = MCC2.PMotor(controller, 0)
+# controller = 2
+# motor = MCC2.PMotor(controller, 0)
+
+
+print(3 or 4 in [1,2,3,4,5])

@@ -153,17 +153,17 @@ def __transform_raw_config_data(raw_config_data: List[dict]) -> List[dict]:
         if motor_line['Ohne Initiatoren(0 oder 1)'] != '':
             motor_line['Ohne Initiatoren(0 oder 1)'] = bool(int(motor_line['Ohne Initiatoren(0 oder 1)']))
         else:
-            motor_line['Ohne Initiatoren(0 oder 1)'] = PMotor.DEFAULT_MOTOR_INFO['without_initiators']
+            motor_line['Ohne Initiatoren(0 oder 1)'] = PMotor.DEFAULT_MOTOR_CONFIG['without_initiators']
 
         if motor_line['Einheiten'] != '':
             motor_line['Einheiten'] = motor_line['Einheiten']
         else:
-            motor_line['Einheiten'] = PMotor.DEFAULT_MOTOR_INFO['display_units']
+            motor_line['Einheiten'] = PMotor.DEFAULT_MOTOR_CONFIG['display_units']
 
         if motor_line['Einheiten pro Schritt'] != '':
             motor_line['Einheiten pro Schritt'] = float(motor_line['Einheiten pro Schritt'])
         else:
-            motor_line['Einheiten pro Schritt'] = PMotor.DEFAULT_MOTOR_INFO['display_u_per_step']
+            motor_line['Einheiten pro Schritt'] = PMotor.DEFAULT_MOTOR_CONFIG['display_u_per_step']
 
         for parameter_name in PBox.PARAMETER_NUMBER.keys():
             if motor_line[parameter_name] != '':
@@ -336,24 +336,30 @@ class WaitReporter:
 
 class PMotor:
     """Diese Klasse entspricht einem Motor, der mit einem MCC-2 Controller verbunden ist."""
-    DEFAULT_MOTOR_INFO = {'name': "", 'without_initiators': False, 'display_units': 'Schritte', 'display_u_per_step': 1}
+    DEFAULT_MOTOR_CONFIG = {'name': "",
+                            'without_initiators': False,
+                            'display_units': 'Schritte',
+                            'display_u_per_step': 1,
+                            'norm_per_contr': 1,
+                            'displ_per_norm': 1,
+                            'displ_null': 0, # Anzeiger Null in Normierte Einheiten
+                            'null_position': 0, # Position von Anfang in Controller Einheiten
+                            'end_position': 1000 # Position von Ende in Controller Einheiten
+                            }
 
     def __init__(self, controller, axis: int, without_initiators: bool = False):
         self.controller: PController = controller
         self.box = self.controller.box
         self.axis = axis
 
-        self.displ_null = 0  # Anzeiger Null in Normierte Einheiten
-        self.conversion_factor = self.read_conversion_factors()
-
-        self.set_info()
+        self.set_config()
 
         self.soft_limits: Tuple[Union[None, float], Union[None, float]] = (None, None)
 
         self.without_initiators = without_initiators
-        self.config()
+        self.set_parameters()
 
-    def config(self, parameters_values: Dict[str, float] = None):
+    def set_parameters(self, parameters_values: Dict[str, float] = None):
         """Die Parametern einstellen laut angegebene Dict mit Parameterwerten"""
         # Parameter_Werte = {'Lauffrequenz': 4000, 'Stoppstrom': 5, 'Laufstrom': 11, 'Booststrom': 18}
 
@@ -364,17 +370,22 @@ class PMotor:
             self.set_parameter(self.box.PARAMETER_NUMBER[name], value)
 
     # noinspection PyAttributeOutsideInit
-    def set_info(self, motor_info: dict = None):
+    def set_config(self, motor_config: dict = None):
         """Einstellt Name, Initiatoren Status, display_units, display_u_per_step anhand angegebene Dict"""
-        if motor_info is None:
+        if motor_config is None:
             name = 'Motor' + str(self.controller.bus) + "." + str(self.axis)
-            motor_info = self.DEFAULT_MOTOR_INFO
-            motor_info['name'] = name
+            motor_config = self.DEFAULT_MOTOR_CONFIG
+            motor_config['name'] = name
 
-        self.name = motor_info['name']
-        self.without_initiators = motor_info['without_initiators']
-        self.display_units = motor_info['display_units']
-        self.display_u_per_step = motor_info['display_u_per_step']
+        self.name = motor_config['name']
+        self.without_initiators = motor_config['without_initiators']
+        self.display_units = motor_config['display_units']
+        self.display_u_per_step = motor_config['display_u_per_step']
+        self.displ_null = motor_config['displ_null']
+        self.norm_per_contr = motor_config['norm_per_contr']
+        self.displ_per_norm = motor_config['displ_per_norm']
+        self.null_position = motor_config['null_position']
+        self.end_position = motor_config['end_position']
 
     def get_parameters(self) -> Dict[str, float]:
         """Liest die Parametern aus Controller und gibt zurück Dict mit Parameterwerten"""
@@ -384,23 +395,54 @@ class PMotor:
             parameters_values[par_name] = parameter_value
         return parameters_values
 
-    def displ_from_norm(self, norm: float) -> float:
-        """Transformiert einen Wert in normierte Einheiten zum Wert in Anzeige Einheiten"""
-        norm_relative = norm - self.displ_null
-        steps = norm_relative / self.conversion_factor
-        return self.display_u_per_step * steps
+    def transform_units(self, value: float, current_u: str, to: str, rel: bool = False) -> float:
+        """Transformiert einen Wert in andere Einheiten."""
+        units_list = ["norm", "displ", "contr"]
+        if current_u not in units_list:
+            raise ValueError(f'Unbekante Einheiten! {units_list} wurde erwartet und kein: "{current_u}".')
+        elif to not in units_list:
+            raise ValueError(f'Unbekante Einheiten! {units_list} wurde erwartet und kein: "{to}".')
+        if current_u == to:
+            return value
 
-    def norm_from_displ(self, displ: float):
-        """Transformiert einen Wert in Anzeige Einheiten zum Wert in normierte Einheiten"""
-        steps = displ / self.display_u_per_step
-        norm_relative = steps * self.conversion_factor
-        return norm_relative + self.displ_null
+        if current_u == "contr" and to == "norm":
+            return self.__contr_to_norm(value, rel)
+        elif current_u == "norm" and to == "contr":
+            return self.__norm_to_contr(value, rel)
+        elif current_u == "norm" and to == "displ":
+            return self.__norm_to_displ(value, rel)
+        elif current_u == "displ" and to == "norm":
+            return self.__displ_to_norm(value, rel)
+        elif current_u == "contr" and to == "displ":
+            value = self.__contr_to_norm(value, rel)
+            return self.__norm_to_displ(value, rel)
+        elif current_u == "displ" and to == "contr":
+            value = self.__displ_to_norm(value, rel)
+            return self.__norm_to_contr(value, rel)
 
-    def norm_from_displ_rel(self, displ: float) -> float:
-        """Transformiert einen Wert in Anzeige Einheiten zum Wert in normierte Einheiten ohne Null zu wechseln"""
-        steps = displ / self.display_u_per_step
-        norm_relative = steps * self.conversion_factor
-        return norm_relative
+    def __contr_to_norm(self, value: float, rel: bool) -> float:
+        if not rel:
+            value = value - self.null_position
+        value *= self.norm_per_contr
+        return value
+
+    def __norm_to_contr(self, value: float, rel: bool) -> float:
+        value /= self.norm_per_contr
+        if not rel:
+            value = value + self.null_position
+        return value
+
+    def __norm_to_displ(self, value: float, rel: bool) -> float:
+        if not rel:
+            value = value - self.displ_null
+        value *= self.displ_per_norm
+        return value
+
+    def __displ_to_norm(self, value: float, rel: bool) -> float:
+        value /= self.displ_per_norm
+        if not rel:
+            value = value + self.displ_null
+        return value
 
     def set_display_null(self, displ_null: float = None):
         """Anzeiger Null in Normierte Einheiten einstellen"""
@@ -409,18 +451,15 @@ class PMotor:
         else:
             self.displ_null = displ_null
 
-    def soft_limits_einstellen(self, soft_limits, displ_u: bool = False):
+    def soft_limits_einstellen(self, soft_limits, units: str = 'norm'):
         """soft limits einstellen"""
-        if displ_u:
-            self.soft_limits = tuple(map(self.norm_from_displ_rel, soft_limits))
-        else:
-            self.soft_limits = soft_limits
+        self.soft_limits = tuple(map(lambda val: self.transform_units(val, ), soft_limits))
 
-    def go_to(self, destination, displ=False):
+
+    def go_to(self, destination: float, units: str = 'norm') -> bool:
         """Bewegt den motor zur absoluten position, die als destination gegeben wird."""
         destination = float(destination)
-        if displ:
-            destination = self.norm_from_displ(destination)
+        destination = self.transform_units(destination, units, to='norm')
 
         bottom, top = self.soft_limits
         if bottom is not None:
@@ -435,6 +474,7 @@ class PMotor:
                               f'(Motor {self.axis} beim Controller {self.controller.bus}:)')
                 return False
 
+        destination = self.transform_units(destination, 'norm', to='contr')
         reply = self.command("A" + str(destination))
         if reply[0] is True:
             logging.info(f'Motor {self.axis} beim Controller {self.controller.bus} wurde zu {destination} geschickt. '
@@ -445,16 +485,16 @@ class PMotor:
                 f'Controller antwort ist "{reply}"')
         return reply[0]
 
-    def go(self, shift: float, displ_u: bool = False, calibrate: bool = False):
+    def go(self, shift: float, units: str = 'norm', calibrate: bool = False):
         """Bewegt den motor relativ um gegebener Verschiebung."""
         shift = float(shift)
-        if displ_u:
-            shift = self.norm_from_displ_rel(shift)
         if self.soft_limits != (None, None) and not calibrate:
-            position = self.position()
+            shift = self.transform_units(shift, units, to='norm')
+            position = self.position('norm')
             destination = position + shift
-            return self.go_to(destination)
+            return self.go_to(destination, 'norm')
 
+        shift = self.transform_units(shift, units, to='contr')
         reply = self.command(str(shift))
         if reply[0] is True:
             logging.info(f'Motor {self.axis} beim Controller {self.controller.bus} wurde um {shift} verschoben. '
@@ -524,13 +564,10 @@ class PMotor:
             raise ConnectError("Hat nicht geklappt einen Parameter zu ändern.")
         return reply[0]
 
-    def position(self, displ_u: bool = False) -> float:
+    def position(self, units: str = 'norm') -> float:
         """Gibt die aktuelle position zurück"""
         position = self.read_parameter(20)
-        if displ_u:
-            return self.displ_from_norm(position)
-        else:
-            return position
+        return self.transform_units(position, 'contr', to=units)
 
     def at_the_end(self):
         """Gibt zurück einen bool Wert, ob der End-Initiator aktiviert ist."""
@@ -540,23 +577,23 @@ class PMotor:
         """Gibt zurück einen bool Wert, ob der Anfang-Initiator aktiviert ist."""
         return self.initiators()[0]
 
-    def set_position(self, position: float):
+    def set_position(self, position: float, units: str = 'norm'):
         """Ändern die Zähler der aktuelle position zu angegebenen Wert"""
         position = float(position)
-        self.set_parameter(20, position)
-        logging.info('position wurde eingestellt. ({})'.format(position))
+        self.set_parameter(20, self.transform_units(position, units, to='contr'))
+        logging.info(f'position wurde eingestellt. ({position})')
 
     def set_null(self):
         """Einstellt die aktuelle position als null"""
         self.set_parameter(20, 0)
 
     def read_conversion_factors(self) -> float:
-        self.conversion_factor = self.read_parameter(3)
-        return self.conversion_factor
+        self.norm_per_contr = self.read_parameter(3)
+        return self.norm_per_contr
 
     def set_conversion_factor(self, conversion_factor: float):
         self.set_parameter(3, conversion_factor)
-        self.conversion_factor = conversion_factor
+        self.norm_per_contr = conversion_factor
 
     def calibrate(self, stop_indicator: StopIndicator = None):
         """Kalibrierung von den gegebenen Motoren"""
@@ -592,7 +629,7 @@ class PMotor:
             motor.set_null()
 
             # Skala normieren
-            self.conversion_factor = 1000 / (end - beginning)
+            self.norm_per_contr = 1000 / (end - beginning)
 
             logging.info(f'Kalibrierung von Motor {self.name} wurde abgeschlossen.')
         else:
@@ -856,7 +893,7 @@ class PBox:
         """Einstellt Name, Initiatoren Status, display_units, AE_in_Schritt der Motoren anhand angegebene Dict"""
         for motor_coord, motor_info in motors_info.items():
             motor = self.get_motor(motor_coord)
-            motor.set_info(motor_info)
+            motor.set_config(motor_info)
 
     def all_motors_stand(self) -> bool:
         """Gibt bool Wert zurück, ob alle Motoren stehen."""
@@ -890,7 +927,7 @@ class PBox:
         available_motors = self.motors_list()
         for motor_coord, param_values in motors_config.items():
             if motor_coord in available_motors:
-                self.get_motor(motor_coord).config(param_values)
+                self.get_motor(motor_coord).set_parameters(param_values)
             else:
                 logging.warning(f"Motor {motor_coord} ist nicht verbunden und kann nicht konfiguriert werden.")
 
@@ -1273,6 +1310,10 @@ class PlantError(FileReadError):
 
 class ReadConfigError(Exception):
     """Grundklasse für alle Fehler mit Lesen der Configuration aus Datei"""
+
+
+class UnitsTransformError(Exception):
+    """Grundklasse für alle Fehler mit Transformation der Einheiten"""
 
 
 if __name__ == '__main__':
