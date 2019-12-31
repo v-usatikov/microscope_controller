@@ -28,4 +28,4 @@
 # motor = MCC2.PMotor(controller, 0)
 
 
-print(3 or 4 in [1,2,3,4,5])
+print([8, 9] + [1,2,3,4,5])
