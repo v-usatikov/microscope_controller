@@ -408,7 +408,7 @@ class ExampleApp(QMainWindow):
         self.Motorlabel.setEnabled(True)
         self.Position_lesen()
         if round(self.Position, 4) == 0.0:
-            self.Box.read_saved_positions()
+            self.Box.read_saved_motors_data()
 
         self.set_HSlider(int(self.Position))
         self.Motor1Box.setTitle(self.Motor.name)

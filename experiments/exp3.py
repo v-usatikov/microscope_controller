@@ -28,4 +28,16 @@
 # motor = MCC2.PMotor(controller, 0)
 
 
-print([8, 9] + [1,2,3,4,5])
+# print([8, 9] + [1,2,3,4,5])
+# if 1.1:
+#     print(bool(str(False)))
+
+# f = open("address.txt", "rt")
+
+# print({1,2,3,4} | {2,4})
+# print(str.isnumeric('0.4'))
+
+# a = b'0123456'
+# print(len(a), a[-2:], bool(b''))
+
+print(f'{15:x}')
