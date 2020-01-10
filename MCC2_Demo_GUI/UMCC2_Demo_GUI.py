@@ -14,7 +14,7 @@ import serial, serial.tools.list_ports
 from PyQt5.uic import loadUi
 
 from MotorController.MotorControllerInterface import SerialConnector
-from MotorController.Phytron_MCC2 import PBox, StopIndicator, WaitReporter
+from MotorController.Phytron_MCC2 import Box, StopIndicator, WaitReporter, MCC2BoxSerial
 import ULoggingConfig
 
 if __name__ == '__main__':
@@ -207,6 +207,8 @@ class ExampleApp(QMainWindow):
         self.Position_erneuern = True
         self.verbunden = False
 
+        self.units = 'norm'
+
         self.ports_lesen()
 
         # self.horizontalSlider1.setTickPosition(300)
@@ -230,7 +232,7 @@ class ExampleApp(QMainWindow):
             self.Motor = self.Box.get_motor(name=self.MotorCBox.currentText())
             self.init_Soft_Limits()
             self.Position_lesen(single_shot=True)
-            if self.Motor.without_initiators:
+            if self.Motor.without_initiators():
                 self.horizontalSlider1.setEnabled(False)
                 self.horizontalScrollBar1.setValue(0)
                 self.horizontalSlider1.setValue(0)
@@ -333,19 +335,21 @@ class ExampleApp(QMainWindow):
 
     def Einheiten_wechseln(self):
         if self.EinheitenBox1.checkState():
-            self.Einheit_label.setText(self.Motor.display_units)
+            self.Einheit_label.setText(self.Motor.config['display_units'])
+            self.units = 'displ'
         else:
             self.Einheit_label.setText('NE')
+            self.units = 'norm'
         self.NullBtn1.setEnabled(self.EinheitenBox1.checkState())
         self.Soft_Limits_Lines_Einheiten_anpassen()
 
 
     def geh_zu(self):
-        self.Motor.go_to(float(self.GeheZuEdit1.text()), self.EinheitenBox1.checkState())
+        self.Motor.go_to(float(self.GeheZuEdit1.text()), self.units)
         self.set_HSlider_tr(int(float(self.GeheZuEdit1.text())))
 
     def NE_aus_AE(self, AE):
-        return self.Motor.norm_from_displ(AE)
+        return self.Motor.transform_units(AE, 'displ', to='norm')
 
     def set_HSlider_tr(self,Val):
         if self.EinheitenBox1.checkState():
@@ -354,15 +358,15 @@ class ExampleApp(QMainWindow):
             self.set_HSlider(Val)
 
     def set_HSlider(self,Val):
-        if not self.Motor.without_initiators:
+        if not self.Motor.without_initiators():
             self.horizontalSlider1.setValue(Val)
 
     def Plus1(self):
-        self.Motor.go(float(self.SchrittEdit1.text()), self.EinheitenBox1.checkState())
+        self.Motor.go(float(self.SchrittEdit1.text()), self.units)
         self.set_HSlider_tr(self.Position + float(self.SchrittEdit1.text()))
 
     def Minus1(self):
-        self.Motor.go(-float(self.SchrittEdit1.text()), self.EinheitenBox1.checkState())
+        self.Motor.go(-float(self.SchrittEdit1.text()), self.units)
         self.set_HSlider_tr(self.Position - float(self.SchrittEdit1.text()))
 
     def Stop(self):
@@ -372,7 +376,8 @@ class ExampleApp(QMainWindow):
     def Schieber_geh_zu(self):
         self.Motor.go_to(self.horizontalSlider1.value())
         if self.EinheitenBox1.checkState():
-            self.GeheZuEdit1.setText(str(round(self.Motor.displ_from_norm(self.horizontalSlider1.value()), 4)))
+            self.GeheZuEdit1.setText(
+                str(round(self.Motor.transform_units(self.horizontalSlider1.value(), 'norm', to='displ'), 4)))
         else:
             self.GeheZuEdit1.setText(str(self.horizontalSlider1.value()))
 
@@ -395,10 +400,9 @@ class ExampleApp(QMainWindow):
             self.Box.close(without_eprom=True)
 
         self.verbunden = True
-        connector = SerialConnector(self.PortBox.currentText())
-        self.Box = PBox(connector)
-        self.Box.initialize_with_config_file(config_Datei)
-        self.Box.read_soft_limits()
+        self.Box = MCC2BoxSerial(self.PortBox.currentText())
+        self.Box.initialize_with_input_file(config_Datei)
+        self.Box.read_saved_motors_data()
 
         self.Motoren_Namen_laden()
         self.KalibrBtn.setEnabled(True)
@@ -417,11 +421,11 @@ class ExampleApp(QMainWindow):
 
     def Position_lesen(self, single_shot = False):
         if self.Position_erneuern:
-            self.Position = self.Motor.position(displ_u= self.EinheitenBox1.checkState())
+            self.Position = self.Motor.position(self.units)
             self.Position_NE = self.Motor.position()
-            # print(position)
+            # print(__position)
             self.AktPosEdit1.setText(str(round(self.Position,4)))
-            if not self.Motor.without_initiators:
+            if not self.Motor.without_initiators():
                 self.horizontalScrollBar1.setValue(int(self.Position_NE))
         if not single_shot:
             QtCore.QTimer.singleShot(100, self.Position_lesen)

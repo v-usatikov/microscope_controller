@@ -325,3 +325,86 @@
 2019-12-28 23:22:54,380_out  Phytron_MCC2_out  go_to_out  [INFO_out]  Motor 1 beim Controller 0 wurde zu 149.0 geschickt. Controller antwort ist "(True, None)"_out
 2019-12-28 23:22:57,439_out  Phytron_MCC2_out  go_to_out  [INFO_out]  Motor 1 beim Controller 0 wurde zu 169.0 geschickt. Controller antwort ist "(True, None)"_out
 2019-12-28 23:23:00,050_out  Phytron_MCC2_out  go_to_out  [INFO_out]  Motor 1 beim Controller 0 wurde zu 116.0 geschickt. Controller antwort ist "(True, None)"_out
+2020-01-08 22:47:29,669_out  MotorControllerInterface_out  initialize_out  [INFO_out]  Box Initialisierung wurde gestartet._out
+2020-01-08 22:47:29,675_out  Phytron_MCC2_out  bus_check_out  [ERROR_out]  Unerwartete Antwort vom Controller: 77_out
+2020-01-08 22:47:29,679_out  Phytron_MCC2_out  bus_check_out  [ERROR_out]  Unerwartete Antwort vom Controller: 77_out
+2020-01-08 22:47:29,683_out  Phytron_MCC2_out  bus_check_out  [ERROR_out]  Unerwartete Antwort vom Controller: 77_out
+2020-01-08 22:47:29,687_out  Phytron_MCC2_out  bus_check_out  [ERROR_out]  Unerwartete Antwort vom Controller: 77_out
+2020-01-08 22:47:29,687_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 0 keinen Kontroller gefunden. Controller Antwort:Unerwartete Antwort vom Controller: 77_out
+2020-01-08 22:47:29,691_out  Phytron_MCC2_out  bus_check_out  [ERROR_out]  Unerwartete Antwort vom Controller: 77_out
+2020-01-08 22:47:29,696_out  Phytron_MCC2_out  bus_check_out  [ERROR_out]  Unerwartete Antwort vom Controller: 77_out
+2020-01-08 22:47:29,700_out  Phytron_MCC2_out  bus_check_out  [ERROR_out]  Unerwartete Antwort vom Controller: 77_out
+2020-01-08 22:47:29,704_out  Phytron_MCC2_out  bus_check_out  [ERROR_out]  Unerwartete Antwort vom Controller: 77_out
+2020-01-08 22:47:29,704_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 1 keinen Kontroller gefunden. Controller Antwort:Unerwartete Antwort vom Controller: 77_out
+2020-01-08 22:47:29,708_out  Phytron_MCC2_out  bus_check_out  [ERROR_out]  Unerwartete Antwort vom Controller: 77_out
+2020-01-08 22:47:29,712_out  Phytron_MCC2_out  bus_check_out  [ERROR_out]  Unerwartete Antwort vom Controller: 77_out
+2020-01-08 22:47:29,716_out  Phytron_MCC2_out  bus_check_out  [ERROR_out]  Unerwartete Antwort vom Controller: 77_out
+2020-01-08 22:47:29,720_out  Phytron_MCC2_out  bus_check_out  [ERROR_out]  Unerwartete Antwort vom Controller: 77_out
+2020-01-08 22:47:29,720_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 2 keinen Kontroller gefunden. Controller Antwort:Unerwartete Antwort vom Controller: 77_out
+2020-01-08 22:47:29,724_out  Phytron_MCC2_out  bus_check_out  [ERROR_out]  Unerwartete Antwort vom Controller: 77_out
+2020-01-08 22:47:29,728_out  Phytron_MCC2_out  bus_check_out  [ERROR_out]  Unerwartete Antwort vom Controller: 77_out
+2020-01-08 22:47:29,732_out  Phytron_MCC2_out  bus_check_out  [ERROR_out]  Unerwartete Antwort vom Controller: 77_out
+2020-01-08 22:47:29,736_out  Phytron_MCC2_out  bus_check_out  [ERROR_out]  Unerwartete Antwort vom Controller: 77_out
+2020-01-08 22:47:29,736_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 3 keinen Kontroller gefunden. Controller Antwort:Unerwartete Antwort vom Controller: 77_out
+2020-01-08 22:47:29,740_out  Phytron_MCC2_out  bus_check_out  [ERROR_out]  Unerwartete Antwort vom Controller: 77_out
+2020-01-08 22:47:29,744_out  Phytron_MCC2_out  bus_check_out  [ERROR_out]  Unerwartete Antwort vom Controller: 77_out
+2020-01-08 22:47:29,748_out  Phytron_MCC2_out  bus_check_out  [ERROR_out]  Unerwartete Antwort vom Controller: 77_out
+2020-01-08 22:47:29,752_out  Phytron_MCC2_out  bus_check_out  [ERROR_out]  Unerwartete Antwort vom Controller: 77_out
+2020-01-08 22:47:29,752_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 4 keinen Kontroller gefunden. Controller Antwort:Unerwartete Antwort vom Controller: 77_out
+2020-01-08 22:47:30,555_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 5 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 22:47:31,359_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 6 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 22:47:32,164_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 7 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 22:47:32,967_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 8 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 22:47:33,772_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 9 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 22:47:34,578_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 10 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 22:47:35,383_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 11 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 22:47:36,188_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 12 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 22:47:36,993_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 13 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 22:47:37,797_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 14 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:03:52,194_out  MotorControllerInterface_out  initialize_out  [INFO_out]  Box Initialisierung wurde gestartet._out
+2020-01-08 23:09:34,356_out  MotorControllerInterface_out  initialize_out  [INFO_out]  Box Initialisierung wurde gestartet._out
+2020-01-08 23:09:35,383_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 5 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:09:36,188_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 6 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:09:36,992_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 7 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:09:37,797_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 8 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:09:38,600_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 9 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:09:39,404_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 10 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:09:40,208_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 11 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:09:41,013_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 12 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:09:41,818_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 13 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:09:42,623_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 14 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:11:27,538_out  MotorControllerInterface_out  initialize_out  [INFO_out]  Box Initialisierung wurde gestartet._out
+2020-01-08 23:11:28,361_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 5 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:11:29,164_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 6 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:11:29,968_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 7 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:11:30,772_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 8 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:11:31,575_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 9 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:11:32,378_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 10 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:11:33,182_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 11 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:11:33,984_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 12 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:11:34,788_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 13 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:11:35,593_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 14 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:12:15,878_out  MotorControllerInterface_out  initialize_out  [INFO_out]  Box Initialisierung wurde gestartet._out
+2020-01-08 23:12:16,682_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 0 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:12:17,486_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 1 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:12:18,290_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 2 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:12:19,094_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 3 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:12:19,899_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 4 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:12:20,704_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 5 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:12:21,508_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 6 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:12:22,312_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 7 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:12:23,118_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 8 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:12:23,923_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 9 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:12:24,725_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 10 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:12:25,528_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 11 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:12:34,498_out  MotorControllerInterface_out  initialize_out  [INFO_out]  Box Initialisierung wurde gestartet._out
+2020-01-08 23:12:35,324_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 5 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:12:36,127_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 6 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:12:36,932_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 7 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:12:37,737_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 8 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:12:38,542_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 9 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:12:39,346_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 10 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:12:40,151_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 11 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:12:40,957_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 12 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:12:41,761_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 13 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-08 23:12:42,567_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 14 keinen Kontroller gefunden. Controller Antwort:None_out
