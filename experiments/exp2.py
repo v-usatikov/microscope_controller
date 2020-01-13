@@ -17,6 +17,6 @@
 
 # print(int(b'A', 16))
 
-string = 'A'
-print(string[1:])
-print('a='.upper())
+# string = 'A'
+# print(string[1:])
+# print('a='.upper())

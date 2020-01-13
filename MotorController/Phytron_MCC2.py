@@ -112,6 +112,7 @@ class MCC2Communicator(ContrCommunicator):
                 if check[0]:
                     bus_list.append(i)
                     break
+            # noinspection PyUnboundLocalVariable
             if not check[0]:
                 logging.error(f'Bei Bus Nummer {i} keinen Kontroller gefunden. Controller Antwort:{check[1]}')
         if not bus_list:
@@ -252,7 +253,7 @@ def is_h_digit(symbol: Union[str, bytes]):
     if len(symbol) != 1:
         return False
     else:
-        return symbol in '123456789ABCDEFabcdef'
+        return symbol in '0123456789ABCDEFabcdef'
 
 
 class MCC2BoxEmulator(SerialEmulator):
@@ -270,7 +271,7 @@ class MCC2BoxEmulator(SerialEmulator):
     def read_until(self, end_symbol: bytes) -> bytes:
         if end_symbol in self.buffer:
             answer, self.buffer = self.buffer.split(end_symbol, 1)
-            return answer
+            return answer + end_symbol
         else:
             if self.realtime:
                 time.sleep(self.timeout)
@@ -294,11 +295,26 @@ class MCC2BoxEmulator(SerialEmulator):
             self.__answer(denial)
             print(f'MCC2BoxEmulator: Unbekannter Befehl für einem Controller: {command_to_modul}')
 
+        def check_parameter_number(n):
+            if n in list(motor.PARAMETER_NAME.keys()) + [20]:
+                return True
+            else:
+                self.__answer(denial)
+                print(f'MCC2BoxEmulator: Falsches Parameter Nummer: {n}')
+                return False
+
+        def is_number(s):
+            try:
+                float(s)
+                return True
+            except ValueError:
+                return False
+
         confirm = b'\x06'
         denial = b'\x15'
 
         if command[:1] == b'\x02' and command[-1:] == b'\x03':
-            command = str(command[1:-1]).upper()  # End- und Anfangsymbol abschneiden
+            command = command[1:-1].decode().upper()  # End- und Anfangsymbol abschneiden
             if is_h_digit(command[0]):
                 bus = int(command[:1], 16)  # Bus-Nummer lesen
                 command_to_modul = command[1:]  # Bus-Nummer abschneiden
@@ -308,30 +324,27 @@ class MCC2BoxEmulator(SerialEmulator):
                 if command_to_modul:  # prüfen ob der Befehl zum Modul nicht leer ist
                     if command_to_modul == 'IVR':
                         self.__answer(confirm + self.__controller_version())
+                        return
                     elif str.isdigit(command_to_modul[0]) or command_to_modul[0] in 'XY':
                         axis = read_axis_number(command_to_modul[0])  # Achse-Nummer lesen
                         command_to_motor = command_to_modul[1:]  # Achse-Nummer abschneiden
                         if axis not in self.controller[bus].motor.keys():  # prüfen ob solche Achse-Nummer vorhanden
                             # TODO Prüfen ob dieser Antwort stimmt.
+                            print(f'Falsche Achsenummer: {axis}')
                             return
                         motor = self.controller[bus].motor[axis]
 
                         if command_to_motor:  # prüfen ob der Befehl zum Motor nicht leer ist
-                            if str.isdigit(command_to_motor[0]):  # "go" Befehl
-                                try:
-                                    shift = float(command_to_motor)
-                                except ValueError:
-                                    self.__answer(denial)
-                                    return
-                                else:
-                                    motor.go(shift)
-                                    self.__answer(confirm)
-                                    return
+                            if is_number(command_to_motor):  # "go" Befehl
+                                shift = float(command_to_motor)
+                                motor.go(shift)
+                                self.__answer(confirm)
+                                return
                             elif command_to_motor[0] == 'A':  # "go_to" Befehl
                                 try:
-                                    destination = float(command_to_motor)
+                                    destination = float(command_to_motor[1:])
                                 except ValueError:
-                                    self.__answer(denial)
+                                    unknown_command()
                                     return
                                 else:
                                     motor.go_to(destination)
@@ -357,9 +370,12 @@ class MCC2BoxEmulator(SerialEmulator):
                                             unknown_command()
                                             return
                                         else:
-                                            motor.set_parameter(param_num, param_value)
-                                            self.__answer(confirm)
-                                            return
+                                            if check_parameter_number(param_num):
+                                                motor.set_parameter(param_num, param_value)
+                                                self.__answer(confirm)
+                                                return
+                                            else:
+                                                return
                                 else:  # Parameter lesen
                                     try:
                                         param_num = int(parameter_command)
@@ -367,12 +383,10 @@ class MCC2BoxEmulator(SerialEmulator):
                                         self.__answer(denial)
                                         return
                                     else:
-                                        if param_num in motor.PARAMETER_NAME.keys():
+                                        if check_parameter_number(param_num):
                                             self.__answer(confirm + str(motor.get_parameter(param_num)).encode())
                                             return
                                         else:
-                                            self.__answer(denial)
-                                            print(f'MCC2BoxEmulator: Falsches Parameter Nummer: {param_num}')
                                             return
                             elif command_to_motor == '=H':  # 'motor_stand' Befehl
                                 if motor.stand():
