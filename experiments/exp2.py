@@ -20,3 +20,9 @@
 # string = 'A'
 # print(string[1:])
 # print('a='.upper())
+
+set1 = {2,1,4,3}
+list1 = [1,2,4,3]
+list2 = [2,1,4,3]
+print(list(set1) == list1)
+print(list2 == list1)

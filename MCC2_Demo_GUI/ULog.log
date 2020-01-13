@@ -408,3 +408,233 @@
 2020-01-08 23:12:40,957_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 12 keinen Kontroller gefunden. Controller Antwort:None_out
 2020-01-08 23:12:41,761_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 13 keinen Kontroller gefunden. Controller Antwort:None_out
 2020-01-08 23:12:42,567_out  Phytron_MCC2_out  bus_list_out  [ERROR_out]  Bei Bus Nummer 14 keinen Kontroller gefunden. Controller Antwort:None_out
+2020-01-13 21:31:04,073_out  MotorControllerInterface_out  initialize_out  [INFO_out]  Box Initialisierung wurde gestartet._out
+2020-01-13 21:32:26,795_out  MotorControllerInterface_out  initialize_out  [INFO_out]  Box Initialisierung wurde gestartet._out
+2020-01-13 22:04:27,837_out  MotorControllerInterface_out  initialize_out  [INFO_out]  Box Initialisierung wurde gestartet._out
+2020-01-13 22:04:27,839_out  MotorControllerInterface_out  make_motors_out  [INFO_out]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2)._out
+2020-01-13 22:04:27,839_out  MotorControllerInterface_out  make_motors_out  [INFO_out]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2)._out
+2020-01-13 22:04:27,839_out  MotorControllerInterface_out  make_motors_out  [INFO_out]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2)._out
+2020-01-13 22:04:27,839_out  MotorControllerInterface_out  make_motors_out  [INFO_out]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2)._out
+2020-01-13 22:04:27,839_out  MotorControllerInterface_out  make_motors_out  [INFO_out]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2)._out
+2020-01-13 22:04:27,840_out  MotorControllerInterface_out  initialize_out  [INFO_out]  Box wurde initialisiert. 5 Controller und 10 Achsen gefunden:
+Controller 0 (2 Achsen)
+Controller 1 (2 Achsen)
+Controller 2 (2 Achsen)
+Controller 3 (2 Achsen)
+Controller 4 (2 Achsen)
+_out
+2020-01-13 22:04:27,840_out  MotorControllerInterface_out  initialize_with_input_file_out  [INFO_out]  Box Initialisierung wurde gestartet._out
+2020-01-13 22:06:16,706_out  MotorControllerInterface_out  initialize_out  [INFO_out]  Box Initialisierung wurde gestartet._out
+2020-01-13 22:06:16,707_out  MotorControllerInterface_out  make_motors_out  [INFO_out]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2)._out
+2020-01-13 22:06:16,707_out  MotorControllerInterface_out  make_motors_out  [INFO_out]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2)._out
+2020-01-13 22:06:16,707_out  MotorControllerInterface_out  make_motors_out  [INFO_out]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2)._out
+2020-01-13 22:06:16,708_out  MotorControllerInterface_out  make_motors_out  [INFO_out]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2)._out
+2020-01-13 22:06:16,708_out  MotorControllerInterface_out  make_motors_out  [INFO_out]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2)._out
+2020-01-13 22:06:16,708_out  MotorControllerInterface_out  initialize_out  [INFO_out]  Box wurde initialisiert. 5 Controller und 10 Achsen gefunden:
+Controller 0 (2 Achsen)
+Controller 1 (2 Achsen)
+Controller 2 (2 Achsen)
+Controller 3 (2 Achsen)
+Controller 4 (2 Achsen)
+_out
+2020-01-13 22:06:16,708_out  MotorControllerInterface_out  initialize_with_input_file_out  [INFO_out]  Box Initialisierung wurde gestartet._out
+2020-01-13 22:11:45,943_out  MotorControllerInterface_out  initialize_out  [INFO_out]  Box Initialisierung wurde gestartet._out
+2020-01-13 22:11:45,944_out  MotorControllerInterface_out  make_motors_out  [INFO_out]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2)._out
+2020-01-13 22:11:45,945_out  MotorControllerInterface_out  make_motors_out  [INFO_out]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2)._out
+2020-01-13 22:11:45,945_out  MotorControllerInterface_out  make_motors_out  [INFO_out]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2)._out
+2020-01-13 22:11:45,945_out  MotorControllerInterface_out  make_motors_out  [INFO_out]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2)._out
+2020-01-13 22:11:45,945_out  MotorControllerInterface_out  make_motors_out  [INFO_out]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2)._out
+2020-01-13 22:11:45,945_out  MotorControllerInterface_out  initialize_out  [INFO_out]  Box wurde initialisiert. 5 Controller und 10 Achsen gefunden:
+Controller 0 (2 Achsen)
+Controller 1 (2 Achsen)
+Controller 2 (2 Achsen)
+Controller 3 (2 Achsen)
+Controller 4 (2 Achsen)
+_out
+2020-01-13 22:11:45,945_out  MotorControllerInterface_out  initialize_with_input_file_out  [INFO_out]  Box Initialisierung wurde gestartet._out
+2020-01-13 22:13:25,698  MotorControllerInterface  initialize  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-13 22:13:25,698  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 22:13:25,699  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 22:13:25,700  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 22:13:25,700  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 22:13:25,700  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 22:13:25,700  MotorControllerInterface  initialize  [INFO]  Box wurde initialisiert. 5 Controller und 10 Achsen gefunden:
+Controller 0 (2 Achsen)
+Controller 1 (2 Achsen)
+Controller 2 (2 Achsen)
+Controller 3 (2 Achsen)
+Controller 4 (2 Achsen)
+
+2020-01-13 22:13:25,701  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-13 22:14:17,111  MotorControllerInterface  initialize  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-13 22:14:17,113  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 22:14:17,113  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 22:14:17,114  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 22:14:17,114  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 22:14:17,115  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 22:14:17,115  MotorControllerInterface  initialize  [INFO]  Box wurde initialisiert. 5 Controller und 10 Achsen gefunden:
+Controller 0 (2 Achsen)
+Controller 1 (2 Achsen)
+Controller 2 (2 Achsen)
+Controller 3 (2 Achsen)
+Controller 4 (2 Achsen)
+
+2020-01-13 22:14:17,115  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-13 22:21:50,044  MotorControllerInterface  initialize  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-13 22:21:50,045  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 22:21:50,045  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 22:21:50,045  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 22:21:50,045  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 22:21:50,045  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 22:21:50,046  MotorControllerInterface  initialize  [INFO]  Box wurde initialisiert. 5 Controller und 10 Achsen gefunden:
+Controller 0 (2 Achsen)
+Controller 1 (2 Achsen)
+Controller 2 (2 Achsen)
+Controller 3 (2 Achsen)
+Controller 4 (2 Achsen)
+
+2020-01-13 22:21:50,046  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-13 22:23:11,798  MotorControllerInterface  initialize  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-13 22:23:11,799  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 22:23:11,799  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 22:23:11,800  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 22:23:11,800  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 22:23:11,800  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 22:23:11,800  MotorControllerInterface  initialize  [INFO]  Box wurde initialisiert. 5 Controller und 10 Achsen gefunden:
+Controller 0 (2 Achsen)
+Controller 1 (2 Achsen)
+Controller 2 (2 Achsen)
+Controller 3 (2 Achsen)
+Controller 4 (2 Achsen)
+
+2020-01-13 22:23:11,801  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-13 22:31:35,020  MotorControllerInterface  initialize  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-13 22:31:35,021  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 22:31:35,021  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 22:31:35,021  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 22:31:35,021  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 22:31:35,021  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 22:31:35,021  MotorControllerInterface  initialize  [INFO]  Box wurde initialisiert. 5 Controller und 10 Achsen gefunden:
+Controller 0 (2 Achsen)
+Controller 1 (2 Achsen)
+Controller 2 (2 Achsen)
+Controller 3 (2 Achsen)
+Controller 4 (2 Achsen)
+
+2020-01-13 22:31:35,021  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-13 22:32:58,148  MotorControllerInterface  initialize  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-13 22:32:58,148  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 22:32:58,148  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 22:32:58,149  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 22:32:58,149  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 22:32:58,149  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 22:32:58,149  MotorControllerInterface  initialize  [INFO]  Box wurde initialisiert. 5 Controller und 10 Achsen gefunden:
+Controller 0 (2 Achsen)
+Controller 1 (2 Achsen)
+Controller 2 (2 Achsen)
+Controller 3 (2 Achsen)
+Controller 4 (2 Achsen)
+
+2020-01-13 22:32:58,149  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-13 22:35:35,279  MotorControllerInterface  initialize  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-13 22:35:35,279  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 22:35:35,280  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 22:35:35,280  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 22:35:35,280  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 22:35:35,280  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 22:35:35,280  MotorControllerInterface  initialize  [INFO]  Box wurde initialisiert. 5 Controller und 10 Achsen gefunden:
+Controller 0 (2 Achsen)
+Controller 1 (2 Achsen)
+Controller 2 (2 Achsen)
+Controller 3 (2 Achsen)
+Controller 4 (2 Achsen)
+
+2020-01-13 22:35:35,280  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-13 23:20:06,026  MotorControllerInterface  initialize  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-13 23:20:06,028  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 5 keinen Kontroller gefunden. Controller Antwort:None
+2020-01-13 23:20:06,029  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 6 keinen Kontroller gefunden. Controller Antwort:None
+2020-01-13 23:20:06,029  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 7 keinen Kontroller gefunden. Controller Antwort:None
+2020-01-13 23:20:06,029  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 8 keinen Kontroller gefunden. Controller Antwort:None
+2020-01-13 23:20:06,029  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 9 keinen Kontroller gefunden. Controller Antwort:None
+2020-01-13 23:20:06,030  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 10 keinen Kontroller gefunden. Controller Antwort:None
+2020-01-13 23:20:06,030  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 11 keinen Kontroller gefunden. Controller Antwort:None
+2020-01-13 23:20:06,030  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 12 keinen Kontroller gefunden. Controller Antwort:None
+2020-01-13 23:20:06,030  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 13 keinen Kontroller gefunden. Controller Antwort:None
+2020-01-13 23:20:06,030  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 14 keinen Kontroller gefunden. Controller Antwort:None
+2020-01-13 23:29:36,480  MotorControllerInterface  initialize  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-13 23:29:36,480  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 23:29:36,480  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 23:29:36,481  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 23:29:36,481  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 23:29:36,481  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 23:29:36,481  MotorControllerInterface  initialize  [INFO]  Box wurde initialisiert. 5 Controller und 10 Achsen gefunden:
+Controller 0 (2 Achsen)
+Controller 1 (2 Achsen)
+Controller 2 (2 Achsen)
+Controller 3 (2 Achsen)
+Controller 4 (2 Achsen)
+
+2020-01-13 23:29:36,481  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-13 23:30:41,855  MotorControllerInterface  initialize  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-13 23:30:41,856  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 23:30:41,856  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 23:30:41,856  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 23:30:41,856  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 23:30:41,857  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 23:30:41,857  MotorControllerInterface  initialize  [INFO]  Box wurde initialisiert. 5 Controller und 10 Achsen gefunden:
+Controller 0 (2 Achsen)
+Controller 1 (2 Achsen)
+Controller 2 (2 Achsen)
+Controller 3 (2 Achsen)
+Controller 4 (2 Achsen)
+
+2020-01-13 23:30:41,857  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-13 23:32:52,098  MotorControllerInterface  initialize  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-13 23:32:52,098  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 23:32:52,099  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 23:32:52,099  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 23:32:52,100  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 23:32:52,100  MotorControllerInterface  make_motors  [INFO]  Controller hat 2 Motor Objekten für alle verfügbare Achsen erstellt, nämlich (1, 2).
+2020-01-13 23:32:52,100  MotorControllerInterface  initialize  [INFO]  Box wurde initialisiert. 5 Controller und 10 Achsen gefunden:
+Controller 0 (2 Achsen)
+Controller 1 (2 Achsen)
+Controller 2 (2 Achsen)
+Controller 3 (2 Achsen)
+Controller 4 (2 Achsen)
+
+2020-01-13 23:32:52,100  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-13 23:32:59,703  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 1 wurde zu 114.0 geschickt.
+2020-01-13 23:33:00,972  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 1 wurde zu 342.0 geschickt.
+2020-01-13 23:33:01,907  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 1 wurde zu 607.0 geschickt.
+2020-01-13 23:33:03,169  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 1 wurde um 100.0 verschoben. 
+2020-01-13 23:33:03,956  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 1 wurde um -100.0 verschoben. 
+2020-01-13 23:33:04,902  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 1 wurde um -100.0 verschoben. 
+2020-01-13 23:33:07,174  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-01-13 23:33:09,309  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 1 wurde zu 309.0 geschickt.
+2020-01-13 23:33:10,908  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 1 wurde zu 742.0 geschickt.
+2020-01-13 23:33:11,438  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-01-13 23:33:21,066  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 1 wurde zu 119.0 geschickt.
+2020-01-13 23:33:25,409  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 1 wurde zu 257.0 geschickt.
+2020-01-13 23:34:02,936  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-01-13 23:36:19,135  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-13 23:37:17,490  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-13 23:37:17,490  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-13 23:37:45,041  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 185.0 geschickt.
+2020-01-13 23:37:46,166  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 339.0 geschickt.
+2020-01-13 23:37:47,645  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-01-13 23:40:17,524  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-13 23:40:17,526  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-13 23:40:21,089  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 1 wurde zu 260.0 geschickt.
+2020-01-13 23:40:22,393  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 1 wurde zu 537.0 geschickt.
+2020-01-13 23:40:25,284  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 1 wurde zu 255.0 geschickt.
+2020-01-13 23:40:26,633  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 1 wurde zu 676.0 geschickt.
+2020-01-13 23:40:27,826  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 1 wurde zu 842.0 geschickt.
+2020-01-13 23:40:54,228  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 1 wurde zu 453.0 geschickt.
+2020-01-13 23:40:55,590  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 1 wurde zu 198.0 geschickt.
+2020-01-13 23:40:58,177  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 1 wurde zu 812.0 geschickt.
+2020-01-13 23:40:59,246  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 1 wurde zu 423.0 geschickt.
+2020-01-13 23:41:07,255  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 1 wurde zu 589.0 geschickt.
+2020-01-13 23:41:08,270  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 1 wurde zu 240.0 geschickt.
+2020-01-13 23:41:09,910  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 1 wurde zu 743.0 geschickt.
+2020-01-13 23:41:11,125  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 1 wurde zu 148.0 geschickt.
+2020-01-13 23:41:20,842  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.

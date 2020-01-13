@@ -14,7 +14,8 @@ import serial, serial.tools.list_ports
 from PyQt5.uic import loadUi
 
 from MotorController.MotorControllerInterface import SerialConnector
-from MotorController.Phytron_MCC2 import Box, StopIndicator, WaitReporter, MCC2BoxSerial
+from MotorController.Phytron_MCC2 import Box, StopIndicator, WaitReporter, MCC2BoxSerial, MCC2BoxEmulator, \
+    MCC2Communicator
 import ULoggingConfig
 
 if __name__ == '__main__':
@@ -400,9 +401,22 @@ class ExampleApp(QMainWindow):
             self.Box.close(without_eprom=True)
 
         self.verbunden = True
-        self.Box = MCC2BoxSerial(self.PortBox.currentText())
+        emulator = MCC2BoxEmulator(n_bus=5, n_axes=2, realtime=True)
+        input_file = 'input/Phytron_Motoren_config.csv'
+        emulator_input_file = 'input/Emulator_config.csv'
+        if self.PortBox.currentText() == 'CommunicatorEmulator':
+            self.Box = Box(emulator, input_file=emulator_input_file)
+        elif self.PortBox.currentText() == 'SerialEmulator':
+            connector = SerialConnector(emulator=emulator, beg_symbol=b'\x02', end_symbol=b'\x03')
+            emul_communicator = MCC2Communicator(connector)
+            self.Box = Box(emul_communicator, input_file=emulator_input_file)
+        else:
+            self.Box = MCC2BoxSerial(self.PortBox.currentText(), input_file=input_file)
         self.Box.initialize_with_input_file(config_Datei)
-        self.Box.read_saved_motors_data()
+        try:
+            self.Box.read_saved_motors_data()
+        except FileNotFoundError:
+            pass
 
         self.Motoren_Namen_laden()
         self.KalibrBtn.setEnabled(True)
@@ -411,8 +425,6 @@ class ExampleApp(QMainWindow):
         self.MotorCBox.setEnabled(True)
         self.Motorlabel.setEnabled(True)
         self.Position_lesen()
-        if round(self.Position, 4) == 0.0:
-            self.Box.read_saved_motors_data()
 
         self.set_HSlider(int(self.Position))
         self.Motor1Box.setTitle(self.Motor.name)
@@ -475,6 +487,8 @@ class ExampleApp(QMainWindow):
         if len(comlist) != 0:
             for element in comlist:
                 self.PortBox.addItem(element.device)
+            self.PortBox.addItem('SerialEmulator')
+            self.PortBox.addItem('CommunicatorEmulator')
 
             if not self.Kal_in_Lauf:
                 self.VerbButton.setEnabled(True)

@@ -117,7 +117,7 @@ class MCC2Communicator(ContrCommunicator):
         return tuple(bus_list)
 
     def axes_list(self, bus: int) -> Tuple[int]:
-        command = self.__contr_prefix(bus) + "IAR".encode()
+        command = self.__contr_prefix(bus) + "IVR".encode()
         self.connector.send(command)
         reply = self.read_reply()
         n_axes = int(self.__get_float_reply(reply))
@@ -133,6 +133,10 @@ class MCC2Communicator(ContrCommunicator):
                 if check[0]:
                     return check
         return check
+
+    def command_to_box(self, command: bytes) -> (bool, bytes):
+        self.connector.send(command)
+        return self.read_reply()
 
     def command_to_modul(self, command: bytes, bus: int) -> (bool, bytes):
         command = self.__contr_prefix(bus) + command
@@ -254,6 +258,12 @@ def is_h_digit(symbol: Union[str, bytes]):
 
 
 class MCC2BoxEmulator(SerialEmulator, ContrCommunicator):
+
+    PARAMETER_NUMBER = deepcopy(MCC2Communicator.PARAMETER_NUMBER)
+    PARAMETER_DEFAULT = deepcopy(MCC2Communicator.PARAMETER_DEFAULT)
+
+    PARAMETER_NUMBER['Umrechnungsfaktor'] = 3
+
     def __init__(self, n_bus: int = 3, n_axes: int = 2, realtime: bool = False):
         self.realtime = realtime
         self.controller: Dict[int, MCC2ControllerEmulator] = {}
@@ -278,10 +288,10 @@ class MCC2BoxEmulator(SerialEmulator, ContrCommunicator):
         self.__get_motor(bus, axis).set_position(new_position)
 
     def get_parameter(self, parameter_name: str, bus: int, axis: int) -> float:
-        return self.__get_motor(bus, axis).get_parameter(MCC2Communicator.PARAMETER_NUMBER[parameter_name])
+        return self.__get_motor(bus, axis).get_parameter(self.PARAMETER_NUMBER[parameter_name])
 
     def set_parameter(self, parameter_name: str, neu_value: float, bus: int, axis: int):
-        self.__get_motor(bus, axis).set_parameter(MCC2Communicator.PARAMETER_NUMBER[parameter_name], neu_value)
+        self.__get_motor(bus, axis).set_parameter(self.PARAMETER_NUMBER[parameter_name], neu_value)
 
     def motor_stand(self, bus: int, axis: int) -> bool:
         return self.__get_motor(bus, axis).stand()
@@ -304,11 +314,23 @@ class MCC2BoxEmulator(SerialEmulator, ContrCommunicator):
     def check_connection(self) -> (bool, bytes):
         return True, b''
 
-    def command_to_modul(self, command: bytes, bus: int) -> (bool, bytes):
-        self.write(b'\x02' + f'{bus:x}{command}'.encode() + b'\x03')
+    def command_to_box(self, command: bytes) -> bytes:
+        self.write(b'\x02' + command + b'\x03')
+        return self.__read_reply()
 
-    def command_to_motor(self, command: bytes, bus: int, axis: int) -> (bool, bytes):
+    def command_to_modul(self, command: bytes, bus: int) -> bytes:
+        self.write(b'\x02' + f'{bus:x}{command}'.encode() + b'\x03')
+        return self.__read_reply()
+
+    def command_to_motor(self, command: bytes, bus: int, axis: int) -> bytes:
         self.write(b'\x02' + f'{bus:x}{axis}{command}'.encode() + b'\x03')
+        return self.__read_reply()
+
+    def __read_reply(self):
+        if self.buffer:
+            return self.read_until(b'\x03')[1:-1]
+        else:
+            return self.buffer
 
     def check_raw_input_data(self, raw_input_data: List[dict]) -> (bool, str):
         return True, ''
@@ -479,11 +501,10 @@ class MCC2ControllerEmulator:
 
 class MCC2MotorEmulator:
 
-    PARAMETER_NAME = inv_map = {v: k for k, v in MCC2Communicator.PARAMETER_NUMBER.items()}
-    PARAMETER_VALUES = MCC2Communicator.PARAMETER_DEFAULT
+    PARAMETER_NAME = {v: k for k, v in MCC2BoxEmulator.PARAMETER_NUMBER.items()}
+    PARAMETER_VALUES = deepcopy(MCC2BoxEmulator.PARAMETER_DEFAULT)
 
-    PARAMETER_NAME[3] = 'Umrechungsfaktor'
-    PARAMETER_VALUES['Umrechungsfaktor'] = 1
+    PARAMETER_VALUES['Umrechnungsfaktor'] = 1
 
     beginning = -10000
     end = 10000
@@ -507,10 +528,10 @@ class MCC2MotorEmulator:
         return self.__end_initiator
 
     def get_position(self):
-        return self.__position * self.PARAMETER_VALUES['Umrechungsfaktor']
+        return self.__position * self.PARAMETER_VALUES['Umrechnungsfaktor']
 
     def set_position(self, value: float):
-        self.__position = value/self.PARAMETER_VALUES['Umrechungsfaktor']
+        self.__position = value/self.PARAMETER_VALUES['Umrechnungsfaktor']
 
     def set_parameter(self, n: int, value: Union[float, int]):
         if n == 20:
@@ -525,7 +546,7 @@ class MCC2MotorEmulator:
             return self.PARAMETER_VALUES[self.PARAMETER_NAME[n]]
 
     def go_to(self, destination: float):
-        self.__destination = int(destination/self.PARAMETER_VALUES['Umrechungsfaktor'])
+        self.__destination = int(destination/self.PARAMETER_VALUES['Umrechnungsfaktor'])
         if self.stand():
             threading.Thread(target=self.__move).start()
 

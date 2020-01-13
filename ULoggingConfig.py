@@ -6,10 +6,10 @@ def init_config():
     root = logging.getLogger()
     root.setLevel(logging.INFO)
 
-    format_ = '%(asctime)s_out  %(module)s_out  %(funcName)s_out  [%(levelname)s_out]  %(message)s_out'
+    format_ = '%(asctime)s  %(module)s  %(funcName)s  [%(levelname)s]  %(message)s'
     date_format = '%Y-%m-%d %H:%M:%S'
 
-    cformat = '%(log_color)s_out' + format_
+    cformat = '%(log_color)s' + format_
     f = colorlog.ColoredFormatter(cformat, date_format,
                                   log_colors={'DEBUG': 'cyan', 'INFO': 'green',
                                               'WARNING': 'bold_yellow', 'ERROR': 'red',

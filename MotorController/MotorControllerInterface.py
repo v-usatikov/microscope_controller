@@ -195,10 +195,13 @@ class ContrCommunicator:
     def check_connection(self) -> (bool, bytes):
         raise NotImplementedError
 
-    def command_to_modul(self, command: bytes, bus: int) -> (bool, bytes):
+    def command_to_box(self, command: bytes) -> bytes:
         raise NotImplementedError
 
-    def command_to_motor(self, command: bytes, bus: int, axis: int) -> (bool, bytes):
+    def command_to_modul(self, command: bytes, bus: int) -> bytes:
+        raise NotImplementedError
+
+    def command_to_motor(self, command: bytes, bus: int, axis: int) -> bytes:
         raise NotImplementedError
 
     def check_raw_input_data(self, raw_input_data: List[dict]) -> (bool, str):
@@ -503,7 +506,7 @@ class Motor:
     def __contr_to_norm(self, value: float, rel: bool) -> float:
         if not rel:
             value = value - self.config['null_position']
-        value *= self.norm_per_contr
+        value *= self.config['norm_per_contr']
         return value
 
     def __norm_to_contr(self, value: float, rel: bool) -> float:
@@ -514,7 +517,7 @@ class Motor:
 
     def __norm_to_displ(self, value: float, rel: bool) -> float:
         if not rel:
-            value = value - self.displ_null
+            value = value - self.config['displ_null']
         value *= self.config['displ_per_norm']
         return value
 
@@ -554,9 +557,8 @@ class Motor:
                 return False
 
         destination = self.transform_units(destination, 'norm', to='contr')
-        self.communicator.go_to(*self.coord(), destination=destination)
+        self.communicator.go_to(destination, *self.coord())
         logging.info(f'Motor {self.axis} beim Controller {self.controller.bus} wurde zu {destination} geschickt.')
-
 
     def go(self, shift: float, units: str = 'norm', calibrate: bool = False):
         """Bewegt den motor relativ um gegebener Verschiebung."""
@@ -568,7 +570,7 @@ class Motor:
             return self.go_to(destination, 'norm')
 
         shift = self.transform_units(shift, units, to='contr')
-        self.communicator.go(*self.coord(), shift=shift)
+        self.communicator.go(shift, *self.coord())
         logging.info(f'Motor {self.axis} beim Controller {self.controller.bus} wurde um {shift} verschoben. ')
 
     def stop(self):
@@ -718,7 +720,6 @@ class Box:
     """Diese Klasse entspricht einem Box mit einem oder mehreren MCC-2 Controller"""
 
     def __init__(self, communicator: ContrCommunicator, input_file: str = None):
-        self.connector = communicator.connector
         self.communicator = communicator
 
         self.report = ""
@@ -732,10 +733,9 @@ class Box:
     def __iter__(self):
         return (controller for controller in self.controller.values())
 
-    def command(self, text: bytes, with_reply: bool = True) \
-            -> Union[Tuple[bool, bytes], None]:
+    def command(self, text: bytes) -> bytes:
         """Befehl für die Box ausführen"""
-        return self.connector.send(text)
+        return self.communicator.command_to_box(text)
 
     def initialize(self):
         """Sucht und macht Objekte für alle verfügbare Controller und Motoren. Gibt ein Bericht zurück."""
@@ -1065,7 +1065,7 @@ class Box:
             for motor in controller:
                 names.append(motor.name)
         names_set = set(names)
-        if names != names_set:
+        if len(names) < len(names_set):
             raise MotorNameError('Es gibt wiederholte Namen der Motoren!')
         return names_set
 
