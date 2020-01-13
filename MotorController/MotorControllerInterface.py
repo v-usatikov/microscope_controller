@@ -153,9 +153,6 @@ class ContrCommunicator:
 
     PARAMETER_DEFAULT: Dict
 
-    def __init__(self, connector: Connector):
-        self.connector = connector
-
     def go(self, shift: float, bus: int, axis: int):
         raise NotImplementedError
 

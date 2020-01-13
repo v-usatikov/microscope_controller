@@ -1,8 +1,5 @@
 # coding= utf-8
 import threading
-
-import serial.tools.list_ports
-
 from MotorController.MotorControllerInterface import *
 
 if __name__ == '__main__':
@@ -30,7 +27,7 @@ class MCC2Communicator(ContrCommunicator):
     PARAMETER_DEFAULT = {'Lauffrequenz': 400.0, 'Stoppstrom': 2, 'Laufstrom': 2, 'Booststrom': 2, 'Initiatortyp': 0}
 
     def __init__(self, connector: Connector):
-        super().__init__(connector)
+        self.connector = connector
         self.connector.beg_symbol = b"\x02"
         self.connector.end_symbol = b"\x03"
 
@@ -256,7 +253,7 @@ def is_h_digit(symbol: Union[str, bytes]):
         return symbol in '0123456789ABCDEFabcdef'
 
 
-class MCC2BoxEmulator(SerialEmulator):
+class MCC2BoxEmulator(SerialEmulator, ContrCommunicator):
     def __init__(self, n_bus: int = 3, n_axes: int = 2, realtime: bool = False):
         self.realtime = realtime
         self.controller: Dict[int, MCC2ControllerEmulator] = {}
@@ -264,6 +261,57 @@ class MCC2BoxEmulator(SerialEmulator):
             self.controller[i] = MCC2ControllerEmulator(self, n_axes)
 
         self.buffer: bytes = b''
+
+    def go(self, shift: float, bus: int, axis: int):
+        self.__get_motor(bus, axis).go(shift)
+
+    def go_to(self, destination: float, bus: int, axis: int):
+        self.__get_motor(bus, axis).go_to(destination)
+
+    def stop(self, bus: int, axis: int):
+        self.__get_motor(bus, axis).stop()
+
+    def get_position(self, bus: int, axis: int) -> float:
+        return self.__get_motor(bus, axis).get_position()
+
+    def set_position(self, new_position: float, bus: int, axis: int):
+        self.__get_motor(bus, axis).set_position(new_position)
+
+    def get_parameter(self, parameter_name: str, bus: int, axis: int) -> float:
+        return self.__get_motor(bus, axis).get_parameter(MCC2Communicator.PARAMETER_NUMBER[parameter_name])
+
+    def set_parameter(self, parameter_name: str, neu_value: float, bus: int, axis: int):
+        self.__get_motor(bus, axis).set_parameter(MCC2Communicator.PARAMETER_NUMBER[parameter_name], neu_value)
+
+    def motor_stand(self, bus: int, axis: int) -> bool:
+        return self.__get_motor(bus, axis).stand()
+
+    def motor_at_the_beg(self, bus: int, axis: int) -> bool:
+        return self.__get_motor(bus, axis).at_the_beg()
+
+    def motor_at_the_end(self, bus: int, axis: int) -> bool:
+        return self.__get_motor(bus, axis).at_the_end()
+
+    def read_reply(self) -> (bool, bytes):
+        self.read_until(b'\x03')
+
+    def bus_list(self) -> Tuple[int]:
+        return tuple(self.controller.keys())
+
+    def axes_list(self, bus: int) -> Tuple[int]:
+        return tuple(self.controller[bus].motor.keys())
+
+    def check_connection(self) -> (bool, bytes):
+        return True, b''
+
+    def command_to_modul(self, command: bytes, bus: int) -> (bool, bytes):
+        self.write(b'\x02' + f'{bus:x}{command}'.encode() + b'\x03')
+
+    def command_to_motor(self, command: bytes, bus: int, axis: int) -> (bool, bytes):
+        self.write(b'\x02' + f'{bus:x}{axis}{command}'.encode() + b'\x03')
+
+    def check_raw_input_data(self, raw_input_data: List[dict]) -> (bool, str):
+        return True, ''
 
     def flushInput(self):
         self.buffer = b''
@@ -416,6 +464,9 @@ class MCC2BoxEmulator(SerialEmulator):
     @staticmethod
     def __controller_version() -> bytes:
         return b'MCC2 Emulator v1.0'
+
+    def __get_motor(self, bus, axis):
+        return self.controller[bus].motor[axis]
 
 
 class MCC2ControllerEmulator:
