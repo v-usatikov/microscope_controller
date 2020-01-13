@@ -246,12 +246,21 @@ def MCC2BoxSerial(port: str, timeout: float = 0.2, baudrate: float = 115200, inp
     return Box(communicator=communicator, input_file=input_file)
 
 
+def is_h_digit(symbol: Union[str, bytes]):
+    """Zeigt ob Symbol ein Hexodecimal-Zahlzeichen ist."""
+    symbol = str(symbol)
+    if len(symbol) != 1:
+        return False
+    else:
+        return symbol in '123456789ABCDEFabcdef'
+
+
 class MCC2BoxEmulator(SerialEmulator):
     def __init__(self, n_bus: int = 3, n_axes: int = 2, realtime: bool = False):
         self.realtime = realtime
-        controller = {}
+        self.controller: Dict[int, MCC2ControllerEmulator] = {}
         for i in range(n_bus):
-            controller[i] = MCC2ControllerEmulator(self, n_axes)
+            self.controller[i] = MCC2ControllerEmulator(self, n_axes)
 
         self.buffer: bytes = b''
 
@@ -263,34 +272,144 @@ class MCC2BoxEmulator(SerialEmulator):
             answer, self.buffer = self.buffer.split(end_symbol, 1)
             return answer
         else:
+            if self.realtime:
+                time.sleep(self.timeout)
             return self.buffer
 
     def write(self, command: bytes):
         """Liest, interpretiert und ausführt den angegebenen Befehl."""
-        answer = b''
+        def read_axis_number(digit: str):
+            if len(digit) > 1:
+                raise ValueError(f'"digit" muss ein einzigen Symbol sein und ken: {digit}')
+            elif not str.isdigit(digit) and digit not in 'XYxy':
+                raise ValueError(f'"digit" muss ein int Ziffer oder gleich "X" oder "Y" sein und kein: {digit}')
+            if digit in 'Xx':
+                return 1
+            elif digit in 'Yy':
+                return 2
+            else:
+                return int(digit)
+
+        def unknown_command():
+            self.__answer(denial)
+            print(f'MCC2BoxEmulator: Unbekannter Befehl für einem Controller: {command_to_modul}')
+
         confirm = b'\x06'
         denial = b'\x15'
 
         if command[:1] == b'\x02' and command[-1:] == b'\x03':
-            command = command[1:-1]
-            if command == b'IVR':
-                answer = confirm + self.__controller_version()
+            command = str(command[1:-1]).upper()  # End- und Anfangsymbol abschneiden
+            if is_h_digit(command[0]):
+                bus = int(command[:1], 16)  # Bus-Nummer lesen
+                command_to_modul = command[1:]  # Bus-Nummer abschneiden
+                if bus not in self.controller.keys():  # prüfen ob solche Bus-Nummer vorhanden
+                    return
 
-        self.buffer += answer
+                if command_to_modul:  # prüfen ob der Befehl zum Modul nicht leer ist
+                    if command_to_modul == 'IVR':
+                        self.__answer(confirm + self.__controller_version())
+                    elif str.isdigit(command_to_modul[0]) or command_to_modul[0] in 'XY':
+                        axis = read_axis_number(command_to_modul[0])  # Achse-Nummer lesen
+                        command_to_motor = command_to_modul[1:]  # Achse-Nummer abschneiden
+                        if axis not in self.controller[bus].motor.keys():  # prüfen ob solche Achse-Nummer vorhanden
+                            # TODO Prüfen ob dieser Antwort stimmt.
+                            return
+                        motor = self.controller[bus].motor[axis]
+
+                        if command_to_motor:  # prüfen ob der Befehl zum Motor nicht leer ist
+                            if str.isdigit(command_to_motor[0]):  # "go" Befehl
+                                try:
+                                    shift = float(command_to_motor)
+                                except ValueError:
+                                    self.__answer(denial)
+                                    return
+                                else:
+                                    motor.go(shift)
+                                    self.__answer(confirm)
+                                    return
+                            elif command_to_motor[0] == 'A':  # "go_to" Befehl
+                                try:
+                                    destination = float(command_to_motor)
+                                except ValueError:
+                                    self.__answer(denial)
+                                    return
+                                else:
+                                    motor.go_to(destination)
+                                    self.__answer(confirm)
+                                    return
+                            elif command_to_motor == 'S':  # Stop Befehl
+                                motor.stop()
+                                # TODO Prüfen ob dieser Antwort stimmt.
+                                self.__answer(confirm)
+                                return
+                            elif command_to_motor[0] == 'P':  # Parameter-Befehl
+                                parameter_command = command_to_motor[1:]
+                                if 'S' in parameter_command:  # Parameter ändern
+                                    if len(parameter_command.split('S')) > 2:
+                                        unknown_command()
+                                        return
+                                    else:
+                                        param_num, param_value = parameter_command.split('S')
+                                        try:
+                                            param_num = int(param_num)
+                                            param_value = float(param_value)
+                                        except ValueError:
+                                            unknown_command()
+                                            return
+                                        else:
+                                            motor.set_parameter(param_num, param_value)
+                                            self.__answer(confirm)
+                                            return
+                                else:  # Parameter lesen
+                                    try:
+                                        param_num = int(parameter_command)
+                                    except ValueError:
+                                        self.__answer(denial)
+                                        return
+                                    else:
+                                        if param_num in motor.PARAMETER_NAME.keys():
+                                            self.__answer(confirm + str(motor.get_parameter(param_num)).encode())
+                                            return
+                                        else:
+                                            self.__answer(denial)
+                                            print(f'MCC2BoxEmulator: Falsches Parameter Nummer: {param_num}')
+                                            return
+                            elif command_to_motor == '=H':  # 'motor_stand' Befehl
+                                if motor.stand():
+                                    self.__answer(confirm + b'E')
+                                else:
+                                    self.__answer(confirm + b'N')
+                                return
+                            elif command_to_motor == '=I-':  # 'motor_at_the_beg' Befehl
+                                if motor.at_the_beg():
+                                    self.__answer(confirm + b'E')
+                                else:
+                                    self.__answer(confirm + b'N')
+                                return
+                            elif command_to_motor == '=I+':  # 'motor_at_the_end' Befehl
+                                if motor.at_the_end():
+                                    self.__answer(confirm + b'E')
+                                else:
+                                    self.__answer(confirm + b'N')
+                                return
+
+                unknown_command()
+                return
+
+    def __answer(self, answer: bytes):
+        self.buffer += b'\x02' + answer + b'\x03'
 
     @staticmethod
     def __controller_version() -> bytes:
         return b'MCC2 Emulator v1.0'
 
 
-
-
 class MCC2ControllerEmulator:
     def __init__(self, box: MCC2BoxEmulator, n_axes: int = 2):
         self.box = box
-        motor = {}
+        self.motor: Dict[int, MCC2MotorEmulator] = {}
         for i in range(1, n_axes+1):
-            motor[i] = MCC2MotorEmulator(box)
+            self.motor[i] = MCC2MotorEmulator(box)
 
 
 class MCC2MotorEmulator:
@@ -301,14 +420,12 @@ class MCC2MotorEmulator:
     PARAMETER_NAME[3] = 'Umrechungsfaktor'
     PARAMETER_VALUES['Umrechungsfaktor'] = 1
 
-    PARAMETER_NAME[20] = 'Position'
-    PARAMETER_VALUES['Position'] = 0.0
-
     beginning = -10000
     end = 10000
 
     def __init__(self, box: MCC2BoxEmulator):
         self.box = box
+        self.__position = 0  # aktuelle Position in Schritten
         self.__stand = True
         self.__beg_initiator = False
         self.__end_initiator = False
@@ -324,22 +441,31 @@ class MCC2MotorEmulator:
     def at_the_end(self):
         return self.__end_initiator
 
-    def position(self):
-        return self.__position() * self.PARAMETER_VALUES['Umrechungsfaktor']
+    def get_position(self):
+        return self.__position * self.PARAMETER_VALUES['Umrechungsfaktor']
 
     def set_position(self, value: float):
-        self.PARAMETER_VALUES['Position'] = value/self.PARAMETER_VALUES['Umrechungsfaktor']
+        self.__position = value/self.PARAMETER_VALUES['Umrechungsfaktor']
 
-    def set_parameter(self, n, value):
-        self.PARAMETER_VALUES[self.PARAMETER_NAME[n]] = value
+    def set_parameter(self, n: int, value: Union[float, int]):
+        if n == 20:
+            self.set_position(value)
+        else:
+            self.PARAMETER_VALUES[self.PARAMETER_NAME[n]] = value
 
-    def move_to(self, destination: float):
+    def get_parameter(self, n: int) -> Union[float, int]:
+        if n == 20:
+            return self.get_position()
+        else:
+            return self.PARAMETER_VALUES[self.PARAMETER_NAME[n]]
+
+    def go_to(self, destination: float):
         self.__destination = int(destination/self.PARAMETER_VALUES['Umrechungsfaktor'])
         if self.stand():
             threading.Thread(target=self.__move).start()
 
-    def move(self, shift: float):
-        self.move_to(self.position() + shift)
+    def go(self, shift: float):
+        self.go_to(self.get_position() + shift)
 
     def stop(self):
         self.__stop = True
@@ -355,14 +481,11 @@ class MCC2MotorEmulator:
         while not self.__stand:
             self.sleep_one_step()
 
-    def __position(self):
-        return self.PARAMETER_VALUES['Position']
-
     def __move(self):
         self.__stop = False
         self.__stand = False
-        while self.__position() != self.__destination:
-            if self.__position() > self.__destination:
+        while self.__position != self.__destination:
+            if self.__position > self.__destination:
                 self.__step_back()
             else:
                 self.__step_forward()
@@ -374,22 +497,22 @@ class MCC2MotorEmulator:
 
     def __step_forward(self):
         if not self.__end_initiator:
-            self.PARAMETER_VALUES['Position'] += 1
+            self.__position += 1
         self.__initiators_sensor()
 
     def __step_back(self):
         if not self.__beg_initiator:
-            self.PARAMETER_VALUES['Position'] -= 1
+            self.__position -= 1
         self.__initiators_sensor()
 
     def __initiators_sensor(self):
-        if self.__position() >= self.end:
+        if self.__position >= self.end:
             self.stop()
             self.__end_initiator = True
         else:
             self.__end_initiator = False
 
-        if self.__position() <= self.beginning:
+        if self.__position <= self.beginning:
             self.stop()
             self.__beg_initiator = True
         else:
@@ -399,29 +522,20 @@ class MCC2MotorEmulator:
         return self.PARAMETER_VALUES['Lauffrequenz']
 
 
-
-
-
-
-
-
-
-if __name__ == '__main__':
-    # config0 = read_config_from_file0('/Users/prouser/Dropbox/Proging/Python_Projects/MikroskopController/MCC2_Demo_GUI/input/Phytron_Motoren_config.csv')
-    # config = read_config_from_file('/Users/prouser/Dropbox/Proging/Python_Projects/MikroskopController/MCC2_Demo_GUI/input/Phytron_Motoren_config.csv')
-    # print(config == config0)
-
-    comlist = serial.tools.list_ports.comports()
-    comlist = [com.device for com in comlist]
-    print(comlist)
-
-    connector1 = SerialConnector(comlist[2])
-    box1 = Box(connector1)
-
-    box1.initialize_with_input_file('/Users/prouser/Dropbox/Proging/Python_Projects/MikroskopController/MCC2_Demo_GUI/input/Phytron_Motoren_config.csv')
-    # print(box1.save_parameters_in_eprom_fast())
-
-
-    # asyncio.run(box1.get_motor((2, 2)).calibrate())
-    # box1.calibrate_motors2()
-
+# if __name__ == '__main__':
+#     # config0 = read_config_from_file0('/Users/prouser/Dropbox/Proging/Python_Projects/MikroskopController/MCC2_Demo_GUI/input/Phytron_Motoren_config.csv')
+#     # config = read_config_from_file('/Users/prouser/Dropbox/Proging/Python_Projects/MikroskopController/MCC2_Demo_GUI/input/Phytron_Motoren_config.csv')
+#     # print(config == config0)
+#
+#     comlist = serial.tools.list_ports.comports()
+#     comlist = [com.device for com in comlist]
+#     print(comlist)
+#
+#     connector1 = SerialConnector(comlist[2])
+#     box1 = Box(connector1)
+#
+#     box1.initialize_with_input_file('/Users/prouser/Dropbox/Proging/Python_Projects/MikroskopController/MCC2_Demo_GUI/input/Phytron_Motoren_config.csv')
+#     # print(box1.save_parameters_in_eprom_fast())
+#
+#     # asyncio.run(box1.get_motor((2, 2)).calibrate())
+#     # box1.calibrate_motors2()

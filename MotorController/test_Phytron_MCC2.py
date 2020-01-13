@@ -38,53 +38,53 @@ class Test__MCC2MotorEmulator(TestCase):
     def test_move_to_fast(self):
         box = MCC2BoxEmulator()
         motor = MCC2MotorEmulator(box)
-        init_position = motor.position()
+        init_position = motor.get_position()
         if init_position == 5000:
-            motor.move_to(-5000)
+            motor.go_to(-5000)
             motor.wait_stop()
-            self.assertEqual(motor.position(), -5000)
+            self.assertEqual(motor.get_position(), -5000)
         else:
-            motor.move_to(5000)
+            motor.go_to(5000)
             motor.wait_stop()
-            self.assertEqual(motor.position(), 5000)
+            self.assertEqual(motor.get_position(), 5000)
 
     def test_set_position(self):
         box = MCC2BoxEmulator()
         motor = MCC2MotorEmulator(box)
         motor.set_position(0)
-        self.assertEqual(motor.position(), 0)
+        self.assertEqual(motor.get_position(), 0)
         motor.set_position(500)
-        self.assertEqual(motor.position(), 500)
+        self.assertEqual(motor.get_position(), 500)
 
     def test_move_to_thread(self):
         box = MCC2BoxEmulator(realtime=True)
         motor = MCC2MotorEmulator(box)
         motor.set_position(0)
-        motor.move_to(400)
+        motor.go_to(400)
         motor.sleep_steps(2)
-        self.assertTrue(0 < motor.position() < 350)
+        self.assertTrue(0 < motor.get_position() < 350)
         motor.stop()
 
     def test_stop(self):
         box = MCC2BoxEmulator(realtime=True)
         motor = MCC2MotorEmulator(box)
         motor.set_position(0)
-        motor.move_to(400)
+        motor.go_to(400)
         motor.sleep_steps(2)
-        position_before_stop = motor.position()
+        position_before_stop = motor.get_position()
         motor.sleep_steps(2)
         motor.stop()
-        stop_position = motor.position()
+        stop_position = motor.get_position()
         motor.sleep_steps(2)
 
         self.assertTrue(position_before_stop > 0)
         self.assertTrue(position_before_stop < stop_position)
-        self.assertTrue(stop_position == motor.position())
+        self.assertTrue(stop_position == motor.get_position())
 
     def test_stand(self):
         box = MCC2BoxEmulator(realtime=True)
         motor = MCC2MotorEmulator(box)
-        motor.move_to(400)
+        motor.go_to(400)
         motor.sleep_one_step()
         self.assertFalse(motor.stand())
         motor.stop()
@@ -95,12 +95,12 @@ class Test__MCC2MotorEmulator(TestCase):
     def test_initiators(self):
         box = MCC2BoxEmulator(realtime=False)
         motor = MCC2MotorEmulator(box)
-        motor.move_to(30000)
+        motor.go_to(30000)
         motor.wait_stop()
-        self.assertEqual(motor.position(), 10000)
-        motor.move_to(-30000)
+        self.assertEqual(motor.get_position(), 10000)
+        motor.go_to(-30000)
         motor.wait_stop()
-        self.assertEqual(motor.position(), -10000)
+        self.assertEqual(motor.get_position(), -10000)
 
 
 

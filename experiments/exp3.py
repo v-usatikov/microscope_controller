@@ -16,16 +16,18 @@ port = comlist[2]
 # print(port)
 ser = Serial(port, 115200, timeout=0.2)
 
-# time.sleep(1)
-# ser.flushInput()
-# # ser.write(b'\x02' + b'2Y-10' + b'\x03')
-# ser.write(b'\x02' + b'2Y' + b'\x03')
-# # ser.write(b'\x02' + b'1SA' + b'\x03')
-# # # ser.write(MCC2.command_format('SA', 1))
-# #
-# # print(MCC2.read_reply(ser))
-# print(ser.read_until(b'\x03'))
-# print(ser.read_until(b'\x03'))
+time.sleep(1)
+ser.flushInput()
+# ser.write(b'\x02' + b'2Y33' + b'\x03')
+ser.write(b'\x02' + b'2YP20S0' + b'\x03')
+ser.write(b'\x02' + b'2YP20R' + b'\x03')
+
+# ser.write(b'\x02' + b'1SA' + b'\x03')
+# # ser.write(MCC2.command_format('SA', 1))
+#
+# print(MCC2.read_reply(ser))
+print(ser.read_until(b'\x03'))
+print(ser.read_until(b'\x03'))
 # controller = 2
 # motor = MCC2.PMotor(controller, 0)
 
@@ -44,10 +46,10 @@ ser = Serial(port, 115200, timeout=0.2)
 
 # print(f'{15:x}')
 
-s = 'word1 word2 word3'
-s = b'wwww 2'
-print(s.split(b' ', 1))
-print(b' ' in s)
-command = b'\x02wwww 2\x03'
-print(command[:1], command[-1:], command[1:-1])
-print(command[:1] == b"\x02" and command[-1:] == b"\x03")
+# s = 'word1 word2 word3'
+# s = b'wwww 2'
+# print(s.split(b' ', 1))
+# print(b' ' in s)
+# command = b'\x02wwww 2\x03'
+# print(command[:1], command[-1:], command[1:-1])
+# print(command[:1] == b"\x02" and command[-1:] == b"\x03")
