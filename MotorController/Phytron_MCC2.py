@@ -26,67 +26,99 @@ class MCC2Communicator(ContrCommunicator):
     # Dict, mit den Defaultwerten der Parametern.
     PARAMETER_DEFAULT = {'Lauffrequenz': 400.0, 'Stoppstrom': 2, 'Laufstrom': 2, 'Booststrom': 2, 'Initiatortyp': 0}
 
+    __mutex = threading.Lock()
+
     def __init__(self, connector: Connector):
+        self.__mutex.acquire()
         self.connector = connector
         self.connector.beg_symbol = b"\x02"
         self.connector.end_symbol = b"\x03"
+        self.__mutex.release()
 
     def go(self, shift: float, bus: int, axis: int):
+        self.__mutex.acquire()
         command = self.__prefix(bus, axis) + str(shift).encode()
         self.connector.send(command)
         self.__check_command_result(self.read_reply())
+        self.__mutex.release()
 
     def go_to(self, destination: float, bus: int, axis: int):
+        self.__mutex.acquire()
         command = self.__prefix(bus, axis) + "A".encode() + str(destination).encode()
         self.connector.send(command)
         self.__check_command_result(self.read_reply())
+        self.__mutex.release()
 
     def stop(self, bus: int, axis: int):
+        self.__mutex.acquire()
         command = self.__prefix(bus, axis) + "S".encode()
         self.connector.send(command)
         self.__check_command_result(self.read_reply())
+        self.__mutex.release()
 
     def get_position(self, bus: int, axis: int) -> float:
+        self.__mutex.acquire()
         command = self.__prefix(bus, axis) + f"P20".encode()
         self.connector.send(command)
         reply = self.read_reply()
-        return self.__get_float_reply(reply)
+
+        to_return = self.__get_float_reply(reply)
+        self.__mutex.release()
+        return to_return
+
+
 
     def set_position(self, new_position: float, bus: int, axis: int):
+        self.__mutex.acquire()
         command = self.__prefix(bus, axis) + f"P20S{new_position}".encode()
         self.connector.send(command)
         self.__check_command_result(self.read_reply())
+        self.__mutex.release()
+
 
     def get_parameter(self, parameter_name: str, bus: int, axis: int) -> float:
+        self.__mutex.acquire()
         param_number = self.PARAMETER_NUMBER[parameter_name]
         command = self.__prefix(bus, axis) + f"P{param_number}".encode()
         self.connector.send(command)
         reply = self.read_reply()
-        return self.__get_float_reply(reply)
+        to_return = self.__get_float_reply(reply)
+        self.__mutex.release()
+        return to_return
+
 
     def set_parameter(self, parameter_name: str, neu_value: float, bus: int, axis: int):
+        self.__mutex.acquire()
         param_number = self.PARAMETER_NUMBER[parameter_name]
         command = self.__prefix(bus, axis) + f"P{param_number}S{neu_value}".encode()
         self.connector.send(command)
         self.__check_command_result(self.read_reply())
+        self.__mutex.release()
 
     def motor_stand(self, bus: int, axis: int) -> bool:
+        self.__mutex.acquire()
         command = self.__prefix(bus, axis) + '=H'.encode()
         self.connector.send(command)
         reply = self.read_reply()
-        return self.__get_bool_reply(reply)
+        to_return = self.__get_bool_reply(reply)
+        self.__mutex.release()
+        return to_return
 
     def motor_at_the_beg(self, bus: int, axis: int) -> bool:
+        self.__mutex.acquire()
         command = self.__prefix(bus, axis) + '=I-'.encode()
         self.connector.send(command)
         reply = self.read_reply()
         return self.__get_bool_reply(reply)
 
     def motor_at_the_end(self, bus: int, axis: int) -> bool:
+        self.__mutex.acquire()
         command = self.__prefix(bus, axis) + '=I+'.encode()
         self.connector.send(command)
         reply = self.read_reply()
-        return self.__get_bool_reply(reply)
+        to_return = self.__get_bool_reply(reply)
+        self.__mutex.release()
+        return to_return
 
     def read_reply(self) -> (bool, Union[bytes, None]):
         """Antwort lesen, der nach einem Befehl erscheint."""
@@ -117,10 +149,12 @@ class MCC2Communicator(ContrCommunicator):
         return tuple(bus_list)
 
     def axes_list(self, bus: int) -> Tuple[int]:
+        self.__mutex.acquire()
         command = self.__contr_prefix(bus) + "IVR".encode()
         self.connector.send(command)
         reply = self.read_reply()
         n_axes = int(self.__get_float_reply(reply))
+        self.__mutex.release()
         return tuple(range(n_axes))
 
     def check_connection(self) -> (bool, bytes):
@@ -135,18 +169,27 @@ class MCC2Communicator(ContrCommunicator):
         return check
 
     def command_to_box(self, command: bytes) -> bytes:
+        self.__mutex.acquire()
         self.connector.send(command)
-        return self.connector.read()
+        reply = self.connector.read()
+        self.__mutex.release()
+        return reply
 
     def command_to_modul(self, command: bytes, bus: int) -> bytes:
+        self.__mutex.acquire()
         command = self.__contr_prefix(bus) + command
         self.connector.send(command)
-        return self.connector.read()
+        reply = self.connector.read()
+        self.__mutex.release()
+        return reply
 
     def command_to_motor(self, command: bytes, bus: int, axis: int) -> bytes:
+        self.__mutex.acquire()
         command = self.__prefix(bus, axis) + command
         self.connector.send(command)
-        return self.connector.read()
+        reply = self.connector.read()
+        self.__mutex.release()
+        return reply
 
     def check_raw_input_data(self, raw_input_data: List[dict]) -> (bool, str):
         for motor_line in raw_input_data:
@@ -173,6 +216,7 @@ class MCC2Communicator(ContrCommunicator):
 
     def bus_check(self, bus: int) -> (bool, str):
         """Prüft ob es bei dem Bus-Nummer ein Controller gibt, und gibt die Version davon zurück."""
+        self.__mutex.acquire()
         command = self.__contr_prefix(bus) + "IVR".encode()
         self.connector.send(command)
         try:
@@ -180,6 +224,8 @@ class MCC2Communicator(ContrCommunicator):
         except ReplyError as err:
             logging.error(str(err))
             return False, str(err)
+
+        self.__mutex.release()
 
         if reply[0] is None:
             return False, None
