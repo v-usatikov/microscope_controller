@@ -134,19 +134,19 @@ class MCC2Communicator(ContrCommunicator):
                     return check
         return check
 
-    def command_to_box(self, command: bytes) -> (bool, bytes):
+    def command_to_box(self, command: bytes) -> bytes:
         self.connector.send(command)
-        return self.read_reply()
+        return self.connector.read()
 
-    def command_to_modul(self, command: bytes, bus: int) -> (bool, bytes):
+    def command_to_modul(self, command: bytes, bus: int) -> bytes:
         command = self.__contr_prefix(bus) + command
         self.connector.send(command)
-        return self.read_reply()
+        return self.connector.read()
 
-    def command_to_motor(self, command: bytes, bus: int, axis: int) -> (bool, bytes):
+    def command_to_motor(self, command: bytes, bus: int, axis: int) -> bytes:
         command = self.__prefix(bus, axis) + command
         self.connector.send(command)
-        return self.read_reply()
+        return self.connector.read()
 
     def check_raw_input_data(self, raw_input_data: List[dict]) -> (bool, str):
         for motor_line in raw_input_data:

@@ -1072,8 +1072,8 @@ class Box:
     def controllers_list(self) -> List[int]:
         """Gibt zurück eine Liste der allen Controllern in Format: [bus, ...]"""
         controllers_list = []
-        for Controller in self:
-            controllers_list.append(Controller.bus)
+        for controller in self:
+            controllers_list.append(controller.bus)
         return controllers_list
 
     def motors_without_initiators(self) -> List[M_Coord]:

@@ -638,3 +638,44 @@ Controller 4 (2 Achsen)
 2020-01-13 23:41:09,910  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 1 wurde zu 743.0 geschickt.
 2020-01-13 23:41:11,125  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 1 wurde zu 148.0 geschickt.
 2020-01-13 23:41:20,842  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-01-17 13:01:15,739  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-17 13:01:15,741  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-17 13:01:19,373  MotorControllerInterface  calibrate_motors  [INFO]  Kalibrierung von allen Motoren wurde angefangen.
+2020-01-17 13:01:19,374  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um 500000.0 verschoben. 
+2020-01-17 13:01:19,374  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 1 wurde um 500000.0 verschoben. 
+2020-01-17 13:01:19,374  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 1 wurde um 500000.0 verschoben. 
+2020-01-17 13:01:19,375  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-17 13:01:19,375  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-17 13:01:51,081  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. 
+2020-01-17 13:01:51,081  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 1 wurde um -500000.0 verschoben. 
+2020-01-17 13:01:51,081  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 1 wurde um -500000.0 verschoben. 
+2020-01-17 13:01:51,081  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-17 13:01:51,082  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-17 13:02:54,032  MotorControllerInterface  calibrate_motors  [INFO]  Kalibrierung von allen Motoren wurde abgeschlossen.
+2020-01-17 13:03:07,655  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 1 wurde zu -9948.0 geschickt.
+2020-01-17 13:03:08,870  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 1 wurde zu -9616.0 geschickt.
+2020-01-17 13:03:11,277  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 1 wurde zu -9282.0 geschickt.
+2020-01-17 13:03:13,686  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 1 wurde zu -9099.0 geschickt.
+2020-01-17 13:03:15,315  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 1 wurde zu -9668.0 geschickt.
+2020-01-17 13:03:18,297  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 1 wurde zu -9846.0 geschickt.
+2020-01-17 13:03:23,573  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 1 wurde zu -9579.0 geschickt.
+2020-01-17 13:03:25,002  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 1 wurde zu -9351.0 geschickt.
+2020-01-17 13:03:26,363  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 1 wurde zu -9200.0 geschickt.
+2020-01-17 13:03:30,054  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 1 wurde zu -9411.0 geschickt.
+2020-01-17 13:03:33,057  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 1 wurde zu -9592.0 geschickt.
+2020-01-17 13:03:34,834  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 1 wurde zu -9787.0 geschickt.
+2020-01-17 13:03:38,019  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 1 wurde zu -9904.0 geschickt.
+2020-01-17 13:03:39,300  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 1 wurde zu -9450.0 geschickt.
+2020-01-17 13:03:41,697  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 1 wurde zu -9102.0 geschickt.
+2020-01-17 13:03:44,037  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 1 wurde zu -9000.0 geschickt.
+2020-01-17 13:03:46,016  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 1 wurde zu -9163.0 geschickt.
+2020-01-17 13:03:50,653  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 1 wurde zu -9428.0 geschickt.
+2020-01-17 13:03:54,095  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 1 wurde zu -9730.0 geschickt.
+2020-01-17 13:03:55,780  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 1 wurde zu -9475.0 geschickt.
+2020-01-17 13:03:57,053  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 1 wurde zu -9822.0 geschickt.
+2020-01-17 13:04:10,407  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 1 wurde zu -9900.0 geschickt.
+2020-01-17 13:04:12,151  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 1 wurde zu -9200.0 geschickt.
+2020-01-17 13:04:15,177  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 1 wurde zu -9200.0 geschickt.
+2020-01-17 13:04:15,920  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 1 wurde zu -9200.0 geschickt.
+2020-01-17 13:04:16,820  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 1 wurde zu -9391.0 geschickt.
+2020-01-17 13:04:18,022  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 1 wurde zu -9622.0 geschickt.
