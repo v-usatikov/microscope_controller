@@ -29,11 +29,9 @@ class MCC2Communicator(ContrCommunicator):
     __mutex = threading.Lock()
 
     def __init__(self, connector: Connector):
-        self.__mutex.acquire()
         self.connector = connector
         self.connector.beg_symbol = b"\x02"
         self.connector.end_symbol = b"\x03"
-        self.__mutex.release()
 
     def go(self, shift: float, bus: int, axis: int):
         self.__mutex.acquire()
@@ -58,15 +56,13 @@ class MCC2Communicator(ContrCommunicator):
 
     def get_position(self, bus: int, axis: int) -> float:
         self.__mutex.acquire()
-        command = self.__prefix(bus, axis) + f"P20".encode()
+        command = self.__prefix(bus, axis) + f"P20R".encode()
         self.connector.send(command)
         reply = self.read_reply()
 
         to_return = self.__get_float_reply(reply)
         self.__mutex.release()
         return to_return
-
-
 
     def set_position(self, new_position: float, bus: int, axis: int):
         self.__mutex.acquire()
@@ -75,11 +71,10 @@ class MCC2Communicator(ContrCommunicator):
         self.__check_command_result(self.read_reply())
         self.__mutex.release()
 
-
     def get_parameter(self, parameter_name: str, bus: int, axis: int) -> float:
         self.__mutex.acquire()
         param_number = self.PARAMETER_NUMBER[parameter_name]
-        command = self.__prefix(bus, axis) + f"P{param_number}".encode()
+        command = self.__prefix(bus, axis) + f"P{param_number}R".encode()
         self.connector.send(command)
         reply = self.read_reply()
         to_return = self.__get_float_reply(reply)
@@ -109,7 +104,9 @@ class MCC2Communicator(ContrCommunicator):
         command = self.__prefix(bus, axis) + '=I-'.encode()
         self.connector.send(command)
         reply = self.read_reply()
-        return self.__get_bool_reply(reply)
+        to_return = self.__get_bool_reply(reply)
+        self.__mutex.release()
+        return to_return
 
     def motor_at_the_end(self, bus: int, axis: int) -> bool:
         self.__mutex.acquire()
@@ -135,7 +132,7 @@ class MCC2Communicator(ContrCommunicator):
 
     def bus_list(self) -> Tuple[int]:
         bus_list = []
-        for i in range(15):
+        for i in range(5):
             for j in range(4):
                 check = self.bus_check(i)
                 if check[0]:
@@ -150,12 +147,12 @@ class MCC2Communicator(ContrCommunicator):
 
     def axes_list(self, bus: int) -> Tuple[int]:
         self.__mutex.acquire()
-        command = self.__contr_prefix(bus) + "IVR".encode()
+        command = self.__contr_prefix(bus) + "IAR".encode()
         self.connector.send(command)
         reply = self.read_reply()
         n_axes = int(self.__get_float_reply(reply))
         self.__mutex.release()
-        return tuple(range(n_axes))
+        return tuple(range(1, n_axes+1))
 
     def check_connection(self) -> (bool, bytes):
         """Prüft ob es bei dem Com-Port tatsächlich ein Controller gibt, und gibt die Version davon zurück."""
@@ -441,6 +438,9 @@ class MCC2BoxEmulator(SerialEmulator, ContrCommunicator):
                     if command_to_modul == 'IVR':
                         self.__answer(confirm + self.__controller_version())
                         return
+                    elif command_to_modul == 'IAR':
+                        self.__answer(confirm + str(len(self.controller[bus].motor)).encode())
+                        return
                     elif str.isdigit(command_to_modul[0]) or command_to_modul[0] in 'XY':
                         axis = read_axis_number(command_to_modul[0])  # Achse-Nummer lesen
                         command_to_motor = command_to_modul[1:]  # Achse-Nummer abschneiden
@@ -492,9 +492,9 @@ class MCC2BoxEmulator(SerialEmulator, ContrCommunicator):
                                                 return
                                             else:
                                                 return
-                                else:  # Parameter lesen
+                                elif parameter_command[-1] == 'R':  # Parameter lesen
                                     try:
-                                        param_num = int(parameter_command)
+                                        param_num = int(parameter_command[:-1])
                                     except ValueError:
                                         self.__answer(denial)
                                         return

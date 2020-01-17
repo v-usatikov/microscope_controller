@@ -106,6 +106,15 @@ class TestMCC2BoxEmulator(TestCase):
         emulator_box.write(b'\x02DIVR\x03')
         self.assertEqual(b'', emulator_box.read_until(b'\x03'))
 
+    def test_axes_numder(self):
+        emulator_box = MCC2BoxEmulator(n_bus=13, n_axes=4, realtime=False)
+        emulator_box.flushInput()
+
+        for i in range(13):
+            bus_index = f'{i:x}'.encode()
+            emulator_box.write(b'\x02' + bus_index + b'IAR\x03')
+            self.assertEqual(b'\x02\x064\x03', emulator_box.read_until(b'\x03'), f'Fehler beim Modul {i}')
+
     def test_get_set_parameter(self):
         emulator_box = MCC2BoxEmulator(n_bus=16, n_axes=2, realtime=False)
         emulator_box.flushInput()
@@ -116,14 +125,14 @@ class TestMCC2BoxEmulator(TestCase):
                     emulator_box.write(f'\x02{bus:x}{axis}P{param_n}S{5.1}\x03'.encode())
                     self.assertEqual(b'\x02\x06\x03', emulator_box.read_until(b'\x03'))
                     # read 5.1
-                    emulator_box.write(f'\x02{bus:x}{axis}P{param_n}\x03'.encode())
+                    emulator_box.write(f'\x02{bus:x}{axis}P{param_n}R\x03'.encode())
                     self.assertEqual(b'\x02\x065.1\x03', emulator_box.read_until(b'\x03'))
 
                     # set 2560.89
                     emulator_box.write(f'\x02{bus:x}{axis}P{param_n}S{2560.89}\x03'.encode())
                     self.assertEqual(b'\x02\x06\x03', emulator_box.read_until(b'\x03'))
                     # read 2560.89
-                    emulator_box.write(f'\x02{bus:x}{axis}P{param_n}\x03'.encode())
+                    emulator_box.write(f'\x02{bus:x}{axis}P{param_n}R\x03'.encode())
                     self.assertEqual(b'\x02\x062560.89\x03', emulator_box.read_until(b'\x03'))
 
         bus, axis = 0, 1
@@ -152,21 +161,21 @@ class TestMCC2BoxEmulator(TestCase):
                 emulator_box.write(f'\x02{bus:x}{axis}P{20}S{-5.1}\x03'.encode())
                 self.assertEqual(b'\x02\x06\x03', emulator_box.read_until(b'\x03'))
                 # read -5.1
-                emulator_box.write(f'\x02{bus:x}{axis}P{20}\x03'.encode())
+                emulator_box.write(f'\x02{bus:x}{axis}P{20}R\x03'.encode())
                 self.assertEqual(b'\x02\x06-5.1\x03', emulator_box.read_until(b'\x03'))
 
                 # set 600.52
                 emulator_box.write(f'\x02{bus:x}{axis}P{20}S{600.52}\x03'.encode())
                 self.assertEqual(b'\x02\x06\x03', emulator_box.read_until(b'\x03'))
                 # read 600.52
-                emulator_box.write(f'\x02{bus:x}{axis}P{20}\x03'.encode())
+                emulator_box.write(f'\x02{bus:x}{axis}P{20}R\x03'.encode())
                 self.assertEqual(b'\x02\x06600.52\x03', emulator_box.read_until(b'\x03'))
 
                 # TODO Проверить действительно ли текущая позиция изменяется при изменении Umrechnungsfactor
                 # Umrechnungsfactor gleich 0.5 einstellen
                 emulator_box.write(f'\x02{bus:x}{axis}P{3}S{0.5}\x03'.encode())
                 emulator_box.flushInput()
-                emulator_box.write(f'\x02{bus:x}{axis}P{20}\x03'.encode())
+                emulator_box.write(f'\x02{bus:x}{axis}P{20}R\x03'.encode())
                 self.assertEqual(b'\x02\x06300.26\x03', emulator_box.read_until(b'\x03'))
 
     @timeout_decorator.timeout(1)

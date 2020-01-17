@@ -207,6 +207,8 @@ class ExampleApp(QMainWindow):
         self.Kal_in_Lauf = False
         self.Position_erneuern = True
         self.verbunden = False
+        self.comm_emulation = False
+        self.serial_emulation = False
 
         self.units = 'norm'
 
@@ -406,13 +408,14 @@ class ExampleApp(QMainWindow):
         emulator_input_file = 'input/Emulator_config.csv'
         if self.PortBox.currentText() == 'CommunicatorEmulator':
             self.Box = Box(emulator, input_file=emulator_input_file)
+            self.comm_emulation = True
         elif self.PortBox.currentText() == 'SerialEmulator':
             connector = SerialConnector(emulator=emulator, beg_symbol=b'\x02', end_symbol=b'\x03')
             emul_communicator = MCC2Communicator(connector)
             self.Box = Box(emul_communicator, input_file=emulator_input_file)
+            self.serial_emulation = True
         else:
             self.Box = MCC2BoxSerial(self.PortBox.currentText(), input_file=input_file)
-        self.Box.initialize_with_input_file(config_Datei)
         try:
             self.Box.read_saved_motors_data()
         except FileNotFoundError:
@@ -452,6 +455,11 @@ class ExampleApp(QMainWindow):
         self.Kalibrierung_unterbrochen()
         self.StatusBar.clearMessage()
 
+        if self.comm_emulation:
+            self.Box.communicator.realtime = True
+        elif self.serial_emulation:
+            self.Box.communicator.connector.ser.realtime = True
+
     def Kalibrierung_unterbrochen(self):
         self.VerbButton.setEnabled(True)
         self.configButton.setEnabled(True)
@@ -471,6 +479,11 @@ class ExampleApp(QMainWindow):
             self.Motorlabel.setEnabled(False)
             self.KalibrBtn.setText("Stop")
             self.Position_erneuern = False
+
+            if self.comm_emulation:
+                self.Box.communicator.realtime = False
+            elif self.serial_emulation:
+                self.Box.communicator.connector.ser.realtime = False
 
             self.Kal_Thread.start(self.Box)
             print("Thr started")

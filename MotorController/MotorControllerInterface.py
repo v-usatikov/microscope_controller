@@ -339,7 +339,7 @@ def __transform_raw_input_data(raw_config_data: List[dict], communicator: ContrC
     for motor_line in raw_config_data:
 
         if motor_line['Ohne Initiatoren(0 oder 1)'] != '':
-            motor_line['Ohne Initiatoren(0 oder 1)'] = bool(int(motor_line['Ohne Initiatoren(0 oder 1)']))
+            motor_line['Ohne Initiatoren(0 oder 1)'] = int(motor_line['Ohne Initiatoren(0 oder 1)'])
         else:
             motor_line['Ohne Initiatoren(0 oder 1)'] = Motor.DEFAULT_MOTOR_CONFIG['without_initiators']
 
@@ -426,10 +426,9 @@ class Motor:
                             'display_units': 'Schritte',
                             'display_u_per_step': 1.0,
                             'norm_per_contr': 1.0,
-                            'displ_per_norm': 1.0,
-                            'displ_null': 0.0,  # Anzeiger Null in Normierte Einheiten
+                            'displ_per_contr': 1.0,
+                            'displ_null': 0.0,  # Anzeiger Null in normierte Einheiten
                             'null_position': 0.0,  # Position von Anfang in Controller Einheiten
-                            'end_position': 1000.0  # Position von Ende in Controller Einheiten
                             }
 
     def __init__(self, controller, axis: int):
@@ -439,7 +438,7 @@ class Motor:
         self.axis = axis
 
         self.name = 'Motor' + str(self.controller.bus) + "." + str(self.axis)
-        self.config = self.DEFAULT_MOTOR_CONFIG
+        self.config = deepcopy(self.DEFAULT_MOTOR_CONFIG)
         self.set_parameters()
 
         self.soft_limits: Tuple[Union[None, float], Union[None, float]] = (None, None)
@@ -465,10 +464,16 @@ class Motor:
     def set_config(self, motor_config: dict = None):
         """Einstellt Name, Initiatoren Status, display_units, display_u_per_step anhand angegebene Dict"""
         if motor_config is None:
-            self.config = self.DEFAULT_MOTOR_CONFIG
+            self.config = deepcopy(self.DEFAULT_MOTOR_CONFIG)
         else:
+            # print('motor_config', motor_config)
             for key, value in motor_config.items():
-                self.config[key] = value
+                if key == 'name':
+                    self.name = value
+                else:
+                    self.config[key] = value
+            # print(self.config)
+            print('init', self.coord(), self.without_initiators())
 
     def get_parameters(self) -> Dict[str, float]:
         """Liest die Parametern aus Controller und gibt zurück Dict mit Parameterwerten"""
@@ -493,38 +498,38 @@ class Motor:
         elif current_u == "norm" and to == "contr":
             return self.__norm_to_contr(value, rel)
         elif current_u == "norm" and to == "displ":
-            return self.__norm_to_displ(value, rel)
+            value = self.__norm_to_contr(value, rel)
+            return self.__contr_to_displ(value, rel)
         elif current_u == "displ" and to == "norm":
-            return self.__displ_to_norm(value, rel)
+            value = self.__displ_to_contr(value, rel)
+            return self.__contr_to_norm(value, rel)
         elif current_u == "contr" and to == "displ":
-            value = self.__contr_to_norm(value, rel)
-            return self.__norm_to_displ(value, rel)
+            return self.__contr_to_displ(value, rel)
         elif current_u == "displ" and to == "contr":
-            value = self.__displ_to_norm(value, rel)
-            return self.__norm_to_contr(value, rel)
+            return self.__displ_to_contr(value, rel)
 
-    def __contr_to_norm(self, value: float, rel: bool) -> float:
+    def __contr_to_norm(self, value: float, rel: bool = False) -> float:
         if not rel:
             value = value - self.config['null_position']
         value *= self.config['norm_per_contr']
         return value
 
-    def __norm_to_contr(self, value: float, rel: bool) -> float:
+    def __norm_to_contr(self, value: float, rel: bool = False) -> float:
         value /= self.config['norm_per_contr']
         if not rel:
             value = value + self.config['null_position']
         return value
 
-    def __norm_to_displ(self, value: float, rel: bool) -> float:
+    def __contr_to_displ(self, value: float, rel: bool = False) -> float:
         if not rel:
-            value = value - self.config['displ_null']
-        value *= self.config['displ_per_norm']
+            value = value - self.__norm_to_contr(self.config['displ_null'])
+        value *= self.config['displ_per_contr']
         return value
 
-    def __displ_to_norm(self, value: float, rel: bool) -> float:
-        value /= self.config['displ_per_norm']
+    def __displ_to_contr(self, value: float, rel: bool = False) -> float:
+        value /= self.config['displ_per_contr']
         if not rel:
-            value = value + self.config['displ_null']
+            value = value + self.__norm_to_contr(self.config['displ_null'])
         return value
 
     def set_display_null(self, displ_null: float = None):
@@ -621,49 +626,46 @@ class Motor:
         self.communicator.set_position(self.transform_units(position, units, to='contr'), *self.coord())
         logging.info(f'__position wurde eingestellt. ({position})')
 
-    def set_null(self):
+    def set_displ_null(self):
         """Einstellt die aktuelle __position als null"""
-        self.config['null_position'] = self.position(units='contr')
+        self.config['displ_null'] = self.position(units='norm')
 
-    # def calibrate(self, stop_indicator: StopIndicator = None):
-    #     """Kalibrierung von den gegebenen Motoren"""
-    #     if not self.without_initiators:
-    #         logging.info(f'Kalibrierung vom Motor {self.name} wurde angefangen.')
-    #
-    #         motor = self
-    #
-    #         # Voreinstellung der Parametern
-    #         motor.set_parameter(1, 1)
-    #         motor.set_parameter(2, 1)
-    #         motor.set_parameter(3, 1)
-    #
-    #         # Bis zum Ende laufen
-    #         while not self.at_the_end():
-    #             motor.go(500000, calibrate=True)
-    #             self.wait_motor_stop(stop_indicator)
-    #             if stop_indicator is not None:
-    #                 if stop_indicator.has_stop_requested():
-    #                     return
-    #         end = motor.__position()
-    #
-    #         # Bis zum Anfang laufen
-    #         while not self.at_the_beginning():
-    #             motor.go(-500000, calibrate=True)
-    #             self.wait_motor_stop(stop_indicator)
-    #             if stop_indicator is not None:
-    #                 if stop_indicator.has_stop_requested():
-    #                     return
-    #         beginning = motor.__position()
-    #
-    #         # Null einstellen
-    #         motor.set_null()
-    #
-    #         # Skala normieren
-    #         self.norm_per_contr = 1000 / (end - beginning)
-    #
-    #         logging.info(f'Kalibrierung von Motor {self.name} wurde abgeschlossen.')
-    #     else:
-    #         logging.error(f'Motor {self.name} hat keine Initiators und kann nicht kalibriert werden!')
+    def calibrate(self, stop_indicator: StopIndicator = None):
+        """Kalibrierung von den gegebenen Motoren"""
+        if not self.without_initiators():
+            logging.info(f'Kalibrierung vom Motor {self.name} wurde angefangen.')
+
+            motor = self
+
+            # Voreinstellung der Parametern
+            motor.set_parameters()
+
+            # Bis zum Ende laufen
+            while not self.at_the_end():
+                motor.go(500000, calibrate=True)
+                self.wait_motor_stop(stop_indicator)
+                if stop_indicator is not None:
+                    if stop_indicator.has_stop_requested():
+                        return
+            end = motor.position('contr')
+
+            # Bis zum Anfang laufen
+            while not self.at_the_beginning():
+                motor.go(-500000, calibrate=True)
+                self.wait_motor_stop(stop_indicator)
+                if stop_indicator is not None:
+                    if stop_indicator.has_stop_requested():
+                        return
+            beginning = motor.position('contr')
+
+            # Skala normieren
+            self.config['norm_per_contr'] = 1000 / (end - beginning)
+            self.config['null_position'] = beginning
+
+
+            logging.info(f'Kalibrierung von Motor {self.name} wurde abgeschlossen.')
+        else:
+            logging.error(f'Motor {self.name} hat keine Initiators und kann nicht kalibriert werden!')
 
 
 class Controller:
@@ -796,6 +798,7 @@ class Box:
                 report += f"Achse {axis} ist beim Controller {bus} nicht vorhanden, " \
                           f"den Motor wurde nicht initialisiert.\n"
 
+        print(motors_config)
         self.set_motors_config(motors_config)
         self.set_parameters(motors_parameters)
 
@@ -932,9 +935,9 @@ class Box:
             motors_to_calibration = [self.controller[bus].motor[axis] for bus, axis in list_to_calibration
                                      if not self.controller[bus].motor[axis].without_initiators()]
 
-        # Voreinstellung der Parametern
-        for motor in motors_to_calibration:
-            motor.set_parameters()
+        # # Voreinstellung der Parametern
+        # for motor in motors_to_calibration:
+        #     motor.set_parameters()
 
         # Bis zum Ende laufen
         while True:
@@ -942,7 +945,7 @@ class Box:
             for motor in motors_to_calibration:
                 if not motor.at_the_end():
                     all_at_the_end = False
-                    motor.go(500000, calibrate=True)
+                    motor.go(500000, units='contr', calibrate=True)
             print(self.__initiators(list_to_calibration))
             self.wait_all_motors_stop(stop_indicator, reporter)
             if stop_indicator is not None:
@@ -962,7 +965,7 @@ class Box:
             for motor in motors_to_calibration:
                 if not motor.at_the_beginning():
                     all_at_the_beginning = False
-                    motor.go(-500000, calibrate=True)
+                    motor.go(-500000, units='contr', calibrate=True)
             print(self.__initiators(list_to_calibration))
             self.wait_all_motors_stop(stop_indicator, reporter)
             if stop_indicator is not None:
@@ -975,14 +978,9 @@ class Box:
         for motor in motors_to_calibration:
             beginning.append(motor.position())
 
-        # Null einstellen
-        for motor in motors_to_calibration:
-            motor.set_null()
-
         for i, motor in enumerate(motors_to_calibration):
-            motor.null_position = beginning[i]
-            motor.end_position = end[i]
-            motor.norm_per_contr = 1000 / (end[i] - beginning[i])
+            motor.config['null_position'] = beginning[i]
+            motor.config['norm_per_contr'] = 1000 / (end[i] - beginning[i])
 
         if all_motors:
             logging.info('Kalibrierung von allen Motoren wurde abgeschlossen.')
@@ -1090,8 +1088,10 @@ class Box:
         motors_list = []
         for controller in self:
             for motor in controller:
+                print(motor.coord(), motor.without_initiators())
                 if not motor.without_initiators():
                     motors_list.append(motor.coord())
+        print(motors_list)
         return motors_list
 
     def get_motor(self, coordinates: (int, int) = None, name: str = None) -> Motor:
@@ -1111,10 +1111,8 @@ class Box:
 
     def stop(self):
         """Stoppt alle Achsen"""
-        reply = True
-        for bus in self.controller:
-            reply = reply and self.controller[bus].stop()
-        return reply
+        for controller in self:
+            controller.stop()
 
     # def save_parameters_in_eprom(self):
     #     """Speichert die aktuelle Parametern in Flash EPROM bei alle Controllern"""
