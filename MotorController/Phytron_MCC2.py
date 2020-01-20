@@ -81,7 +81,6 @@ class MCC2Communicator(ContrCommunicator):
         self.__mutex.release()
         return to_return
 
-
     def set_parameter(self, parameter_name: str, neu_value: float, bus: int, axis: int):
         self.__mutex.acquire()
         param_number = self.PARAMETER_NUMBER[parameter_name]
@@ -191,21 +190,21 @@ class MCC2Communicator(ContrCommunicator):
     def check_raw_input_data(self, raw_input_data: List[dict]) -> (bool, str):
         for motor_line in raw_input_data:
 
-            init_status = motor_line['Ohne Initiatoren(0 oder 1)']
-            message = f'"Ohne Initiatoren" muss 0 oder 1 sein, und kein "{init_status}"'
+            init_status = motor_line['Mit Initiatoren(0 oder 1)']
+            message = f'"Mit Initiatoren" muss 0 oder 1 sein, und kein "{init_status}"'
             if init_status != '':
                 try:
-                    init_status = bool(int(motor_line['Ohne Initiatoren(0 oder 1)']))
+                    init_status = bool(int(motor_line['Mit Initiatoren(0 oder 1)']))
                 except ValueError:
                     return False, message
                 if init_status not in (0, 1):
                     return False, message
 
-            units_per_step = motor_line['Einheiten pro Schritt']
+            units_per_step = motor_line['Umrechnungsfaktor']
             message = f'"Einheiten pro Schritt" muss ein float Wert haben, und kein "{units_per_step}"'
             if units_per_step != '':
                 try:
-                    float(motor_line['Ohne Initiatoren(0 oder 1)'])
+                    float(motor_line['Mit Initiatoren(0 oder 1)'])
                 except ValueError:
                     return False, message
 
@@ -445,7 +444,7 @@ class MCC2BoxEmulator(SerialEmulator, ContrCommunicator):
                         axis = read_axis_number(command_to_modul[0])  # Achse-Nummer lesen
                         command_to_motor = command_to_modul[1:]  # Achse-Nummer abschneiden
                         if axis not in self.controller[bus].motor.keys():  # prüfen ob solche Achse-Nummer vorhanden
-                            # TODO Prüfen ob dieser Antwort stimmt.
+                            self.__answer(denial)
                             print(f'Falsche Achsenummer: {axis}')
                             return
                         motor = self.controller[bus].motor[axis]
@@ -468,7 +467,6 @@ class MCC2BoxEmulator(SerialEmulator, ContrCommunicator):
                                     return
                             elif command_to_motor == 'S':  # Stop Befehl
                                 motor.stop()
-                                # TODO Prüfen ob dieser Antwort stimmt.
                                 self.__answer(confirm)
                                 return
                             elif command_to_motor[0] == 'P':  # Parameter-Befehl

@@ -1565,3 +1565,667 @@ Controller 4 (2 Achsen)
 2020-01-17 17:22:05,172  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
 2020-01-17 17:22:05,173  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
 2020-01-17 17:22:05,175  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-01-17 17:25:15,718  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-17 17:25:17,983  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor MirrorX wurde angefangen.
+2020-01-17 17:25:17,983  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor Fokus wurde angefangen.
+2020-01-17 17:25:17,983  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor TestMotor wurde angefangen.
+2020-01-17 17:25:17,987  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um 500000.0 verschoben. 
+2020-01-17 17:25:17,991  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-17 17:25:17,997  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-17 17:25:27,615  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-17 17:25:38,754  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor TestMotor wurde abgeschlossen.
+2020-01-17 17:26:00,458  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. 
+2020-01-17 17:26:12,093  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-17 17:26:42,896  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor MirrorX wurde abgeschlossen.
+2020-01-17 17:27:15,528  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor Fokus wurde abgeschlossen.
+2020-01-17 17:27:26,455  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -839.6233576119191 geschickt.
+2020-01-17 17:27:31,768  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu -790.145543899424 geschickt.
+2020-01-17 17:29:39,686  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-01-17 17:29:39,689  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-01-17 17:29:39,690  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-01-17 17:29:39,692  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-01-17 17:29:39,694  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-01-17 17:42:52,985  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-17 17:42:55,005  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor MirrorX wurde angefangen.
+2020-01-17 17:42:55,005  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor Fokus wurde angefangen.
+2020-01-17 17:42:55,005  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor TestMotor wurde angefangen.
+2020-01-17 17:42:55,009  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um 500000.0 verschoben. 
+2020-01-17 17:42:55,013  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-17 17:42:55,019  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-17 17:43:04,132  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-17 17:43:15,258  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor TestMotor wurde abgeschlossen.
+2020-01-17 18:28:44,732  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-17 18:28:52,101  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 112.0 geschickt.
+2020-01-17 18:28:53,125  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 389.0 geschickt.
+2020-01-17 18:28:54,290  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor MirrorX wurde angefangen.
+2020-01-17 18:28:54,290  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor Fokus wurde angefangen.
+2020-01-17 18:28:54,295  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um 500000.0 verschoben. 
+2020-01-17 18:28:54,296  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor TestMotor wurde angefangen.
+2020-01-17 18:28:54,312  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-17 18:28:54,325  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. 
+2020-01-17 18:28:54,341  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-17 18:28:54,351  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-17 18:28:54,368  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-17 18:28:54,374  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor Fokus wurde abgeschlossen.
+2020-01-17 18:28:54,374  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor MirrorX wurde abgeschlossen.
+2020-01-17 18:28:54,876  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor TestMotor wurde abgeschlossen.
+2020-01-17 18:29:43,571  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-17 18:29:46,478  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor MirrorX wurde angefangen.
+2020-01-17 18:29:46,478  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor Fokus wurde angefangen.
+2020-01-17 18:29:46,484  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um 500000.0 verschoben. 
+2020-01-17 18:29:46,497  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-17 18:29:46,497  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor TestMotor wurde angefangen.
+2020-01-17 18:29:46,507  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. 
+2020-01-17 18:29:46,531  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-17 18:29:46,544  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-17 18:29:46,544  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor MirrorX wurde abgeschlossen.
+2020-01-17 18:29:46,556  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-17 18:29:47,057  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor Fokus wurde abgeschlossen.
+2020-01-17 18:29:47,057  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor TestMotor wurde abgeschlossen.
+2020-01-17 18:29:52,851  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -5940.0 geschickt.
+2020-01-17 18:29:55,854  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 400.0 geschickt.
+2020-01-17 18:29:59,183  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 5640.0 geschickt.
+2020-01-17 18:30:02,548  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 7920.0 geschickt.
+2020-01-17 18:30:06,239  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 10000.0 geschickt.
+2020-01-17 18:30:08,207  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 5160.0 geschickt.
+2020-01-17 18:30:12,257  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -1180.0 geschickt.
+2020-01-17 18:30:15,117  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -6240.0 geschickt.
+2020-01-17 18:30:18,265  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -8920.0 geschickt.
+2020-01-17 18:30:24,396  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu -6440.0 geschickt.
+2020-01-17 18:30:26,884  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 1 wurde um 100.0 verschoben. 
+2020-01-17 18:30:28,020  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 1 wurde um 100.0 verschoben. 
+2020-01-17 18:30:30,709  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 1 wurde um 100.0 verschoben. 
+2020-01-17 18:30:31,373  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 1 wurde um 100.0 verschoben. 
+2020-01-17 18:30:32,138  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 1 wurde um 100.0 verschoben. 
+2020-01-17 18:30:32,397  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 1 wurde um 100.0 verschoben. 
+2020-01-17 18:30:32,554  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 1 wurde um 100.0 verschoben. 
+2020-01-17 18:30:32,723  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 1 wurde um 100.0 verschoben. 
+2020-01-17 18:30:32,880  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 1 wurde um 100.0 verschoben. 
+2020-01-17 18:30:33,534  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 1 wurde um 100.0 verschoben. 
+2020-01-17 18:30:33,691  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 1 wurde um 100.0 verschoben. 
+2020-01-17 18:30:33,871  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 1 wurde um 100.0 verschoben. 
+2020-01-17 18:30:33,994  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 1 wurde um 100.0 verschoben. 
+2020-01-17 18:30:38,196  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-01-17 18:30:38,196  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-01-17 18:30:38,196  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-01-17 18:30:38,196  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-01-17 18:30:38,196  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-01-17 18:32:01,734  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-17 18:32:04,720  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor MirrorX wurde angefangen.
+2020-01-17 18:32:04,720  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor Fokus wurde angefangen.
+2020-01-17 18:32:04,727  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um 500000.0 verschoben. 
+2020-01-17 18:32:04,727  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor TestMotor wurde angefangen.
+2020-01-17 18:32:04,740  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-17 18:32:04,757  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. 
+2020-01-17 18:32:04,764  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-17 18:32:04,791  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-17 18:32:05,268  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor MirrorX wurde abgeschlossen.
+2020-01-17 18:32:05,277  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor Fokus wurde abgeschlossen.
+2020-01-17 18:32:05,301  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-17 18:32:05,812  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor TestMotor wurde abgeschlossen.
+2020-01-17 18:32:09,158  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -5400.0 geschickt.
+2020-01-17 18:32:11,261  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu 1380.0 geschickt.
+2020-01-17 18:32:14,354  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu 5580.0 geschickt.
+2020-01-17 18:32:16,155  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -1740.0 geschickt.
+2020-01-17 18:32:19,777  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu 3460.0 geschickt.
+2020-01-17 18:32:20,463  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu 1440.0 geschickt.
+2020-01-17 18:32:22,117  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -6920.0 geschickt.
+2020-01-17 18:32:23,117  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu 2760.0 geschickt.
+2020-01-17 18:32:24,355  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -4800.0 geschickt.
+2020-01-17 18:32:25,469  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu 4540.0 geschickt.
+2020-01-17 18:32:26,504  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -3660.0 geschickt.
+2020-01-17 18:32:27,426  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu 6200.0 geschickt.
+2020-01-17 18:32:28,270  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu 1180.0 geschickt.
+2020-01-17 18:32:29,103  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -1820.0 geschickt.
+2020-01-17 18:32:42,536  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -4000.0 geschickt.
+2020-01-17 18:32:44,235  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu 1820.0 geschickt.
+2020-01-17 18:36:11,307  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-17 18:36:17,968  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 205.0 geschickt.
+2020-01-17 18:36:19,002  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 418.0 geschickt.
+2020-01-17 18:36:21,279  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor MirrorX wurde angefangen.
+2020-01-17 18:36:21,279  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor Fokus wurde angefangen.
+2020-01-17 18:36:21,297  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um 500000.0 verschoben. 
+2020-01-17 18:36:21,303  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-17 18:36:21,308  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. 
+2020-01-17 18:36:21,333  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-17 18:36:21,333  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor TestMotor wurde angefangen.
+2020-01-17 18:36:21,344  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor Fokus wurde abgeschlossen.
+2020-01-17 18:36:21,350  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-17 18:36:21,358  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-17 18:36:21,840  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor MirrorX wurde abgeschlossen.
+2020-01-17 18:36:21,863  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor TestMotor wurde abgeschlossen.
+2020-01-17 18:36:24,041  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu -5500.0 geschickt.
+2020-01-17 18:36:27,967  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -6780.0 geschickt.
+2020-01-17 18:36:29,699  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -2860.0 geschickt.
+2020-01-17 18:36:32,545  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -5300.0 geschickt.
+2020-01-17 18:38:26,218  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -2120.0 geschickt.
+2020-01-17 18:38:27,770  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -6000.0 geschickt.
+2020-01-17 18:38:35,544  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -6000.0 geschickt.
+2020-01-17 18:38:36,186  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -2000.0 geschickt.
+2020-01-17 18:38:38,515  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -3620.0 geschickt.
+2020-01-17 18:38:41,788  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -6000.0 geschickt.
+2020-01-17 18:38:49,124  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -8000.0 geschickt.
+2020-01-17 18:38:50,665  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -5360.0 geschickt.
+2020-01-17 18:38:51,846  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -2000.0 geschickt.
+2020-01-17 18:38:58,772  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -2000.0 geschickt.
+2020-01-17 18:39:00,902  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -3220.0 geschickt.
+2020-01-17 18:39:05,121  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -2180.0 geschickt.
+2020-01-17 18:39:06,100  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -5880.0 geschickt.
+2020-01-17 18:39:08,552  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -2380.0 geschickt.
+2020-01-17 18:39:10,150  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -2000.0 geschickt.
+2020-01-17 18:39:11,376  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -4860.0 geschickt.
+2020-01-17 18:39:14,571  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -6980.0 geschickt.
+2020-01-17 18:39:16,360  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -3620.0 geschickt.
+2020-01-17 18:39:20,882  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -4860.0 geschickt.
+2020-01-17 18:39:32,616  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -7020.0 geschickt.
+2020-01-17 18:39:33,191  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-01-17 18:39:33,191  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-01-17 18:39:33,191  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-01-17 18:39:33,192  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-01-17 18:39:33,192  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-01-17 18:39:34,636  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-01-17 18:39:34,636  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-01-17 18:39:34,637  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-01-17 18:39:34,637  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-01-17 18:39:34,637  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-01-17 18:40:30,151  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-17 18:40:33,710  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor MirrorX wurde angefangen.
+2020-01-17 18:40:33,711  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor Fokus wurde angefangen.
+2020-01-17 18:40:33,711  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um 500000.0 verschoben. 
+2020-01-17 18:40:33,711  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor TestMotor wurde angefangen.
+2020-01-17 18:40:33,712  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-17 18:40:33,712  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-17 18:40:37,219  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. 
+2020-01-17 18:40:37,220  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-17 18:40:37,220  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-17 18:40:44,248  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor MirrorX wurde abgeschlossen.
+2020-01-17 18:40:44,249  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor TestMotor wurde abgeschlossen.
+2020-01-17 18:40:44,249  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor Fokus wurde abgeschlossen.
+2020-01-17 18:40:47,088  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-01-17 18:40:47,088  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-01-17 18:40:47,088  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-01-17 18:40:47,089  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-01-17 18:40:47,089  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-01-17 18:42:30,640  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-17 18:42:33,469  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor MirrorX wurde angefangen.
+2020-01-17 18:42:33,469  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor Fokus wurde angefangen.
+2020-01-17 18:42:33,470  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor TestMotor wurde angefangen.
+2020-01-17 18:42:33,470  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um 500000.0 verschoben. 
+2020-01-17 18:42:33,470  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-17 18:42:33,471  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-17 18:42:36,983  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. 
+2020-01-17 18:42:36,996  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-17 18:42:36,996  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-17 18:42:44,008  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor MirrorX wurde abgeschlossen.
+2020-01-17 18:42:44,026  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor TestMotor wurde abgeschlossen.
+2020-01-17 18:42:44,039  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor Fokus wurde abgeschlossen.
+2020-01-17 18:43:00,717  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-01-17 18:43:00,718  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-01-17 18:43:00,718  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-01-17 18:43:00,718  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-01-17 18:43:00,718  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-01-17 18:43:24,134  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-17 18:43:26,377  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor MirrorX wurde angefangen.
+2020-01-17 18:43:26,377  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor Fokus wurde angefangen.
+2020-01-17 18:43:26,378  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor TestMotor wurde angefangen.
+2020-01-17 18:43:26,378  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um 500000.0 verschoben. 
+2020-01-17 18:43:26,378  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-17 18:43:26,379  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-17 18:43:29,889  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. 
+2020-01-17 18:43:29,894  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-17 18:43:29,895  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-17 18:43:36,913  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor MirrorX wurde abgeschlossen.
+2020-01-17 18:43:36,919  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor TestMotor wurde abgeschlossen.
+2020-01-17 18:43:36,920  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor Fokus wurde abgeschlossen.
+2020-01-17 18:43:40,114  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-01-17 18:43:40,115  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-01-17 18:43:40,115  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-01-17 18:43:40,115  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-01-17 18:43:40,116  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-01-17 18:43:44,677  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-17 18:43:47,850  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu 354.0 geschickt.
+2020-01-17 18:43:53,163  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor MirrorX wurde angefangen.
+2020-01-17 18:43:53,163  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor Fokus wurde angefangen.
+2020-01-17 18:43:53,163  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor TestMotor wurde angefangen.
+2020-01-17 18:43:53,172  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. 
+2020-01-17 18:43:53,176  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-17 18:43:53,227  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-17 18:43:58,806  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-17 18:44:04,360  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-17 18:44:15,487  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor TestMotor wurde abgeschlossen.
+2020-01-17 18:44:35,657  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor MirrorX wurde abgeschlossen.
+2020-01-17 18:45:01,005  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor Fokus wurde abgeschlossen.
+2020-01-17 18:45:13,042  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-01-17 18:45:13,044  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-01-17 18:45:13,046  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-01-17 18:45:13,047  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-01-17 18:45:13,049  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-01-17 18:48:49,860  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-17 18:48:53,133  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-01-17 18:48:53,133  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-01-17 18:48:53,134  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-01-17 18:48:53,134  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-01-17 18:48:53,134  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-01-17 18:50:17,657  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-17 18:50:20,942  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-01-17 18:50:20,944  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-01-17 18:50:20,946  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-01-17 18:50:20,948  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-01-17 18:50:20,950  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-01-17 18:50:20,967  MotorControllerInterface  save_data  [INFO]  Kalibrierungsdaten für  Motoren {(0, 1), (1, 2), (2, 1), (2, 2), (1, 1)} wurde gespeichert.
+2020-01-17 18:50:20,967  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-18 19:13:36,257  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-18 19:15:14,584  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-18 19:16:53,860  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-18 19:16:57,349  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 96.0 geschickt.
+2020-01-18 19:16:58,704  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor MirrorX wurde angefangen.
+2020-01-18 19:16:58,704  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor Fokus wurde angefangen.
+2020-01-18 19:16:58,705  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor TestMotor wurde angefangen.
+2020-01-18 19:16:58,705  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um 500000.0 verschoben. 
+2020-01-18 19:16:58,705  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-18 19:16:58,705  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-18 19:17:02,225  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-18 19:17:02,225  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. 
+2020-01-18 19:17:02,226  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-18 19:17:08,750  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor Fokus wurde abgeschlossen.
+2020-01-18 19:17:08,750  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor MirrorX wurde abgeschlossen.
+2020-01-18 19:17:08,752  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor TestMotor wurde abgeschlossen.
+2020-01-18 19:17:12,223  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu -8280.0 geschickt.
+2020-01-18 19:17:16,659  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu -4900.0 geschickt.
+2020-01-18 19:17:18,445  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu -100.0 geschickt.
+2020-01-18 19:20:10,225  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 4000.0 geschickt.
+2020-01-18 19:20:24,560  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu -680.0 geschickt.
+2020-01-18 19:20:30,544  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu -6000.0 geschickt.
+2020-01-18 19:20:39,433  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu -2000.0 geschickt.
+2020-01-18 19:20:41,956  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu -2000.0 geschickt.
+2020-01-18 19:20:43,427  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu -300.0 geschickt.
+2020-01-18 19:20:44,774  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 1820.0 geschickt.
+2020-01-18 19:20:46,176  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 4000.0 geschickt.
+2020-01-18 19:21:17,609  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 4000.0 geschickt.
+2020-01-18 19:21:18,658  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 3560.0 geschickt.
+2020-01-18 19:21:20,352  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 4000.0 geschickt.
+2020-01-18 19:21:59,711  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 2680.0 geschickt.
+2020-01-18 19:22:37,373  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 1100.0 geschickt.
+2020-01-18 19:22:50,762  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 260.0 geschickt.
+2020-01-18 19:22:52,008  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu -1140.0 geschickt.
+2020-01-18 19:22:59,812  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 360.0 geschickt.
+2020-01-18 19:23:02,066  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 1480.0 geschickt.
+2020-01-18 19:30:45,003  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 360.0 geschickt.
+2020-01-18 19:30:57,584  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 1840.0 geschickt.
+2020-01-18 19:30:59,548  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu -1000.0 geschickt.
+2020-01-18 19:31:08,321  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-01-18 19:31:08,321  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-01-18 19:31:08,321  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-01-18 19:31:08,321  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-01-18 19:31:08,322  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-01-18 19:31:08,324  MotorControllerInterface  save_data  [INFO]  Kalibrierungsdaten für  Motoren {(0, 1), (1, 2), (2, 1), (2, 2), (1, 1)} wurde gespeichert.
+2020-01-20 15:52:58,507  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-20 15:55:14,319  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-20 15:55:14,323  MotorControllerInterface  set_position  [INFO]  __position wurde eingestellt. (0.0)
+2020-01-20 15:55:14,323  MotorControllerInterface  set_position  [INFO]  __position wurde eingestellt. (0.0)
+2020-01-20 15:55:14,323  MotorControllerInterface  set_position  [INFO]  __position wurde eingestellt. (0.0)
+2020-01-20 15:55:14,324  MotorControllerInterface  set_position  [INFO]  __position wurde eingestellt. (0.0)
+2020-01-20 15:55:14,324  MotorControllerInterface  set_position  [INFO]  __position wurde eingestellt. (450.0)
+2020-01-20 15:55:14,324  MotorControllerInterface  read_saved_motors_data  [INFO]  Gesicherte Daten für Motoren [(0, 1), (1, 1), (1, 2), (2, 1), (2, 2)] wurde geladen.
+2020-01-20 15:55:23,611  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu -1620.0 geschickt.
+2020-01-20 15:55:24,849  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 1040.0 geschickt.
+2020-01-20 15:55:26,592  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 4000.0 geschickt.
+2020-01-20 15:55:30,777  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 2080.0 geschickt.
+2020-01-20 15:56:04,343  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-01-20 15:56:04,344  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-01-20 15:56:04,344  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-01-20 15:56:04,344  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-01-20 15:56:04,344  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-01-20 15:56:04,346  MotorControllerInterface  save_data  [INFO]  Kalibrierungsdaten für  Motoren {(0, 1), (1, 2), (2, 1), (2, 2), (1, 1)} wurde gespeichert.
+2020-01-20 15:56:08,961  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-20 15:57:44,880  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-20 16:04:05,540  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-20 16:04:10,512  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu 144.0 geschickt.
+2020-01-20 16:04:23,512  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor MirrorX wurde angefangen.
+2020-01-20 16:04:23,512  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor Fokus wurde angefangen.
+2020-01-20 16:04:23,512  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor TestMotor wurde angefangen.
+2020-01-20 16:04:23,516  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um 500000.0 verschoben. 
+2020-01-20 16:04:23,520  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-20 16:04:23,526  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-20 16:04:34,663  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-20 16:04:45,783  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor TestMotor wurde abgeschlossen.
+2020-01-20 16:05:05,987  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. 
+2020-01-20 16:05:16,611  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-20 16:05:48,461  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor MirrorX wurde abgeschlossen.
+2020-01-20 16:06:18,804  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor Fokus wurde abgeschlossen.
+2020-01-20 16:07:06,656  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu 44.726297024511496 geschickt.
+2020-01-20 16:07:13,766  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu 108.7547544648123 geschickt.
+2020-01-20 16:07:18,589  MotorControllerInterface  go_to  [ERROR]  Soft Limits Fehler: Obere Grenze ist kleiner als Untere! (Motor 1 beim Controller 2:)
+2020-01-20 16:07:19,263  MotorControllerInterface  go_to  [ERROR]  Soft Limits Fehler: Obere Grenze ist kleiner als Untere! (Motor 1 beim Controller 2:)
+2020-01-20 16:07:20,064  MotorControllerInterface  go_to  [ERROR]  Soft Limits Fehler: Obere Grenze ist kleiner als Untere! (Motor 1 beim Controller 2:)
+2020-01-20 16:07:28,043  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu 128.7636474149063 geschickt.
+2020-01-20 16:07:31,035  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu 106.75386516980289 geschickt.
+2020-01-20 16:07:39,798  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu 99.75075263727 geschickt.
+2020-01-20 16:07:42,184  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu 239.81300328792798 geschickt.
+2020-01-20 16:07:46,324  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu 190.79121556019768 geschickt.
+2020-01-20 16:07:52,149  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu 99.75075263727 geschickt.
+2020-01-20 16:08:06,428  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu 99.75075263727 geschickt.
+2020-01-20 16:08:18,870  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu 133.76587065242978 geschickt.
+2020-01-20 16:08:24,490  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu 233.80993562807 geschickt.
+2020-01-20 16:08:26,615  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu 99.75075263727 geschickt.
+2020-01-20 16:08:33,270  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 42.2096682732936 geschickt.
+2020-01-20 16:08:45,375  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu 46.7271863195209 geschickt.
+2020-01-20 16:08:47,672  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu 56.73163279456789 geschickt.
+2020-01-20 16:16:54,089  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu 110.7556437598217 geschickt.
+2020-01-20 16:16:58,566  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 111.2047774312188 geschickt.
+2020-01-20 16:17:22,383  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 100.20555713068 geschickt.
+2020-01-20 16:17:24,498  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 164.2010206974512 geschickt.
+2020-01-20 16:17:25,468  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 141.20265097814283 geschickt.
+2020-01-20 16:17:26,729  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 100.20555713068 geschickt.
+2020-01-20 16:29:22,546  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor MirrorX wurde angefangen.
+2020-01-20 16:29:22,546  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor Fokus wurde angefangen.
+2020-01-20 16:29:22,546  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor TestMotor wurde angefangen.
+2020-01-20 16:29:22,551  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um 500000.0 verschoben. 
+2020-01-20 16:29:22,556  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-20 16:29:22,561  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-20 16:29:32,680  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-20 16:29:43,814  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor TestMotor wurde abgeschlossen.
+2020-01-20 16:30:05,489  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. 
+2020-01-20 16:30:06,504  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. 
+2020-01-20 16:30:17,658  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-20 16:30:48,956  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor MirrorX wurde abgeschlossen.
+2020-01-20 16:31:21,640  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor Fokus wurde abgeschlossen.
+2020-01-20 18:13:16,973  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-01-20 18:13:16,975  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-01-20 18:13:16,977  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-01-20 18:13:16,979  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-01-20 18:13:16,980  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-01-20 19:41:29,144  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-20 19:42:56,626  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-20 19:44:11,101  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-20 19:45:18,341  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-01-20 19:45:18,341  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-01-20 19:45:18,341  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-01-20 19:45:18,341  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-01-20 19:45:18,342  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-01-20 19:45:18,342  MotorControllerInterface  save_data  [INFO]  Kalibrierungsdaten für  Motoren {(0, 1), (1, 2), (2, 1), (2, 2), (1, 1)} wurde gespeichert.
+2020-01-20 19:59:17,526  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-20 20:00:06,789  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-20 20:01:16,092  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-20 20:02:16,438  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-20 20:02:55,376  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-20 20:02:58,535  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 91.0 geschickt.
+2020-01-20 20:02:59,941  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 227.0 geschickt.
+2020-01-20 20:03:04,307  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 1 wurde zu 124.0 geschickt.
+2020-01-20 20:03:06,073  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 1 wurde zu 111.0 geschickt.
+2020-01-20 20:03:07,806  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 138.0 geschickt.
+2020-01-20 20:03:10,709  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu 74.0 geschickt.
+2020-01-20 20:03:24,396  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-01-20 20:03:24,397  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-01-20 20:03:24,397  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-01-20 20:03:24,397  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-01-20 20:03:24,397  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-01-20 20:04:03,035  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-20 20:04:06,731  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-01-20 20:04:06,731  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-01-20 20:04:06,731  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-01-20 20:04:06,731  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-01-20 20:04:06,731  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-01-20 20:04:32,083  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-20 20:04:35,941  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu 124.0 geschickt.
+2020-01-20 20:04:39,638  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor MirrorX wurde angefangen.
+2020-01-20 20:04:39,638  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor Fokus wurde angefangen.
+2020-01-20 20:04:39,638  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um 500000.0 verschoben. 
+2020-01-20 20:04:39,639  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor TestMotor wurde angefangen.
+2020-01-20 20:04:39,639  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-20 20:04:39,640  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-20 20:04:43,155  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. 
+2020-01-20 20:04:43,156  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-20 20:04:43,156  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-20 20:04:50,192  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor MirrorX wurde abgeschlossen.
+2020-01-20 20:04:50,193  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor Fokus wurde abgeschlossen.
+2020-01-20 20:04:50,193  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor TestMotor wurde abgeschlossen.
+2020-01-20 20:05:11,053  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -7760.0 geschickt.
+2020-01-20 20:05:12,448  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -5880.0 geschickt.
+2020-01-20 20:05:14,327  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -4560.0 geschickt.
+2020-01-20 20:05:15,542  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -7120.0 geschickt.
+2020-01-20 20:05:20,132  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -5400.0 geschickt.
+2020-01-20 20:05:21,448  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -3700.0 geschickt.
+2020-01-20 20:05:22,641  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -1340.0 geschickt.
+2020-01-20 20:05:24,204  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu 1040.0 geschickt.
+2020-01-20 20:05:49,311  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-01-20 20:05:49,311  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-01-20 20:05:49,312  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-01-20 20:05:49,312  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-01-20 20:05:49,312  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-01-20 20:07:46,721  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-20 20:07:50,361  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor MirrorX wurde angefangen.
+2020-01-20 20:07:50,361  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor Fokus wurde angefangen.
+2020-01-20 20:07:50,362  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um 500000.0 verschoben. 
+2020-01-20 20:07:50,362  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor TestMotor wurde angefangen.
+2020-01-20 20:07:50,362  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-20 20:07:50,362  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-20 20:07:53,875  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. 
+2020-01-20 20:07:53,876  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-20 20:07:53,877  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-20 20:08:00,919  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor TestMotor wurde abgeschlossen.
+2020-01-20 20:08:00,919  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor MirrorX wurde abgeschlossen.
+2020-01-20 20:08:00,920  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor Fokus wurde abgeschlossen.
+2020-01-20 20:08:02,853  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -7880.0 geschickt.
+2020-01-20 20:08:04,328  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -5700.0 geschickt.
+2020-01-20 20:08:09,983  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-01-20 20:08:09,983  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-01-20 20:08:09,983  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-01-20 20:08:09,983  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-01-20 20:08:09,983  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-01-20 20:09:51,194  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-20 20:09:55,221  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu 107.0 geschickt.
+2020-01-20 20:09:58,540  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu 138.0 geschickt.
+2020-01-20 20:10:05,260  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-01-20 20:10:05,261  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-01-20 20:10:05,261  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-01-20 20:10:05,261  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-01-20 20:10:05,261  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-01-20 20:11:06,402  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-20 20:11:10,167  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-01-20 20:11:10,167  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-01-20 20:11:10,168  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-01-20 20:11:10,168  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-01-20 20:11:10,168  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-01-20 20:12:52,504  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-20 20:12:54,337  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu 81.0 geschickt.
+2020-01-20 20:12:55,086  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-01-20 20:12:55,087  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-01-20 20:12:55,087  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-01-20 20:12:55,087  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-01-20 20:12:55,087  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-01-20 20:12:55,088  MotorControllerInterface  save_data  [INFO]  Kalibrierungsdaten für  Motoren {(0, 1), (1, 2), (2, 1), (2, 2), (1, 1)} wurde gespeichert.
+2020-01-20 20:25:56,945  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-20 20:25:59,526  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor MirrorX wurde angefangen.
+2020-01-20 20:25:59,527  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor Fokus wurde angefangen.
+2020-01-20 20:25:59,527  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor TestMotor wurde angefangen.
+2020-01-20 20:25:59,528  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-20 20:25:59,528  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-20 20:25:59,528  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um 500000.0 verschoben. 
+2020-01-20 20:26:03,043  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-20 20:26:03,044  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-20 20:26:03,044  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. 
+2020-01-20 20:26:10,079  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor TestMotor wurde abgeschlossen.
+2020-01-20 20:26:10,080  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor Fokus wurde abgeschlossen.
+2020-01-20 20:26:10,080  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor MirrorX wurde abgeschlossen.
+2020-01-20 20:26:10,081  MotorControllerInterface  calibrate_motors  [INFO]  Kalibrierung von allen Motoren wurde abgeschlossen.
+2020-01-20 20:26:13,162  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-01-20 20:26:13,162  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-01-20 20:26:13,162  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-01-20 20:26:13,162  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-01-20 20:26:13,163  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-01-20 20:26:13,164  MotorControllerInterface  save_data  [INFO]  Kalibrierungsdaten für  Motoren {(0, 1), (1, 2), (2, 1), (2, 2), (1, 1)} wurde gespeichert.
+2020-01-20 20:27:07,798  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-20 20:27:10,268  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor MirrorX wurde angefangen.
+2020-01-20 20:27:10,269  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor Fokus wurde angefangen.
+2020-01-20 20:27:10,287  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor TestMotor wurde angefangen.
+2020-01-20 20:27:10,287  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-20 20:27:10,287  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um 500000.0 verschoben. 
+2020-01-20 20:27:10,316  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. 
+2020-01-20 20:27:10,316  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-20 20:27:10,323  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-20 20:27:10,348  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor Fokus wurde abgeschlossen.
+2020-01-20 20:27:10,348  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-20 20:27:10,823  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor MirrorX wurde abgeschlossen.
+2020-01-20 20:27:10,858  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor TestMotor wurde abgeschlossen.
+2020-01-20 20:27:10,859  MotorControllerInterface  calibrate_motors  [INFO]  Kalibrierung von allen Motoren wurde abgeschlossen.
+2020-01-20 20:27:28,318  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -8060.0 geschickt.
+2020-01-20 20:27:29,454  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -4100.0 geschickt.
+2020-01-20 20:27:31,636  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -100.0 geschickt.
+2020-01-20 20:27:40,419  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-01-20 20:27:40,419  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-01-20 20:27:40,419  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-01-20 20:27:40,420  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-01-20 20:27:40,420  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-01-20 20:27:40,420  MotorControllerInterface  save_data  [INFO]  Kalibrierungsdaten für  Motoren {(0, 1), (1, 2), (2, 1), (2, 2), (1, 1)} wurde gespeichert.
+2020-01-20 21:22:50,892  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-20 21:22:54,026  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor MirrorX wurde angefangen.
+2020-01-20 21:22:54,026  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor Fokus wurde angefangen.
+2020-01-20 21:22:54,026  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor TestMotor wurde angefangen.
+2020-01-20 21:22:54,030  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um 500000.0 verschoben. 
+2020-01-20 21:22:54,034  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-20 21:22:54,040  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-20 21:23:05,176  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-20 21:23:16,306  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor TestMotor wurde abgeschlossen.
+2020-01-20 21:23:36,518  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. 
+2020-01-20 21:23:37,538  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. 
+2020-01-20 21:23:56,243  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-20 21:24:23,396  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor MirrorX wurde abgeschlossen.
+2020-01-20 21:24:58,391  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor Fokus wurde abgeschlossen.
+2020-01-20 21:24:58,392  MotorControllerInterface  calibrate_motors  [INFO]  Kalibrierung von allen Motoren wurde abgeschlossen.
+2020-01-20 21:27:41,238  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor MirrorX wurde angefangen.
+2020-01-20 21:27:41,239  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor Fokus wurde angefangen.
+2020-01-20 21:27:41,239  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor TestMotor wurde angefangen.
+2020-01-20 21:27:41,243  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um 500000.0 verschoben. 
+2020-01-20 21:27:41,247  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-20 21:27:41,253  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-20 21:27:52,373  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-20 21:28:03,475  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor TestMotor wurde abgeschlossen.
+2020-01-20 21:28:24,150  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. 
+2020-01-20 21:28:25,161  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. 
+2020-01-20 21:28:49,241  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-20 21:29:07,732  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor MirrorX wurde abgeschlossen.
+2020-01-20 21:29:51,156  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor Fokus wurde abgeschlossen.
+2020-01-20 21:29:51,157  MotorControllerInterface  calibrate_motors  [INFO]  Kalibrierung von allen Motoren wurde abgeschlossen.
+2020-01-20 21:50:37,645  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-01-20 21:50:37,647  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-01-20 21:50:37,649  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-01-20 21:50:37,650  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-01-20 21:50:37,652  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-01-20 21:50:42,515  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-20 21:50:44,230  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor MirrorX wurde angefangen.
+2020-01-20 21:50:44,230  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor Fokus wurde angefangen.
+2020-01-20 21:50:44,230  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor TestMotor wurde angefangen.
+2020-01-20 21:50:44,234  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um 500000.0 verschoben. 
+2020-01-20 21:50:44,242  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-20 21:50:44,244  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-20 21:50:55,371  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-20 21:51:06,501  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor TestMotor wurde abgeschlossen.
+2020-01-20 21:51:26,728  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. 
+2020-01-20 21:51:46,446  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-20 21:52:14,949  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor MirrorX wurde abgeschlossen.
+2020-01-20 21:52:49,464  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor Fokus wurde abgeschlossen.
+2020-01-20 22:43:01,766  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-20 22:43:04,126  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor MirrorX wurde angefangen.
+2020-01-20 22:43:04,126  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor Fokus wurde angefangen.
+2020-01-20 22:43:04,127  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor TestMotor wurde angefangen.
+2020-01-20 22:43:04,130  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um 500000.0 verschoben. 
+2020-01-20 22:43:04,134  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-20 22:43:04,140  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-20 22:43:15,277  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-20 22:43:47,062  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. 
+2020-01-20 22:43:48,079  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. 
+2020-01-20 22:43:56,043  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-01-20 22:43:56,045  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-01-20 22:43:56,047  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-01-20 22:43:56,048  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-01-20 22:43:56,050  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-01-20 22:43:57,168  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. 
+2020-01-20 22:43:57,198  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-20 22:44:07,315  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-20 22:51:35,082  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-20 22:51:37,169  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor MirrorX wurde angefangen.
+2020-01-20 22:51:37,169  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor Fokus wurde angefangen.
+2020-01-20 22:51:37,169  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor TestMotor wurde angefangen.
+2020-01-20 22:51:37,173  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um 500000.0 verschoben. 
+2020-01-20 22:51:37,177  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-20 22:51:37,183  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-20 22:51:48,300  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-20 22:52:52,552  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-20 22:52:54,557  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor MirrorX wurde angefangen.
+2020-01-20 22:52:54,558  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor Fokus wurde angefangen.
+2020-01-20 22:52:54,558  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor TestMotor wurde angefangen.
+2020-01-20 22:52:54,567  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. 
+2020-01-20 22:52:54,571  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-20 22:52:54,583  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-20 22:53:05,706  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-20 22:53:16,846  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor TestMotor wurde abgeschlossen.
+2020-01-20 22:53:37,492  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor MirrorX wurde abgeschlossen.
+2020-01-20 22:53:56,716  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor Fokus wurde abgeschlossen.
+2020-01-20 23:03:29,079  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-20 23:03:30,717  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor MirrorX wurde angefangen.
+2020-01-20 23:03:30,717  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor Fokus wurde angefangen.
+2020-01-20 23:03:30,718  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor TestMotor wurde angefangen.
+2020-01-20 23:03:30,721  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um 500000.0 verschoben. 
+2020-01-20 23:03:30,725  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-20 23:03:30,731  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-20 23:03:41,864  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-20 23:03:52,988  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor TestMotor wurde abgeschlossen.
+2020-01-20 23:04:13,668  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. 
+2020-01-20 23:04:14,685  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. 
+2020-01-20 23:04:32,887  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-20 23:04:57,152  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor MirrorX wurde abgeschlossen.
+2020-01-20 23:05:35,025  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor Fokus wurde abgeschlossen.
+2020-01-20 23:10:52,441  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-20 23:10:54,260  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor MirrorX wurde angefangen.
+2020-01-20 23:10:54,260  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor Fokus wurde angefangen.
+2020-01-20 23:10:54,260  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor TestMotor wurde angefangen.
+2020-01-20 23:10:54,264  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um 500000.0 verschoben. 
+2020-01-20 23:10:54,268  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-20 23:10:54,274  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-20 23:11:05,402  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-20 23:11:16,515  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor TestMotor wurde abgeschlossen.
+2020-01-20 23:11:37,220  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. 
+2020-01-20 23:11:38,242  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. 
+2020-01-20 23:11:56,420  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-20 23:12:20,665  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor MirrorX wurde abgeschlossen.
+2020-01-20 23:12:58,532  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor Fokus wurde abgeschlossen.
+2020-01-20 23:12:58,533  MotorControllerInterface  calibrate_motors  [INFO]  Kalibrierung von allen Motoren wurde abgeschlossen.
+2020-01-20 23:14:27,276  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 221.9978908122085 geschickt.
+2020-01-20 23:14:30,956  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 174.855230845552 geschickt.
+2020-01-20 23:14:38,605  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 152.788453839883 geschickt.
+2020-01-20 23:14:40,197  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 159.8097010689595 geschickt.
+2020-01-20 23:14:40,980  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-01-20 23:14:40,982  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-01-20 23:14:40,984  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-01-20 23:14:40,986  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-01-20 23:14:40,987  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-01-20 23:14:41,963  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-01-20 23:14:41,965  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-01-20 23:14:41,966  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-01-20 23:14:41,968  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-01-20 23:14:41,969  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-01-20 23:16:07,662  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-20 23:16:09,274  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor MirrorX wurde angefangen.
+2020-01-20 23:16:09,275  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor Fokus wurde angefangen.
+2020-01-20 23:16:09,275  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor TestMotor wurde angefangen.
+2020-01-20 23:16:09,279  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um 500000.0 verschoben. 
+2020-01-20 23:16:09,283  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-20 23:16:09,289  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-20 23:16:20,422  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-20 23:16:31,552  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor TestMotor wurde abgeschlossen.
+2020-01-20 23:16:45,150  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. 
+2020-01-20 23:16:46,168  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. 
+2020-01-20 23:17:11,431  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-20 23:17:12,454  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-20 23:17:28,597  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor MirrorX wurde abgeschlossen.
+2020-01-20 23:18:14,105  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor Fokus wurde abgeschlossen.
+2020-01-20 23:18:14,105  MotorControllerInterface  calibrate_motors  [INFO]  Kalibrierung von allen Motoren wurde abgeschlossen.
+2020-01-20 23:18:58,948  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 296.33153683906363 geschickt.
+2020-01-20 23:19:00,850  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 94.7406535494448 geschickt.
+2020-01-20 23:19:06,863  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-01-20 23:19:06,864  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-01-20 23:19:06,866  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-01-20 23:19:06,867  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-01-20 23:19:06,869  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-01-20 23:19:06,885  MotorControllerInterface  save_data  [INFO]  Kalibrierungsdaten für  Motoren ((0, 1), (1, 1), (1, 2), (2, 1), (2, 2)) wurde gespeichert.

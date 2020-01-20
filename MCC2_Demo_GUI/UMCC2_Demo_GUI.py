@@ -1,7 +1,7 @@
 # coding= utf-8
 import logging
 import time
-from typing import List
+from typing import List, Set
 
 from PyQt5 import QtGui, QtCore
 from PyQt5.QtWidgets import QFileDialog, QMessageBox, QMainWindow, QApplication, QScrollBar, QStatusBar
@@ -14,7 +14,7 @@ import serial, serial.tools.list_ports
 from PyQt5.uic import loadUi
 
 from MotorController.MotorControllerInterface import SerialConnector
-from MotorController.Phytron_MCC2 import Box, StopIndicator, WaitReporter, MCC2BoxSerial, MCC2BoxEmulator, \
+from MotorController.Phytron_MCC2 import Box, StopIndicator, CalibrationReporter, MCC2BoxSerial, MCC2BoxEmulator, \
     MCC2Communicator
 import ULoggingConfig
 
@@ -24,7 +24,7 @@ if __name__ == '__main__':
 
 class AktPositionSlider(QScrollBar):
     def __init__(self, parent=None):
-        super(AktPositionSlider, self).__init__(Qt.Horizontal,parent)
+        super(AktPositionSlider, self).__init__(Qt.Horizontal, parent)
         self.U_x = 0
         self.O_x = 100
         self.setInvertedAppearance(True)
@@ -46,7 +46,7 @@ class AktPositionSlider(QScrollBar):
         rund_k = 1
         h_hint = 7
         height = self.height()
-        hcenter = height/2
+        hcenter = height / 2
         width = self.width()
         v_range = width - 2 * d_icon
         x_icon = d_icon + self.value() * v_range / 1000
@@ -57,29 +57,26 @@ class AktPositionSlider(QScrollBar):
         pen.setColor(Qt.white)
         qp.setPen(pen)
         qp.setBrush(Qt.white)
-        qp.drawRect(0, hcenter-h_hint, width, 2*h_hint)
+        qp.drawRect(0, hcenter - h_hint, width, 2 * h_hint)
 
         # Icon malen
         pen.setWidth(0)
         pen.setColor(Qt.gray)
         qp.setPen(pen)
         qp.setBrush(Qt.gray)
-        qp.drawRoundedRect(x_icon-d_icon, hcenter-h_icon, 2*d_icon, 2*h_icon, rund_k*h_icon, rund_k*h_icon)
+        qp.drawRoundedRect(x_icon - d_icon, hcenter - h_icon, 2 * d_icon, 2 * h_icon, rund_k * h_icon, rund_k * h_icon)
         # print(x_icon+d_icon, width)
-
 
         # Soft Limits malen
         pen.setWidth(2)
         qp.setPen(pen)
-        U_pixel_x = d_icon + self.U_x*v_range/1000
+        U_pixel_x = d_icon + self.U_x * v_range / 1000
         O_pixel_x = d_icon + self.O_x * v_range / 1000
         try:
             qp.drawLine(U_pixel_x, hcenter - h_hint, U_pixel_x, hcenter + h_hint)
             qp.drawLine(O_pixel_x, hcenter - h_hint, O_pixel_x, hcenter + h_hint)
         except OverflowError:
             logging.error("OverflowError, kann nicht Soft Limits malen.")
-
-
 
     def Soft_Limits_einstellen(self, U_x, O_x):
         if U_x is None:
@@ -91,7 +88,6 @@ class AktPositionSlider(QScrollBar):
         else:
             self.O_x = O_x
         self.update()
-
 
         # M_d = 10.5
         # size = self.frameGeometry().width()
@@ -116,9 +112,9 @@ class KalibrierungThread(QThread):
         self.stop = False
 
     def run(self):
-        wait_reporter = GuiWaitReporter(self)
+        calibration_reporter = GuiCalibrationReporter(self)
         stop_indicator = GuiStopIndicator(self)
-        self.box.calibrate_motors(stop_indicator=stop_indicator, reporter=wait_reporter)
+        self.box.calibrate_motors(stop_indicator=stop_indicator, reporter=calibration_reporter)
 
         if self.stop:
             self.box.stop()
@@ -128,23 +124,34 @@ class KalibrierungThread(QThread):
 
     def report(self, text):
         self.status = text
+        print(self.status)
         self.Kalibrierung_Status_Nachricht.emit()
 
 
-class GuiWaitReporter(WaitReporter):
+class GuiCalibrationReporter(CalibrationReporter):
     """Durch dieses Objekt kann man während eine Kalibrierung die Liste der im Moment laufenden Motoren bekommen.
             Es wird als argument für PBox.calibrate_motors() verwendet."""
+
     def __init__(self, kal_thread: KalibrierungThread):
         self.kal_thread = kal_thread
 
-    def report(self, motors_list: List[str]):
-        report = f'Wartet auf Motoren: {", ".join(motors_list)}'
+    def set_wait_list(self, wait_list: Set[str]):
+        self.wait_list = wait_list
+        self.__report()
+
+    def motor_is_done(self, motor_name: str):
+        self.wait_list -= {motor_name}
+        self.__report()
+
+    def __report(self):
+        report = f'Wartet auf Motoren: {", ".join(self.wait_list)}'
         self.kal_thread.report(report)
 
 
 class GuiStopIndicator(StopIndicator):
     """Durch dieses Objekt kann man Kalibrierung abbrechen.
     Es wird als argument für PBox.calibrate_motors() verwendet."""
+
     def __init__(self, kal_thread: KalibrierungThread):
         self.kal_thread = kal_thread
 
@@ -161,7 +168,6 @@ class ExampleApp(QMainWindow):
         self.StatusBar.setObjectName("statusbar")
         self.setStatusBar(self.StatusBar)
 
-
         self.Kal_Thread = KalibrierungThread()
         self.Kal_Thread.Kalibrierung_unterbrochen.connect(self.Kalibrierung_unterbrochen)
         self.Kal_Thread.Kalibrierung_fertig.connect(self.Kalibrierung_fertig)
@@ -176,7 +182,7 @@ class ExampleApp(QMainWindow):
         self.verticalLayout_11.addWidget(self.horizontalSlider1)
         self.horizontalScrollBar1.setEnabled(False)
         self.horizontalScrollBar1.setMaximum(1000)
-        self.horizontalScrollBar1.Soft_Limits_einstellen(None,None)
+        self.horizontalScrollBar1.Soft_Limits_einstellen(None, None)
 
         self.refrBtn.clicked.connect(self.ports_lesen)
         self.VerbButton.clicked.connect(self.Verbinden)
@@ -235,7 +241,7 @@ class ExampleApp(QMainWindow):
             self.Motor = self.Box.get_motor(name=self.MotorCBox.currentText())
             self.init_Soft_Limits()
             self.Position_lesen(single_shot=True)
-            if self.Motor.without_initiators():
+            if not self.Motor.with_initiators():
                 self.horizontalSlider1.setEnabled(False)
                 self.horizontalScrollBar1.setValue(0)
                 self.horizontalSlider1.setValue(0)
@@ -248,7 +254,6 @@ class ExampleApp(QMainWindow):
         else:
             self.Motor1Box.setEnabled(False)
 
-
     def Soft_Limits_Lines_Einheiten_anpassen(self):
         Motor = self.Motor
 
@@ -257,13 +262,12 @@ class ExampleApp(QMainWindow):
 
         if U_Grenze is not None:
             if self.EinheitenBox1.checkState():
-                U_Grenze = Motor.displ_from_norm(U_Grenze)
-            self.SL_U_Edit.setText(str(round(U_Grenze,4)))
+                U_Grenze = Motor.transform_units(U_Grenze, 'norm', to='displ')
+            self.SL_U_Edit.setText(str(round(U_Grenze, 4)))
         if O_Grenze is not None:
             if self.EinheitenBox1.checkState():
-                O_Grenze = Motor.displ_from_norm(O_Grenze)
-            self.SL_O_Edit.setText(str(round(O_Grenze,4)))
-
+                O_Grenze = Motor.transform_units(O_Grenze, 'norm', to='displ')
+            self.SL_O_Edit.setText(str(round(O_Grenze, 4)))
 
     def Soft_Limits_einstellen(self):
         Motor = self.Motor
@@ -287,8 +291,8 @@ class ExampleApp(QMainWindow):
 
         if self.EinheitenBox1.checkState():
             pass
-            U_Grenze = Motor.norm_from_displ(float(U_Grenze)) if U_Grenze != '' else None
-            O_Grenze = Motor.norm_from_displ(float(O_Grenze)) if O_Grenze != '' else None
+            U_Grenze = Motor.transform_units(float(U_Grenze), 'displ', to='norm') if U_Grenze != '' else None
+            O_Grenze = Motor.transform_units(float(O_Grenze), 'displ', to='norm') if O_Grenze != '' else None
         else:
             U_Grenze = float(U_Grenze) if U_Grenze != '' else None
             O_Grenze = float(O_Grenze) if O_Grenze != '' else None
@@ -322,19 +326,18 @@ class ExampleApp(QMainWindow):
 
         if U_Grenze is not None:
             if self.EinheitenBox1.checkState():
-                U_Grenze = Motor.displ_from_norm(U_Grenze)
+                U_Grenze = Motor.transform_units(U_Grenze, 'norm', to='displ')
             self.SL_U_Edit.setText(str(round(U_Grenze, 4)))
         else:
             self.SL_U_Edit.setText('')
         if O_Grenze is not None:
             if self.EinheitenBox1.checkState():
-                O_Grenze = Motor.displ_from_norm(O_Grenze)
+                O_Grenze = Motor.transform_units(O_Grenze, 'norm', to='displ')
             self.SL_O_Edit.setText(str(round(O_Grenze, 4)))
         else:
             self.SL_O_Edit.setText('')
 
         self.Soft_Limits_einstellen()
-
 
     def Einheiten_wechseln(self):
         if self.EinheitenBox1.checkState():
@@ -346,7 +349,6 @@ class ExampleApp(QMainWindow):
         self.NullBtn1.setEnabled(self.EinheitenBox1.checkState())
         self.Soft_Limits_Lines_Einheiten_anpassen()
 
-
     def geh_zu(self):
         self.Motor.go_to(float(self.GeheZuEdit1.text()), self.units)
         self.set_HSlider_tr(int(float(self.GeheZuEdit1.text())))
@@ -354,14 +356,14 @@ class ExampleApp(QMainWindow):
     def NE_aus_AE(self, AE):
         return self.Motor.transform_units(AE, 'displ', to='norm')
 
-    def set_HSlider_tr(self,Val):
+    def set_HSlider_tr(self, Val):
         if self.EinheitenBox1.checkState():
             self.set_HSlider(int(self.NE_aus_AE(Val)))
         else:
             self.set_HSlider(Val)
 
-    def set_HSlider(self,Val):
-        if not self.Motor.without_initiators():
+    def set_HSlider(self, Val):
+        if self.Motor.with_initiators():
             self.horizontalSlider1.setValue(Val)
 
     def Plus1(self):
@@ -395,12 +397,12 @@ class ExampleApp(QMainWindow):
         if fileName[0] == '':
             return
 
-        self.Verbinden(config_Datei = fileName[0])
+        self.Verbinden(config_Datei=fileName[0])
 
     def Verbinden(self, arg=None, config_Datei='input/Phytron_Motoren_config.csv'):
 
         if self.verbunden:
-            self.Box.close(without_eprom=True)
+            self.Box.close()
 
         self.verbunden = True
         emulator = MCC2BoxEmulator(n_bus=5, n_axes=2, realtime=True)
@@ -416,10 +418,10 @@ class ExampleApp(QMainWindow):
             self.serial_emulation = True
         else:
             self.Box = MCC2BoxSerial(self.PortBox.currentText(), input_file=input_file)
-        try:
-            self.Box.read_saved_motors_data()
-        except FileNotFoundError:
-            pass
+        # try:
+        #     self.Box.read_saved_motors_data()
+        # except FileNotFoundError:
+        #     pass
 
         self.Motoren_Namen_laden()
         self.KalibrBtn.setEnabled(True)
@@ -434,13 +436,13 @@ class ExampleApp(QMainWindow):
         QMessageBox.information(self, "Verbindung abgeschlossen!",
                                 self.Box.report)
 
-    def Position_lesen(self, single_shot = False):
+    def Position_lesen(self, single_shot=False):
         if self.Position_erneuern:
             self.Position = self.Motor.position(self.units)
             self.Position_NE = self.Motor.position()
             # print(__position)
-            self.AktPosEdit1.setText(str(round(self.Position,4)))
-            if not self.Motor.without_initiators():
+            self.AktPosEdit1.setText(str(round(self.Position, 4)))
+            if self.Motor.with_initiators():
                 self.horizontalScrollBar1.setValue(int(self.Position_NE))
         if not single_shot:
             QtCore.QTimer.singleShot(100, self.Position_lesen)
@@ -467,7 +469,6 @@ class ExampleApp(QMainWindow):
         self.KalibrBtn.setText("Kalibrierung")
         self.StatusBar.showMessage("Kalibrierung wurde unterbrochen")
 
-
     def Kalibrierung(self):
 
         if not self.Kal_in_Lauf:
@@ -488,7 +489,7 @@ class ExampleApp(QMainWindow):
             self.Kal_Thread.start(self.Box)
             print("Thr started")
 
-            #Kal_Thread(q, self.Box)
+            # Kal_Thread(q, self.Box)
 
 
         else:
@@ -508,23 +509,23 @@ class ExampleApp(QMainWindow):
         else:
             self.VerbButton.setEnabled(False)
 
-
-
-
     # QtCore.QTimer.singleShot(1000, self.weiter) # QUICKLY repeat
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setStyle('macintosh')
     form = ExampleApp()
     form.show()
     # form.update() #start with something
     app.exec_()
-    try:
+
+    if form.verbunden:
         form.Box.close()
-        print("Exit ohne Fehler")
-    except:
-        print("Exit mit Fehler")
+    # try:
+    #     form.Box.close()
+    #     print("Exit ohne Fehler")
+    # except:
+    #     print("Exit mit Fehler")
 
     print("DONE")

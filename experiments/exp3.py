@@ -19,8 +19,10 @@ ser = Serial(port, 115200, timeout=0.2)
 time.sleep(1)
 ser.flushInput()
 # ser.write(b'\x02' + b'2Y33' + b'\x03')
-ser.write(b'\x02' + b'2YP20S0' + b'\x03')
-ser.write(b'\x02' + b'2YP20R' + b'\x03')
+# ser.write(b'\x02' + b'22P20S500' + b'\x03')
+ser.write(b'\x02' + b'22S' + b'\x03')
+ser.write(b'\x02' + b'4vbsdfhj' + b'\x03')
+
 
 # ser.write(b'\x02' + b'1SA' + b'\x03')
 # # ser.write(MCC2.command_format('SA', 1))
