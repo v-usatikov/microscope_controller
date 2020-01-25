@@ -154,96 +154,80 @@ class ContrCommunicator:
     PARAMETER_DEFAULT: Dict
 
     def go(self, shift: float, bus: int, axis: int):
+        """Verschiebt den angegeben Motor um die angegebene Verschiebung."""
         raise NotImplementedError
 
     def go_to(self, destination: float, bus: int, axis: int):
+        """Schickt den angegeben Motor zur angegebene absolute Position."""
         raise NotImplementedError
 
     def stop(self, bus: int, axis: int):
+        """Stoppt den angegebenen Motor."""
         raise NotImplementedError
 
     def get_position(self, bus: int, axis: int) -> float:
+        """Gibt die Position des angegebenen Motors zurück."""
         raise NotImplementedError
 
     def set_position(self, new_position: float, bus: int, axis: int):
+        """Ändert den Wert des Positionzählers im Controller für die angegebene Achse."""
         raise NotImplementedError
 
     def get_parameter(self, parameter_name: str, bus: int, axis: int) -> float:
+        """Liest den Wert des angegebenen Parameters."""
         raise NotImplementedError
 
     def set_parameter(self, parameter_name: str, neu_value: float, bus: int, axis: int):
+        """Ändert den Wert des angegebenen Parameters."""
         raise NotImplementedError
 
     def motor_stand(self, bus: int, axis: int) -> bool:
+        """Zeigt, ob der Motor im Moment steht(True) oder fährt(False)."""
         raise NotImplementedError
 
     def motor_at_the_beg(self, bus: int, axis: int) -> bool:
+        """Zeigt, ob der Anfang-Initiator im Moment aktiviert ist."""
         raise NotImplementedError
 
     def motor_at_the_end(self, bus: int, axis: int) -> bool:
+        """Zeigt, ob der End-Initiator im Moment aktiviert ist."""
         raise NotImplementedError
 
     def read_reply(self) -> (bool, bytes):
+        """Antwort lesen, der nach einem Befehl erscheint."""
         raise NotImplementedError
 
     def bus_list(self) -> Tuple[int]:
+        """Gibt die Liste der allen verfügbaren Bus-Nummern zurück."""
         raise NotImplementedError
 
     def axes_list(self, bus: int) -> Tuple[int]:
+        """Gibt die Liste der allen verfügbaren Achsen zurück."""
         raise NotImplementedError
 
     def check_connection(self) -> (bool, bytes):
+        """Prüft ob es bei dem Com-Port tatsächlich ein Controller gibt, und gibt die Version davon zurück."""
         raise NotImplementedError
 
-    def command_to_box(self, command: bytes) -> bytes:
+    def command_to_box(self, command: bytes) -> (bool, Union[bytes, None]):
+        """Ausführt ein Befehl ohne Adressieren und gibt die Antwort zurück."""
         raise NotImplementedError
 
-    def command_to_modul(self, command: bytes, bus: int) -> bytes:
+    def command_to_modul(self, command: bytes, bus: int) -> (bool, Union[bytes, None]):
+        """Ausführt ein zum Modul adressierte Befehl und gibt die Antwort zurück."""
         raise NotImplementedError
 
-    def command_to_motor(self, command: bytes, bus: int, axis: int) -> bytes:
+    def command_to_motor(self, command: bytes, bus: int, axis: int) -> (bool, Union[bytes, None]):
+        """Ausführt ein zum Motor adressierte Befehl und gibt die Antwort zurück."""
         raise NotImplementedError
 
     def check_raw_input_data(self, raw_input_data: List[dict]) -> (bool, str):
+        """Prüft ob die rohe Daten aus der input-Datei kompatibel sind."""
         raise NotImplementedError
 
 
 M_Coord = Tuple[int, int]
 Param_Val = Dict[str, float]
-
-
-# def bus_check(bus: int, connector: Connector, timeout: float = None) -> (bool, str):
-#     """Prüft ob es bei dem Bus-Nummer ein Controller gibt, und gibt die Version davon zurück."""
-#
-#     connector.clear_buffer()
-#     connector.send(command_format("IVR", bus))
-#     try:
-#         com_reply = read_reply(connector, timeout)
-#     except ReplyError as err:
-#         logging.error(str(err))
-#         return False, str(err)
-#     # print(COM_Antwort)
-#
-#     if com_reply[0] is None:
-#         return False, None
-#     elif com_reply[0] is False:
-#         return False, 'Controller sagt, dass der "IVR" Befehl nicht ausgeführt wurde.'
-#     elif com_reply[1][0:3] == b'MCC':
-#         return True, com_reply[1]
-#     else:
-#         return False, com_reply[1]
-#
-#
-# def check_connection(connector: Connector) -> (bool, str):
-#     """Prüft ob es bei dem Com-Port tatsächlich ein Controller gibt, und gibt die Version davon zurück."""
-#     check = False
-#     for i in range(10):
-#         for j in range(4):
-#             check = bus_check(i, connector)
-#             # print(check)
-#             if check[0]:
-#                 return check
-#     return check
 
 
 def read_csv(address: str, delimiter: str = ';') -> List[dict]:
@@ -265,7 +249,7 @@ def read_csv(address: str, delimiter: str = ';') -> List[dict]:
     return data_from_file
 
 
-def __raw_saved_data_is_ok(raw_motors_data: List[dict]) -> bool:
+def __raw_saved_session_data_is_ok(raw_motors_data: List[dict]) -> bool:
     right_header = ['bus', 'axis', 'position', 'norm_per_contr', 'min_limit', 'max_limit']
     if list(raw_motors_data[0].keys()) != right_header:
         return False
@@ -291,7 +275,7 @@ def __raw_saved_data_is_ok(raw_motors_data: List[dict]) -> bool:
     return True
 
 
-def __transform_raw_saved_data(raw_motors_data: List[dict]) -> Dict[Tuple[int, int], Tuple[float, float, tuple]]:
+def __transform_raw_saved_session_data(raw_motors_data: List[dict]) -> Dict[Tuple[int, int], Tuple[float, float, tuple]]:
     transformed_motors_data = {}
     for motor_line in raw_motors_data:
         coord = (int(motor_line['bus']), int(motor_line['axis']))
@@ -307,10 +291,10 @@ def __transform_raw_saved_data(raw_motors_data: List[dict]) -> Dict[Tuple[int, i
     return transformed_motors_data
 
 
-def read_saved_motors_data_from_file(address: str = 'data/saved_motors_data.csv'):
+def read_saved_session_data_from_file(address: str = 'data/saved_session_data.csv'):
     raw_data = read_csv(address)
-    if __raw_saved_data_is_ok(raw_data):
-        return __transform_raw_saved_data(raw_data)
+    if __raw_saved_session_data_is_ok(raw_data):
+        return __transform_raw_saved_session_data(raw_data)
     else:
         raise FileReadError('Die gelesene Data ist defekt oder inkompatibel!')
 
@@ -405,6 +389,55 @@ class CalibrationReporter:
         raise NotImplementedError
 
 
+class Controller:
+    """Diese Klasse entspricht einem MCC-2 Controller"""
+
+    def __init__(self, communicator: ContrCommunicator, bus: int):
+
+        self.communicator = communicator
+        self.bus = bus
+        self.motor: Dict[int, Motor] = {}
+
+    def __iter__(self):
+        return (motor for motor in self.motor.values())
+
+    def command(self, command: bytes) -> (bool, bytes):
+        """Befehl für den Controller ausführen"""
+        return self.communicator.command_to_modul(command, self.bus)
+
+    # def save_parameters_in_eprom(self):
+    #     """Speichert die aktuelle Parametern in Flash EPROM des Controllers"""
+    #     reply = self.command("SA", timeout=5)
+    #     if reply[0] is False:
+    #         raise ConnectError("Hat nicht geklappt Parametern in Controller-Speicher zu sichern.")
+
+    def motors_stand(self) -> bool:
+        """Gibt zurück der Status der Motoren, ob die Motoren in Lauf sind."""
+        for motor in self:
+            if not motor.stand():
+                return False
+        return True
+
+    def wait_stop(self):
+        """Haltet die programme, bis die Motoren stoppen."""
+        while not self.motors_stand():
+            time.sleep(0.5)
+
+    def make_motors(self):
+        """erstellt Objekten für alle verfügbare Motoren"""
+        axes_list = self.communicator.axes_list(self.bus)
+        self.motor = {}
+        for i in axes_list:
+            self.motor[i] = Motor(self, i)
+        logging.info(
+            f'Controller hat {len(axes_list)} Motor Objekten für alle verfügbare Achsen erstellt, nämlich {axes_list}.')
+
+    def stop(self):
+        """Stoppt alle Achsen des Controllers"""
+        for motor in self:
+            motor.stop()
+
+
 class Motor:
     """Diese Klasse entspricht einem Motor, der mit einem MCC-2 Controller verbunden ist."""
     DEFAULT_MOTOR_CONFIG = {'with_initiators': 0,
@@ -415,10 +448,9 @@ class Motor:
                             'null_position': 0.0,  # Position von Anfang in Controller Einheiten
                             }
 
-    def __init__(self, controller, axis: int):
-        self.controller: Controller = controller
-        self.box = self.controller.box
-        self.communicator = self.box.communicator
+    def __init__(self, controller: Controller, axis: int):
+        self.controller = controller
+        self.communicator = self.controller.communicator
         self.axis = axis
 
         self.name = 'Motor' + str(self.controller.bus) + "." + str(self.axis)
@@ -650,56 +682,6 @@ class Motor:
             logging.error(f'Motor {self.name} hat keine Initiators und kann nicht kalibriert werden!')
 
 
-class Controller:
-    """Diese Klasse entspricht einem MCC-2 Controller"""
-
-    def __init__(self, box, bus: int):
-
-        self.box: Box = box
-        self.communicator = self.box.communicator
-        self.bus = bus
-        self.motor: Dict[int, Motor] = {}
-
-    def __iter__(self):
-        return (motor for motor in self.motor.values())
-
-    def command(self, command: bytes) -> (bool, bytes):
-        """Befehl für den Controller ausführen"""
-        return self.communicator.command_to_modul(command, self.bus)
-
-    # def save_parameters_in_eprom(self):
-    #     """Speichert die aktuelle Parametern in Flash EPROM des Controllers"""
-    #     reply = self.command("SA", timeout=5)
-    #     if reply[0] is False:
-    #         raise ConnectError("Hat nicht geklappt Parametern in Controller-Speicher zu sichern.")
-
-    def motors_stand(self) -> bool:
-        """Gibt zurück der Status der Motoren, ob die Motoren in Lauf sind."""
-        for motor in self:
-            if not motor.stand():
-                return False
-        return True
-
-    def wait_stop(self):
-        """Haltet die programme, bis die Motoren stoppen."""
-        while not self.motors_stand():
-            time.sleep(0.5)
-
-    def make_motors(self):
-        """erstellt Objekten für alle verfügbare Motoren"""
-        axes_list = self.communicator.axes_list(self.bus)
-        self.motor = {}
-        for i in axes_list:
-            self.motor[i] = Motor(self, i)
-        logging.info(
-            f'Controller hat {len(axes_list)} Motor Objekten für alle verfügbare Achsen erstellt, nämlich {axes_list}.')
-
-    def stop(self):
-        """Stoppt alle Achsen des Controllers"""
-        for motor in self:
-            motor.stop()
-
-
 class Box:
     """Diese Klasse entspricht einem Box mit einem oder mehreren MCC-2 Controller"""
 
@@ -730,7 +712,7 @@ class Box:
 
         self.controller = {}
         for i in self.communicator.bus_list():
-            self.controller[i] = Controller(self, i)
+            self.controller[i] = Controller(self.communicator, i)
 
         for controller in self:
             controller.make_motors()
@@ -761,7 +743,7 @@ class Box:
         bus_list = self.communicator.bus_list()
         for bus in controllers_to_init:
             if bus in bus_list:
-                self.controller[bus] = Controller(self, bus)
+                self.controller[bus] = Controller(self.communicator, bus)
                 n_controllers += 1
             else:
                 if bus not in absent_bus:
@@ -820,15 +802,12 @@ class Box:
                     running_motors.append(motor.name)
         return running_motors
 
-    def wait_all_motors_stop(self, stop_indicator: Union[StopIndicator, None] = None,
-                             reporter: Union[CalibrationReporter, None] = None):
+    def wait_all_motors_stop(self, stop_indicator: Union[StopIndicator, None] = None):
         """Haltet die programme, bis alle Motoren stoppen."""
         while not self.all_motors_stand():
             if stop_indicator is not None:
                 if stop_indicator.has_stop_requested():
                     return
-            if reporter is not None:
-                reporter.motor_is_done(self.names_from_running_motors())
             time.sleep(0.5)
 
     def set_parameters(self, motors_config: Dict[M_Coord, Param_Val]):
@@ -985,7 +964,7 @@ class Box:
     #     else:
     #         logging.info(f'Kalibrierung von Motoren {list_to_calibration} wurde abgeschlossen.')
 
-    def save_data(self, address: str = "data/saved_motors_data.txt"):
+    def save_session_data(self, address: str = "data/saved_session_data.txt"):
         """Sichert die aktuelle Positionen der Motoren in einer Datei"""
 
         def make_csv_row(list_to_convert: list) -> str:
@@ -994,7 +973,7 @@ class Box:
 
         # Bevor die Datei geändert wurde, die Data daraus sichern.
         try:
-            saved_data = read_saved_motors_data_from_file(address)
+            saved_data = read_saved_session_data_from_file(address)
         except FileNotFoundError:
             saved_data = {}
 
@@ -1019,9 +998,9 @@ class Box:
         f.close()
         logging.info(f'Kalibrierungsdaten für  Motoren {self.motors_list()} wurde gespeichert.')
 
-    def read_saved_motors_data(self, address: str = "data/saved_motors_data.txt"):
+    def read_saved_motors_data(self, address: str = "data/saved_session_data.txt"):
         """Liest die gesicherte Positionen der Motoren aus einer Datei"""
-        saved_data = read_saved_motors_data_from_file(address)
+        saved_data = read_saved_session_data_from_file(address)
         list_to_calibration = []
         success_list = []
 
@@ -1112,7 +1091,7 @@ class Box:
     def close(self, data_folder: str = 'data/'):
         """Alle nötige am Ende der Arbeit Operationen ausführen."""
         self.stop()
-        self.save_data(address=data_folder + 'saved_motors_data.txt')
+        self.save_session_data(address=data_folder + 'saved_motors_data.txt')
         del self
 
 

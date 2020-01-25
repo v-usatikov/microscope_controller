@@ -34,92 +34,71 @@ class MCC2Communicator(ContrCommunicator):
         self.connector.end_symbol = b"\x03"
 
     def go(self, shift: float, bus: int, axis: int):
-        self.__mutex.acquire()
-        command = self.__prefix(bus, axis) + str(shift).encode()
-        self.connector.send(command)
-        self.__check_command_result(self.read_reply())
-        self.__mutex.release()
+        """Verschiebt den angegeben Motor um die angegebene Verschiebung."""
+
+        command = str(shift).encode()
+        self.command_without_reply(command, bus, axis)
 
     def go_to(self, destination: float, bus: int, axis: int):
-        self.__mutex.acquire()
-        command = self.__prefix(bus, axis) + "A".encode() + str(destination).encode()
-        self.connector.send(command)
-        self.__check_command_result(self.read_reply())
-        self.__mutex.release()
+        """Schickt den angegeben Motor zur angegebene absolute Position."""
+
+        command = f"A{destination}".encode()
+        self.command_without_reply(command, bus, axis)
 
     def stop(self, bus: int, axis: int):
-        self.__mutex.acquire()
-        command = self.__prefix(bus, axis) + "S".encode()
-        self.connector.send(command)
-        self.__check_command_result(self.read_reply())
-        self.__mutex.release()
+        """Stoppt den angegebenen Motor."""
+
+        command = b"S"
+        self.command_without_reply(command, bus, axis)
 
     def get_position(self, bus: int, axis: int) -> float:
-        self.__mutex.acquire()
-        command = self.__prefix(bus, axis) + f"P20R".encode()
-        self.connector.send(command)
-        reply = self.read_reply()
+        """Gibt die Position des angegebenen Motors zurück."""
 
-        to_return = self.__get_float_reply(reply)
-        self.__mutex.release()
-        return to_return
+        command = b"P20R"
+        return self.command_with_float_reply(command, bus, axis)
 
     def set_position(self, new_position: float, bus: int, axis: int):
-        self.__mutex.acquire()
-        command = self.__prefix(bus, axis) + f"P20S{new_position}".encode()
-        self.connector.send(command)
-        self.__check_command_result(self.read_reply())
-        self.__mutex.release()
+        """Ändert den Wert des Positionzählers im Controller für die angegebene Achse."""
+
+        command = f"P20S{new_position}".encode()
+        self.command_without_reply(command, bus, axis)
 
     def get_parameter(self, parameter_name: str, bus: int, axis: int) -> float:
-        self.__mutex.acquire()
+        """Liest den Wert des angegebenen Parameters."""
+
         param_number = self.PARAMETER_NUMBER[parameter_name]
-        command = self.__prefix(bus, axis) + f"P{param_number}R".encode()
-        self.connector.send(command)
-        reply = self.read_reply()
-        to_return = self.__get_float_reply(reply)
-        self.__mutex.release()
-        return to_return
+        command = f"P{param_number}R".encode()
+        return self.command_with_float_reply(command, bus, axis)
 
     def set_parameter(self, parameter_name: str, neu_value: float, bus: int, axis: int):
-        self.__mutex.acquire()
+        """Ändert den Wert des angegebenen Parameters."""
+
         param_number = self.PARAMETER_NUMBER[parameter_name]
-        command = self.__prefix(bus, axis) + f"P{param_number}S{neu_value}".encode()
-        self.connector.send(command)
-        self.__check_command_result(self.read_reply())
-        self.__mutex.release()
+        command = f"P{param_number}S{neu_value}".encode()
+        self.command_without_reply(command, bus, axis)
 
     def motor_stand(self, bus: int, axis: int) -> bool:
-        self.__mutex.acquire()
-        command = self.__prefix(bus, axis) + '=H'.encode()
-        self.connector.send(command)
-        reply = self.read_reply()
-        to_return = self.__get_bool_reply(reply)
-        self.__mutex.release()
-        return to_return
+        """Zeigt, ob der Motor im Moment steht(True) oder fährt(False)."""
+
+        command = b'=H'
+        return self.command_with_bool_reply(command, bus, axis)
 
     def motor_at_the_beg(self, bus: int, axis: int) -> bool:
-        self.__mutex.acquire()
-        command = self.__prefix(bus, axis) + '=I-'.encode()
-        self.connector.send(command)
-        reply = self.read_reply()
-        to_return = self.__get_bool_reply(reply)
-        self.__mutex.release()
-        return to_return
+        """Zeigt, ob der Anfang-Initiator im Moment aktiviert ist."""
+
+        command = b'=I-'
+        return self.command_with_bool_reply(command, bus, axis)
 
     def motor_at_the_end(self, bus: int, axis: int) -> bool:
-        self.__mutex.acquire()
-        command = self.__prefix(bus, axis) + '=I+'.encode()
-        self.connector.send(command)
-        reply = self.read_reply()
-        to_return = self.__get_bool_reply(reply)
-        self.__mutex.release()
-        return to_return
+        """Zeigt, ob der End-Initiator im Moment aktiviert ist."""
+
+        command = b'=I+'
+        return self.command_with_bool_reply(command, bus, axis)
 
     def read_reply(self) -> (bool, Union[bytes, None]):
         """Antwort lesen, der nach einem Befehl erscheint."""
-        reply = self.connector.read()
 
+        reply = self.connector.read()
         if reply is None:
             return None, None
         elif reply[:1] == b'\x06':
@@ -130,6 +109,8 @@ class MCC2Communicator(ContrCommunicator):
             raise ReplyError(f'Unerwartete Antwort vom Controller: {reply[1]}')
 
     def bus_list(self) -> Tuple[int]:
+        """Gibt die Liste der allen verfügbaren Bus-Nummern zurück."""
+
         bus_list = []
         for i in range(5):
             for j in range(4):
@@ -145,16 +126,15 @@ class MCC2Communicator(ContrCommunicator):
         return tuple(bus_list)
 
     def axes_list(self, bus: int) -> Tuple[int]:
-        self.__mutex.acquire()
-        command = self.__contr_prefix(bus) + "IAR".encode()
-        self.connector.send(command)
-        reply = self.read_reply()
-        n_axes = int(self.__get_float_reply(reply))
-        self.__mutex.release()
+        """Gibt die Liste der allen verfügbaren Achsen zurück."""
+
+        command = b"IAR"
+        n_axes = int(self.command_with_float_reply(command, bus))
         return tuple(range(1, n_axes+1))
 
     def check_connection(self) -> (bool, bytes):
         """Prüft ob es bei dem Com-Port tatsächlich ein Controller gibt, und gibt die Version davon zurück."""
+
         check = False
         for i in range(15):
             for j in range(4):
@@ -164,32 +144,40 @@ class MCC2Communicator(ContrCommunicator):
                     return check
         return check
 
-    def command_to_box(self, command: bytes) -> bytes:
+    def command_to_box(self, command: bytes) -> (bool, Union[bytes, None]):
+        """Ausführt ein Befehl ohne Adressieren und gibt die Antwort zurück."""
+
         self.__mutex.acquire()
         self.connector.send(command)
-        reply = self.connector.read()
+        reply = self.read_reply()
         self.__mutex.release()
         return reply
 
-    def command_to_modul(self, command: bytes, bus: int) -> bytes:
-        self.__mutex.acquire()
+    def command_to_modul(self, command: bytes, bus: int) -> (bool, Union[bytes, None]):
+        """Ausführt ein zum Modul adressierte Befehl und gibt die Antwort zurück."""
+
         command = self.__contr_prefix(bus) + command
-        self.connector.send(command)
-        reply = self.connector.read()
-        self.__mutex.release()
-        return reply
+        return self.command_to_box(command)
 
-    def command_to_motor(self, command: bytes, bus: int, axis: int) -> bytes:
-        self.__mutex.acquire()
-        command = self.__prefix(bus, axis) + command
-        self.connector.send(command)
-        reply = self.connector.read()
-        self.__mutex.release()
-        return reply
+    def command_to_motor(self, command: bytes, bus: int, axis: int) -> (bool, Union[bytes, None]):
+        """Ausführt ein zum Motor adressierte Befehl und gibt die Antwort zurück."""
 
+        command = self.__axis_prefix(axis) + command
+        return self.command_to_modul(command, bus)
+
+    def command(self, command: bytes, bus: int, axis: int = None) -> (bool, Union[bytes, None]):
+        """Ausführt ein Befehl für Motor oder für Controller und gibt die Antwort zurück."""
+
+        if axis is None:
+            return self.command_to_modul(command, bus)
+        else:
+            return self.command_to_motor(command, bus, axis)
+
+    # TODO schreiben check_raw_input_data zu Ende
     def check_raw_input_data(self, raw_input_data: List[dict]) -> (bool, str):
-        for motor_line in raw_input_data:
+        """Prüft ob die rohe Daten aus der input-Datei kompatibel sind."""
 
+        for motor_line in raw_input_data:
             init_status = motor_line['Mit Initiatoren(0 oder 1)']
             message = f'"Mit Initiatoren" muss 0 oder 1 sein, und kein "{init_status}"'
             if init_status != '':
@@ -212,16 +200,13 @@ class MCC2Communicator(ContrCommunicator):
 
     def bus_check(self, bus: int) -> (bool, str):
         """Prüft ob es bei dem Bus-Nummer ein Controller gibt, und gibt die Version davon zurück."""
-        self.__mutex.acquire()
-        command = self.__contr_prefix(bus) + "IVR".encode()
-        self.connector.send(command)
+
         try:
-            reply = self.read_reply()
+            command = b"IVR"
+            reply = self.command_to_modul(command, bus)
         except ReplyError as err:
             logging.error(str(err))
             return False, str(err)
-
-        self.__mutex.release()
 
         if reply[0] is None:
             return False, None
@@ -232,8 +217,32 @@ class MCC2Communicator(ContrCommunicator):
         else:
             return False, reply[1]
 
+    def command_with_float_reply(self, command: bytes, bus: int, axis: int = None) -> float:
+        """Ausführt ein Befehl mit einer erwarteten Fließkommazahl-Antwort
+        und gibt die erhaltene Fließkommazahl zurück.
+        """
+
+        reply = self.command(command, bus, axis)
+        return self.__transform_float_reply(reply)
+
+    def command_with_bool_reply(self, command: bytes, bus: int, axis: int = None) -> bool:
+        """Ausführt ein Befehl mit einer erwarteten bool Antwort
+        und gibt den erhaltenen bool Wert zurück.
+        """
+
+        reply = self.command(command, bus, axis)
+        return self.__transform_bool_reply(reply)
+
+    def command_without_reply(self, command: bytes, bus: int, axis: int = None):
+        """Ausführt ein Befehl ohne erwartete Antwort."""
+
+        reply = self.command(command, bus, axis)
+        self.__check_command_result(reply)
+
     @staticmethod
     def __check_command_result(reply: Tuple[bool, Union[bytes, None]]):
+        """Prüft die Antwort vom Controller für ein Befehl ohne erwartete Antwort."""
+
         if reply[0] is None:
             raise ReplyError('Der Controller antwortet nicht!')
         elif reply[0] is False:
@@ -243,7 +252,10 @@ class MCC2Communicator(ContrCommunicator):
                 raise ReplyError(f'Unerwartete Antwort vom Controller: {reply[1]}!')
 
     @staticmethod
-    def __get_float_reply(reply: Tuple[bool, Union[bytes, None]]) -> float:
+    def __transform_float_reply(reply: Tuple[bool, Union[bytes, None]]) -> float:
+        """Prüft die Antwort vom Controller und kriegt die enthaltene Fließkommazahl heraus.
+        """
+
         if reply[0] is None:
             raise ReplyError('Der Controller antwortet nicht!')
         elif reply[0] is False:
@@ -255,7 +267,10 @@ class MCC2Communicator(ContrCommunicator):
                 raise ReplyError(f'Unerwartete Antwort vom Controller: {reply}!')
 
     @staticmethod
-    def __get_bool_reply(reply: Tuple[bool, Union[bytes, None]]) -> bool:
+    def __transform_bool_reply(reply: Tuple[bool, Union[bytes, None]]) -> bool:
+        """Prüft die Antwort vom Controller und kriegt den enthaltenen boll Wert heraus.
+        """
+
         if reply[0] is None:
             raise ReplyError('Der Controller antwortet nicht!')
         elif reply[0] is False:
@@ -269,18 +284,19 @@ class MCC2Communicator(ContrCommunicator):
 
     @staticmethod
     def __contr_prefix(bus: int) -> bytes:
+        """Gibt ein Präfix zurück, das einen Befehl an den gewünschten Controller adressiert."""
+
         if bus > 15 or bus < 0:
             raise ValueError(f'bus muss ein Wert zwischen 0 und 15 haben und kein {bus}')
         return f'{bus:x}'.encode()
 
     @staticmethod
     def __axis_prefix(axis: int) -> bytes:
+        """Gibt ein Teil des Präfixes zurück, das einen Befehl an die gewünschte Achse adressiert."""
+
         if axis > 9 or axis < 0:
             raise ValueError(f'axis muss ein Wert zwischen 0 und 9 haben und kein {axis}')
         return str(axis).encode()
-
-    def __prefix(self, bus: int, axis: int) -> bytes:
-        return self.__contr_prefix(bus) + self.__axis_prefix(axis)
 
 
 # noinspection PyPep8Naming
@@ -315,18 +331,28 @@ class MCC2BoxEmulator(SerialEmulator, ContrCommunicator):
         self.buffer: bytes = b''
 
     def go(self, shift: float, bus: int, axis: int):
+        """Verschiebt den angegeben Motor um die angegebene Verschiebung."""
+
         self.__get_motor(bus, axis).go(shift)
 
     def go_to(self, destination: float, bus: int, axis: int):
+        """Schickt den angegeben Motor zur angegebene absolute Position."""
+
         self.__get_motor(bus, axis).go_to(destination)
 
     def stop(self, bus: int, axis: int):
+        """Stoppt den angegebenen Motor."""
+
         self.__get_motor(bus, axis).stop()
 
     def get_position(self, bus: int, axis: int) -> float:
+        """Gibt die Position des angegebenen Motors zurück."""
+
         return self.__get_motor(bus, axis).get_position()
 
     def set_position(self, new_position: float, bus: int, axis: int):
+        """Ändert den Wert des Positionzählers im Controller für die angegebene Achse."""
+
         self.__get_motor(bus, axis).set_position(new_position)
 
     def get_parameter(self, parameter_name: str, bus: int, axis: int) -> float:

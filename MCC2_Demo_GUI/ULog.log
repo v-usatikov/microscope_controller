@@ -2229,3 +2229,35 @@ Controller 4 (2 Achsen)
 2020-01-20 23:19:06,867  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
 2020-01-20 23:19:06,869  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
 2020-01-20 23:19:06,885  MotorControllerInterface  save_data  [INFO]  Kalibrierungsdaten für  Motoren ((0, 1), (1, 1), (1, 2), (2, 1), (2, 2)) wurde gespeichert.
+2020-01-20 23:25:11,105  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-20 23:25:13,199  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor MirrorX wurde angefangen.
+2020-01-20 23:25:13,199  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor Fokus wurde angefangen.
+2020-01-20 23:25:13,199  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor TestMotor wurde angefangen.
+2020-01-20 23:25:13,203  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um 500000.0 verschoben. 
+2020-01-20 23:25:13,207  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-20 23:25:13,213  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-01-20 23:25:24,344  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-20 23:25:35,459  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor TestMotor wurde abgeschlossen.
+2020-01-20 23:25:52,113  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. 
+2020-01-20 23:26:15,334  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-01-20 23:26:35,029  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor MirrorX wurde abgeschlossen.
+2020-01-20 23:27:22,361  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor Fokus wurde abgeschlossen.
+2020-01-20 23:27:22,361  MotorControllerInterface  calibrate_motors  [INFO]  Kalibrierung von allen Motoren wurde abgeschlossen.
+2020-01-20 23:27:30,968  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 30.480811170881598 geschickt.
+2020-01-20 23:27:35,452  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-01-20 23:27:35,454  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-01-20 23:27:35,456  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-01-20 23:27:35,457  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-01-20 23:27:35,459  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-01-20 23:27:35,476  MotorControllerInterface  save_data  [INFO]  Kalibrierungsdaten für  Motoren ((0, 1), (1, 1), (1, 2), (2, 1), (2, 2)) wurde gespeichert.
+2020-01-20 23:27:41,689  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-01-20 23:27:55,729  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 50.0 geschickt.
+2020-01-20 23:28:04,414  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 10.0 geschickt.
+2020-01-20 23:28:05,391  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 20.0 geschickt.
+2020-01-20 23:28:17,532  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 40.0 geschickt.
+2020-01-20 23:28:24,929  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-01-20 23:28:24,930  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-01-20 23:28:24,932  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-01-20 23:28:24,933  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-01-20 23:28:24,935  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-01-20 23:28:24,950  MotorControllerInterface  save_data  [INFO]  Kalibrierungsdaten für  Motoren ((0, 1), (1, 1), (1, 2), (2, 1), (2, 2)) wurde gespeichert.
