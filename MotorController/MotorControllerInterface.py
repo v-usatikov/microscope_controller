@@ -17,11 +17,12 @@ if __name__ == '__main__':
 
 class Connector:
     """Ein Objekt, durch das die Kommunikation zwischen dem Programm und dem Controller stattfindet."""
+
     beg_symbol: bytes
     end_symbol: bytes
 
-    def mess_format(self, mess: bytes) -> bytes:
-        return self.beg_symbol + mess + self.end_symbol
+    def message_format(self, message: bytes) -> bytes:
+        return self.beg_symbol + message + self.end_symbol
 
     def reply_format(self, reply: bytes) -> Union[bytes, None]:
         f_reply = deepcopy(reply)
@@ -65,6 +66,7 @@ class Connector:
 
 def com_list() -> List[str]:
     """Gibt eine Liste der verfügbaren COM-Ports"""
+
     comlist = serial.tools.list_ports.comports()
     n_list = []
     for element in comlist:
@@ -74,6 +76,7 @@ def com_list() -> List[str]:
 
 class SerialEmulator:
     """Interface für eine Emulation von einer Serial-Verbindung."""
+
     timeout: float = 0
 
     def write(self, command: bytes):
@@ -89,6 +92,7 @@ class SerialEmulator:
 
 class SerialConnector(Connector):
     """Connector Objekt für eine Verbindung durch Serial Port."""
+
     def __init__(self,
                  port: str = '',
                  beg_symbol: bytes = b'',
@@ -107,24 +111,29 @@ class SerialConnector(Connector):
 
     def send(self, message: bytes, clear_buffer=True):
         """Schickt ein Nachricht zum Controller."""
+
         if clear_buffer:
             self.clear_buffer()
-        self.ser.write(self.mess_format(message))
+        self.ser.write(self.message_format(message))
 
     def read(self) -> bytes:
         """Liest ein Nachricht von dem Controller bis zum bestimmten End-Symbol und gibt das zurück."""
+
         return self.reply_format(self.ser.read_until(self.end_symbol))
 
     def clear_buffer(self):
         """Löscht alle vorher empfangene information aus Buffer"""
+
         self.ser.flushInput()
 
     def set_timeout(self, timeout: float):
         """Einstellt das Time-out"""
+
         self.ser.timeout = timeout
 
     def get_timeout(self) -> float:
         """Gibt den Wert des Time-outs zurück"""
+
         return self.ser.timeout
 
 
@@ -232,6 +241,7 @@ Param_Val = Dict[str, float]
 
 def read_csv(address: str, delimiter: str = ';') -> List[dict]:
     """Liest CSV-Datei, und gibt die Liste von Dicts für jede Reihe."""
+
     with open(address, newline='') as config_file:
         csv.register_dialect('my', delimiter=delimiter)
         data_from_file = list(csv.DictReader(config_file, dialect='my'))
@@ -275,7 +285,9 @@ def __raw_saved_session_data_is_ok(raw_motors_data: List[dict]) -> bool:
     return True
 
 
-def __transform_raw_saved_session_data(raw_motors_data: List[dict]) -> Dict[Tuple[int, int], Tuple[float, float, tuple]]:
+def __transform_raw_saved_session_data(raw_motors_data: List[dict])\
+        -> Dict[Tuple[int, int], Tuple[float, float, tuple]]:
+
     transformed_motors_data = {}
     for motor_line in raw_motors_data:
         coord = (int(motor_line['bus']), int(motor_line['axis']))
@@ -364,10 +376,6 @@ def read_input_config_from_file(communicator: ContrCommunicator, address: str = 
     return controllers_to_init, motors_to_init, motors_config, motors_parameters
 
 
-class PTranslator:
-    """Diese Klasse beschreibt die Sprache, die man braucht^ um mit MCC2 Controller zu kommunizieren."""
-
-
 class StopIndicator:
     """Durch dieses Objekt kann man Erwartung von dem Stop von allen Motoren abbrechen.
     Es wird als argument für PBox.wait_all_motors_stop() verwendet."""
@@ -403,6 +411,7 @@ class Controller:
 
     def command(self, command: bytes) -> (bool, bytes):
         """Befehl für den Controller ausführen"""
+
         return self.communicator.command_to_modul(command, self.bus)
 
     # def save_parameters_in_eprom(self):
@@ -413,6 +422,7 @@ class Controller:
 
     def motors_stand(self) -> bool:
         """Gibt zurück der Status der Motoren, ob die Motoren in Lauf sind."""
+
         for motor in self:
             if not motor.stand():
                 return False
@@ -420,11 +430,13 @@ class Controller:
 
     def wait_stop(self):
         """Haltet die programme, bis die Motoren stoppen."""
+
         while not self.motors_stand():
             time.sleep(0.5)
 
     def make_motors(self):
-        """erstellt Objekten für alle verfügbare Motoren"""
+        """Erstellt Objekten für alle verfügbare Motoren"""
+
         axes_list = self.communicator.axes_list(self.bus)
         self.motor = {}
         for i in axes_list:
@@ -434,12 +446,14 @@ class Controller:
 
     def stop(self):
         """Stoppt alle Achsen des Controllers"""
+
         for motor in self:
             motor.stop()
 
 
 class Motor:
     """Diese Klasse entspricht einem Motor, der mit einem MCC-2 Controller verbunden ist."""
+
     DEFAULT_MOTOR_CONFIG = {'with_initiators': 0,
                             'display_units': 'Schritte',
                             'norm_per_contr': 1.0,
@@ -461,14 +475,17 @@ class Motor:
 
     def coord(self) -> (int, int):
         """Gibt die Koordinaten des Motors zurück"""
+
         return self.controller.bus, self.axis
 
     def with_initiators(self) -> bool:
         """Zeigt ob der Motor mit Initiatoren ist."""
+
         return bool(self.config['with_initiators'])
 
     def set_parameters(self, parameters_values: Dict[str, float] = None):
         """Die Parametern einstellen laut angegebene Dict mit Parameterwerten"""
+
         # Parameter_Werte = {'Lauffrequenz': 4000, 'Stoppstrom': 5, 'Laufstrom': 11, 'Booststrom': 18}
 
         if parameters_values is None:
@@ -479,6 +496,7 @@ class Motor:
 
     def set_config(self, motor_config: dict = None):
         """Einstellt Name, Initiatoren Status, display_units, display_u_per_step anhand angegebene Dict"""
+
         if motor_config is None:
             self.config = deepcopy(self.DEFAULT_MOTOR_CONFIG)
         else:
@@ -493,6 +511,7 @@ class Motor:
 
     def get_parameters(self) -> Dict[str, float]:
         """Liest die Parametern aus Controller und gibt zurück Dict mit Parameterwerten"""
+
         parameters_values = {}
         for par_name in self.communicator.PARAMETER_DEFAULT.keys():
             parameter_value = self.read_parameter(par_name)
@@ -501,6 +520,7 @@ class Motor:
 
     def transform_units(self, value: float, current_u: str, to: str, rel: bool = False) -> float:
         """Transformiert einen Wert in andere Einheiten."""
+
         units_list = ["norm", "displ", "contr"]
         if current_u not in units_list:
             raise ValueError(f'Unbekante Einheiten! {units_list} wurde erwartet und kein: "{current_u}".')
@@ -550,6 +570,7 @@ class Motor:
 
     def set_display_null(self, displ_null: float = None):
         """Anzeiger Null in Normierte Einheiten einstellen"""
+
         if displ_null is None:
             self.config['displ_null'] = self.position()
         else:
@@ -557,10 +578,12 @@ class Motor:
 
     def soft_limits_einstellen(self, soft_limits: Tuple[float, float], units: str = 'norm'):
         """soft limits einstellen"""
+
         self.soft_limits = tuple(map(lambda val: self.transform_units(val, units, to='norm'), soft_limits))
 
     def go_to(self, destination: float, units: str = 'norm'):
         """Bewegt den motor zur absoluten __position, die als destination gegeben wird."""
+
         destination = float(destination)
         destination = self.transform_units(destination, units, to='norm')
 
@@ -583,6 +606,7 @@ class Motor:
 
     def go(self, shift: float, units: str = 'norm', calibrate: bool = False):
         """Bewegt den motor relativ um gegebener Verschiebung."""
+
         shift = float(shift)
         if self.soft_limits != (None, None) and not calibrate:
             shift = self.transform_units(shift, units, to='norm')
@@ -596,15 +620,18 @@ class Motor:
 
     def stop(self):
         """Stoppt die Achse"""
+
         self.communicator.stop(*self.coord())
         logging.info(f'Motor {self.axis} beim Controller {self.controller.bus} wurde gestoppt.')
 
     def stand(self):
         """Gibt zurück bool Wert ob Motor steht"""
+
         return self.communicator.motor_stand(*self.coord())
 
     def wait_motor_stop(self, stop_indicator: Union[StopIndicator, None] = None):
         """Haltet die programme, bis alle Motoren stoppen."""
+
         while not self.stand():
             if stop_indicator is not None:
                 if stop_indicator.has_stop_requested():
@@ -613,23 +640,28 @@ class Motor:
 
     def command(self, text):
         """Befehl für den Motor ausführen"""
+
         return self.communicator.command_to_motor(text, *self.coord())
 
     def read_parameter(self, parameter_name: str) -> float:
         """Liest einen Parameter Nummer number für die Achse"""
+
         return self.communicator.get_parameter(parameter_name, *self.coord())
 
     def set_parameter(self, parameter_name: str, new_value: float):
         """Ändert einen Parameter Nummer number für die Achse"""
+
         self.communicator.set_parameter(parameter_name, new_value, *self.coord())
 
     def position(self, units: str = 'norm') -> float:
         """Gibt die aktuelle __position zurück"""
+
         position = self.communicator.get_position(*self.coord())
         return self.transform_units(position, 'contr', to=units)
 
     def at_the_end(self):
         """Gibt zurück einen bool Wert, ob der End-Initiator aktiviert ist."""
+
         return self.communicator.motor_at_the_end(*self.coord())
 
     def at_the_beginning(self):
@@ -638,16 +670,19 @@ class Motor:
 
     def set_position(self, position: float, units: str = 'norm'):
         """Ändern die Zähler der aktuelle Position zu angegebenen Wert"""
+
         position = float(position)
         self.communicator.set_position(self.transform_units(position, units, to='contr'), *self.coord())
         logging.info(f'__position wurde eingestellt. ({position})')
 
     def set_displ_null(self):
         """Einstellt die aktuelle __position als null"""
+
         self.config['displ_null'] = self.position(units='norm')
 
     def calibrate(self, stop_indicator: StopIndicator = None, reporter: CalibrationReporter = None):
         """Kalibrierung von den gegebenen Motoren"""
+
         if self.with_initiators():
             logging.info(f'Kalibrierung vom Motor {self.name} wurde angefangen.')
 
@@ -701,10 +736,12 @@ class Box:
 
     def command(self, text: bytes) -> bytes:
         """Befehl für die Box ausführen"""
+
         return self.communicator.command_to_box(text)
 
     def initialize(self):
         """Sucht und macht Objekte für alle verfügbare Controller und Motoren. Gibt ein Bericht zurück."""
+
         logging.info('Box Initialisierung wurde gestartet.')
 
         report = ""
@@ -728,6 +765,7 @@ class Box:
 
     def initialize_with_input_file(self, config_file: str = 'input/Phytron_Motoren_config.csv'):
         """Sucht und macht Objekte für alle verfügbare Controller und Motoren. Gibt ein Bericht zurück."""
+
         logging.info('Box Initialisierung wurde gestartet.')
 
         report = ""
@@ -782,12 +820,14 @@ class Box:
 
     def set_motors_config(self, motors_config: Dict[M_Coord, dict]):
         """Einstellt Name, Initiatoren Status, display_units, AE_in_Schritt der Motoren anhand angegebene Dict"""
+
         for motor_coord, motor_config in motors_config.items():
             motor = self.get_motor(motor_coord)
             motor.set_config(motor_config)
 
     def all_motors_stand(self) -> bool:
         """Gibt bool Wert zurück, ob alle Motoren stehen."""
+
         for controller in self:
             if not controller.motors_stand():
                 return False
@@ -795,6 +835,7 @@ class Box:
 
     def names_from_running_motors(self):
         """Gibt eine Liste der Namen von den im Moment laufenden Motoren zurück."""
+
         running_motors = []
         for controller in self:
             for motor in controller:
@@ -804,6 +845,7 @@ class Box:
 
     def wait_all_motors_stop(self, stop_indicator: Union[StopIndicator, None] = None):
         """Haltet die programme, bis alle Motoren stoppen."""
+
         while not self.all_motors_stand():
             if stop_indicator is not None:
                 if stop_indicator.has_stop_requested():
@@ -812,6 +854,7 @@ class Box:
 
     def set_parameters(self, motors_config: Dict[M_Coord, Param_Val]):
         """Die Parametern einstellen laut angegebene Dict in Format {(bus, Achse) : Parameterwerte,}"""
+
         available_motors = self.motors_list()
         for motor_coord, param_values in motors_config.items():
             if motor_coord in available_motors:
@@ -821,6 +864,7 @@ class Box:
 
     def get_parameters(self) -> Dict[M_Coord, Param_Val]:
         """Liest die Parametern aus Controller und gibt zurück Dict mit Parameterwerten"""
+
         motors_parameters = {}
 
         for controller in self:
@@ -831,8 +875,8 @@ class Box:
 
     def make_empty_config_file(self, address: str = 'input/Phytron_Motoren_config.csv'):
         """Erstellt eine Datei mit einer leeren Konfigurationstabelle"""
-        f = open(address, "wt")
 
+        f = open(address, "wt")
         separator = ';'
 
         # Motor liste schreiben
@@ -856,6 +900,7 @@ class Box:
 
     def __initiators(self, motors_list: List[M_Coord] = None) -> List[Tuple[bool, bool]]:
         """Gibt zurück eine Liste mit Status von den Initiatoren von allen Motoren"""
+
         if motors_list is None:
             motors_list = self.motors_list()
 
@@ -1000,6 +1045,7 @@ class Box:
 
     def read_saved_motors_data(self, address: str = "data/saved_session_data.txt"):
         """Liest die gesicherte Positionen der Motoren aus einer Datei"""
+
         saved_data = read_saved_session_data_from_file(address)
         list_to_calibration = []
         success_list = []
@@ -1025,6 +1071,7 @@ class Box:
 
     def motors_list(self) -> Tuple[M_Coord]:
         """Gibt zurück eine Liste der allen Motoren in Format: [(bus, Achse), …]"""
+
         m_list = []
         for controller in self:
             for motor in controller:
@@ -1033,6 +1080,7 @@ class Box:
 
     def motors_names_list(self) -> Tuple[str]:
         """Gibt zurück eine Liste der Namen der Motoren"""
+
         names = []
         for controller in self:
             for motor in controller:
@@ -1043,6 +1091,7 @@ class Box:
 
     def controllers_list(self) -> List[int]:
         """Gibt zurück eine Liste der allen Controllern in Format: [bus, ...]"""
+
         controllers_list = []
         for controller in self:
             controllers_list.append(controller.bus)
@@ -1050,6 +1099,7 @@ class Box:
 
     def motors_without_initiators(self) -> List[M_Coord]:
         """Gibt zurück eine Liste der allen Motoren ohne Initiatoren in Format: [(bus, Achse), …]"""
+
         motors_list = []
         for controller in self:
             for motor in controller:
@@ -1059,6 +1109,7 @@ class Box:
 
     def motors_with_initiators(self) -> List[M_Coord]:
         """Gibt zurück eine Liste der allen Motoren mit Initiatoren in Format: [(bus, Achse), …]"""
+
         motors_list = []
         for controller in self:
             for motor in controller:
@@ -1085,11 +1136,13 @@ class Box:
 
     def stop(self):
         """Stoppt alle Achsen"""
+
         for controller in self:
             controller.stop()
 
     def close(self, data_folder: str = 'data/'):
         """Alle nötige am Ende der Arbeit Operationen ausführen."""
+
         self.stop()
         self.save_session_data(address=data_folder + 'saved_motors_data.txt')
         del self

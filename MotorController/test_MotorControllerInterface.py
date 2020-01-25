@@ -14,7 +14,7 @@ class TestConnector(TestCase):
         self.assertEqual(res, b'hello!')
 
     def test_mess_format(self):
-        res = self.connector.mess_format(b'hello!')
+        res = self.connector.message_format(b'hello!')
         self.assertEqual(res, b'bgg hello! egg')
 
     def none_reply(self):
