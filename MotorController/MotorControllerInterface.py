@@ -459,7 +459,7 @@ class Motor:
                             'norm_per_contr': 1.0,
                             'displ_per_contr': 1.0,
                             'displ_null': 0.0,  # Anzeiger Null in normierte Einheiten
-                            'null_position': 0.0,  # Position von Anfang in Controller Einheiten
+                            'null_position': 0.0  # Position von Anfang in Controller Einheiten
                             }
 
     def __init__(self, controller: Controller, axis: int):
@@ -511,7 +511,7 @@ class Motor:
             destination = position + shift
             return self.go_to(destination, 'norm')
 
-        shift = self.transform_units(shift, units, to='contr')
+        shift = self.transform_units(shift, units, to='contr', rel=True)
         self.communicator.go(shift, *self.coord())
         logging.info(f'Motor {self.axis} beim Controller {self.controller.bus} wurde um {shift} verschoben. ')
 
@@ -597,12 +597,14 @@ class Motor:
                 reporter.motor_is_done(self.name)
             logging.info(f'Kalibrierung von Motor {self.name} wurde abgeschlossen.')
         else:
-            logging.error(f'Motor {self.name} hat keine Initiators und kann nicht kalibriert werden!')
+            raise CalibrationError(f'Motor {self.name} hat keine Initiators und kann nicht kalibriert werden!')
 
-    def soft_limits_einstellen(self, soft_limits: Tuple[float, float], units: str = 'norm'):
+    def soft_limits_einstellen(self, soft_limits: Tuple[Union[float, None], Union[float, None]], units: str = 'norm'):
         """soft limits einstellen"""
+        def transform(val):
+            return self.transform_units(val, units, to='norm') if val is not None else None
 
-        self.soft_limits = tuple(map(lambda val: self.transform_units(val, units, to='norm'), soft_limits))
+        self.soft_limits = tuple(map(transform, soft_limits))
 
     def wait_motor_stop(self, stop_indicator: Union[StopIndicator, None] = None):
         """Haltet die programme, bis alle Motoren stoppen."""
@@ -632,14 +634,13 @@ class Motor:
         if motor_config is None:
             self.config = deepcopy(self.DEFAULT_MOTOR_CONFIG)
         else:
-            # print('motor_config', motor_config)
             for key, value in motor_config.items():
                 if key == 'name':
                     self.name = value
-                else:
+                elif key in self.config.keys():
                     self.config[key] = value
-            # print(self.config)
-            print('init', self.coord(), self.with_initiators())
+                else:
+                    raise ValueError(f'Falsche config-key: "{key}"')
 
     def get_parameters(self) -> Dict[str, float]:
         """Liest die Parametern aus Controller und gibt zurück Dict mit Parameterwerten"""
@@ -925,7 +926,7 @@ class Box:
             str_list = list(map(str, list_to_convert))
             return ';'.join(str_list) + '\n'
 
-        # Bevor die Datei geändert wurde, die Data daraus sichern.
+        # Bevor die Datei geändert wurde, die Daten daraus sichern.
         try:
             saved_data = read_saved_session_data_from_file(address)
         except FileNotFoundError:
@@ -941,7 +942,7 @@ class Box:
                 row = [*motor.coord(), motor.position('norm'), motor.config['norm_per_contr'], *motor.soft_limits]
                 f.write(make_csv_row(row))
 
-        # Data von den abwesenden Motoren zurück in Datei schreiben
+        # Daten von den abwesenden Motoren zurück in Datei schreiben
         if saved_data:
             absent_motors = set(saved_data.keys()) - set(self.motors_list())
             for coord in absent_motors:
@@ -1130,6 +1131,7 @@ class Box:
     #     else:
     #         logging.info(f'Kalibrierung von Motoren {list_to_calibration} wurde abgeschlossen.')
 
+
 class SerialError(Exception):
     """Base class for serial port related exceptions."""
 
@@ -1171,4 +1173,8 @@ class ReadConfigError(Exception):
 
 
 class UnitsTransformError(Exception):
+    """Grundklasse für alle Fehler mit Transformation der Einheiten"""
+
+
+class CalibrationError(Exception):
     """Grundklasse für alle Fehler mit Transformation der Einheiten"""

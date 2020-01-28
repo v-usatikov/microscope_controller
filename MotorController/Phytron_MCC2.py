@@ -583,8 +583,8 @@ class MCC2MotorEmulator:
         self.box = box
         self.__position = 0  # aktuelle Position in Schritten
         self.__stand = True
-        self.__beg_initiator = False
-        self.__end_initiator = False
+        self.beg_initiator = False
+        self.end_initiator = False
         self.__destination = 0
         self.__stop = False
 
@@ -592,10 +592,10 @@ class MCC2MotorEmulator:
         return self.__stand
 
     def at_the_beg(self):
-        return self.__beg_initiator
+        return self.beg_initiator
 
     def at_the_end(self):
-        return self.__end_initiator
+        return self.end_initiator
 
     def get_position(self):
         return self.__position * self.PARAMETER_VALUES['Umrechnungsfaktor']
@@ -616,7 +616,7 @@ class MCC2MotorEmulator:
             return self.PARAMETER_VALUES[self.PARAMETER_NAME[n]]
 
     def go_to(self, destination: float):
-        self.__destination = int(destination/self.PARAMETER_VALUES['Umrechnungsfaktor'])
+        self.__destination = destination/self.PARAMETER_VALUES['Umrechnungsfaktor']
         if self.stand():
             threading.Thread(target=self.__move).start()
 
@@ -640,7 +640,7 @@ class MCC2MotorEmulator:
     def __move(self):
         self.__stop = False
         self.__stand = False
-        while self.__position != self.__destination:
+        while abs(self.__position - self.__destination) > 0.5:
             if self.__position > self.__destination:
                 self.__step_back()
             else:
@@ -652,27 +652,27 @@ class MCC2MotorEmulator:
         self.__stand = True
 
     def __step_forward(self):
-        if not self.__end_initiator:
+        if not self.end_initiator:
             self.__position += 1
         self.__initiators_sensor()
 
     def __step_back(self):
-        if not self.__beg_initiator:
+        if not self.beg_initiator:
             self.__position -= 1
         self.__initiators_sensor()
 
     def __initiators_sensor(self):
         if self.__position >= self.end:
             self.stop()
-            self.__end_initiator = True
+            self.end_initiator = True
         else:
-            self.__end_initiator = False
+            self.end_initiator = False
 
         if self.__position <= self.beginning:
             self.stop()
-            self.__beg_initiator = True
+            self.beg_initiator = True
         else:
-            self.__beg_initiator = False
+            self.beg_initiator = False
 
     def __freq(self):
         return self.PARAMETER_VALUES['Lauffrequenz']
