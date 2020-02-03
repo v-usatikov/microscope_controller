@@ -54,5 +54,3 @@ import sys
 #     app = QApplication(sys.argv)
 #     ex = Example()
 #     sys.exit(app.exec_())
-
-print(0.99995/0.99995-1)

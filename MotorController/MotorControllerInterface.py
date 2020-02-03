@@ -467,7 +467,7 @@ class Motor:
         self.communicator = self.controller.communicator
         self.axis = axis
 
-        self.name = 'Motor' + str(self.controller.bus) + "." + str(self.axis)
+        self.name = f'Motor{self.controller.bus}.{self.axis}'
         self.config = deepcopy(self.DEFAULT_MOTOR_CONFIG)
         self.set_parameters()
 
@@ -657,7 +657,7 @@ class Motor:
         # Parameter_Werte = {'Lauffrequenz': 4000, 'Stoppstrom': 5, 'Laufstrom': 11, 'Booststrom': 18}
 
         if parameters_values is None:
-            parameters_values = self.communicator.PARAMETER_DEFAULT
+            parameters_values = deepcopy(self.communicator.PARAMETER_DEFAULT)
 
         for name, value in parameters_values.items():
             self.set_parameter(name, value)
@@ -771,6 +771,9 @@ class Box:
 
     def initialize_with_input_file(self, config_file: str = 'input/Phytron_Motoren_config.csv'):
         """Sucht und macht Objekte für alle verfügbare Controller und Motoren. Gibt ein Bericht zurück."""
+        def del_motor_from_init(bus: int, axis: int):
+            del motors_config[bus, axis]
+            del motors_parameters[bus, axis]
 
         logging.info('Box Initialisierung wurde gestartet.')
 
@@ -794,19 +797,23 @@ class Box:
                     absent_bus.append(bus)
         if len(absent_bus) > 1:
             report += f"Controller {absent_bus} sind nicht verbunden und wurden nicht initialisiert.\n"
+            print(report)
         elif len(absent_bus) == 1:
-            report += f"Controller {absent_bus} ist nicht verbunden und wurde nicht initialisiert.\n"
+            report += f"Controller {absent_bus[0]} ist nicht verbunden und wurde nicht initialisiert.\n"
 
         # Motoren initialisieren
         for bus, axis in motors_to_init:
-            if axis in self.communicator.axes_list(bus):
-                self.controller[bus].motor[axis] = Motor(self.controller[bus], axis)
-                n_motors += 1
+            if bus in absent_bus:
+                del_motor_from_init(bus, axis)
             else:
-                report += f"Achse {axis} ist beim Controller {bus} nicht vorhanden, " \
-                          f"den Motor wurde nicht initialisiert.\n"
+                if axis in self.communicator.axes_list(bus):
+                    self.controller[bus].motor[axis] = Motor(self.controller[bus], axis)
+                    n_motors += 1
+                else:
+                    del_motor_from_init(bus, axis)
+                    report += f"Achse {axis} ist beim Controller {bus} nicht vorhanden, " \
+                              f"der Motor wurde nicht initialisiert.\n"
 
-        print(motors_config)
         self.set_motors_config(motors_config)
         self.set_parameters(motors_parameters)
 
@@ -824,20 +831,21 @@ class Box:
         self.report = report
         return report
 
-    def get_motor(self, coordinates: (int, int) = None, name: str = None) -> Motor:
+    def get_motor(self, coordinates: (int, int) = None) -> Motor:
+        """Gibt den Motor objekt zurück aus Koordinaten in Format (bus, Achse)"""
+        if coordinates not in self.motors_list():
+            raise ValueError(f"Es gibt kein Motor mit solchen Koordinaten: {coordinates}")
+        bus, axis = coordinates
+        return self.controller[bus].motor[axis]
+
+    def get_motor_by_name(self, name: str) -> Motor:
         """Gibt den Motor objekt zurück aus Koordinaten in Format (bus, Achse)"""
 
-        if coordinates is not None:
-            bus, axis = coordinates
-            return self.controller[bus].motor[axis]
-        elif name is not None:
-            for controller in self:
-                for motor in controller:
-                    if motor.name == name:
-                        return motor
-            raise ValueError(f"Es gibt kein Motor mit solchem Name: {name}")
-        else:
-            raise ValueError("Kein Argument! Die Koordinaten oder der Name des Motors muss gegeben sein. ")
+        for controller in self:
+            for motor in controller:
+                if motor.name == name:
+                    return motor
+        raise ValueError(f"Es gibt kein Motor mit solchem Name: {name}")
 
     def stop(self):
         """Stoppt alle Achsen"""
@@ -910,7 +918,8 @@ class Box:
         wait_list = set()
         for motor in motors_to_calibration:
             wait_list.add(motor.name)
-        reporter.set_wait_list(wait_list)
+        if reporter is not None:
+            reporter.set_wait_list(wait_list)
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
             executor.map(lambda motor: motor.calibrate(stop_indicator, reporter), motors_to_calibration)

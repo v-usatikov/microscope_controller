@@ -26,12 +26,11 @@ class MCC2Communicator(ContrCommunicator):
     # Dict, mit den Defaultwerten der Parametern.
     PARAMETER_DEFAULT = {'Lauffrequenz': 400.0, 'Stoppstrom': 2, 'Laufstrom': 2, 'Booststrom': 2, 'Initiatortyp': 0}
 
-    __mutex = threading.Lock()
-
     def __init__(self, connector: Connector):
         self.connector = connector
         self.connector.beg_symbol = b"\x02"
         self.connector.end_symbol = b"\x03"
+        self.__mutex = threading.Lock()
 
     def go(self, shift: float, bus: int, axis: int):
         """Verschiebt den angegeben Motor um die angegebene Verschiebung."""
@@ -572,51 +571,51 @@ class MCC2ControllerEmulator:
 class MCC2MotorEmulator:
 
     PARAMETER_NAME = {v: k for k, v in MCC2BoxEmulator.PARAMETER_NUMBER.items()}
-    PARAMETER_VALUES = deepcopy(MCC2BoxEmulator.PARAMETER_DEFAULT)
-
-    PARAMETER_VALUES['Umrechnungsfaktor'] = 1
-
-    beginning = -10000
-    end = 10000
 
     def __init__(self, box: MCC2BoxEmulator):
         self.box = box
         self.__position = 0  # aktuelle Position in Schritten
-        self.__stand = True
-        self.beg_initiator = False
-        self.end_initiator = False
+        self._stand = True
+        self._beg_initiator = False
+        self._end_initiator = False
         self.__destination = 0
         self.__stop = False
 
+        self.parameter_values = deepcopy(MCC2BoxEmulator.PARAMETER_DEFAULT)
+        self.parameter_values['Umrechnungsfaktor'] = 1
+
+        self.beginning = -10000
+        self.end = 10000
+
     def stand(self):
-        return self.__stand
+        return self._stand
 
     def at_the_beg(self):
-        return self.beg_initiator
+        return self._beg_initiator
 
     def at_the_end(self):
-        return self.end_initiator
+        return self._end_initiator
 
     def get_position(self):
-        return self.__position * self.PARAMETER_VALUES['Umrechnungsfaktor']
+        return self.__position * self.parameter_values['Umrechnungsfaktor']
 
     def set_position(self, value: float):
-        self.__position = value/self.PARAMETER_VALUES['Umrechnungsfaktor']
+        self.__position = value/self.parameter_values['Umrechnungsfaktor']
 
     def set_parameter(self, n: int, value: Union[float, int]):
         if n == 20:
             self.set_position(value)
         else:
-            self.PARAMETER_VALUES[self.PARAMETER_NAME[n]] = value
+            self.parameter_values[self.PARAMETER_NAME[n]] = value
 
     def get_parameter(self, n: int) -> Union[float, int]:
         if n == 20:
             return self.get_position()
         else:
-            return self.PARAMETER_VALUES[self.PARAMETER_NAME[n]]
+            return self.parameter_values[self.PARAMETER_NAME[n]]
 
     def go_to(self, destination: float):
-        self.__destination = destination/self.PARAMETER_VALUES['Umrechnungsfaktor']
+        self.__destination = destination/self.parameter_values['Umrechnungsfaktor']
         if self.stand():
             threading.Thread(target=self.__move).start()
 
@@ -634,12 +633,12 @@ class MCC2MotorEmulator:
             time.sleep(1 / self.__freq())
 
     def wait_stop(self):
-        while not self.__stand:
+        while not self._stand:
             self.sleep_one_step()
 
     def __move(self):
         self.__stop = False
-        self.__stand = False
+        self._stand = False
         while abs(self.__position - self.__destination) > 0.5:
             if self.__position > self.__destination:
                 self.__step_back()
@@ -649,49 +648,33 @@ class MCC2MotorEmulator:
                 self.sleep_one_step()
             if self.__stop:
                 break
-        self.__stand = True
+        self._stand = True
 
     def __step_forward(self):
-        if not self.end_initiator:
+        if not self._end_initiator:
             self.__position += 1
         self.__initiators_sensor()
 
     def __step_back(self):
-        if not self.beg_initiator:
+        if not self._beg_initiator:
             self.__position -= 1
         self.__initiators_sensor()
 
     def __initiators_sensor(self):
         if self.__position >= self.end:
             self.stop()
-            self.end_initiator = True
+            self._end_initiator = True
         else:
-            self.end_initiator = False
+            self._end_initiator = False
 
         if self.__position <= self.beginning:
             self.stop()
-            self.beg_initiator = True
+            self._beg_initiator = True
         else:
-            self.beg_initiator = False
+            self._beg_initiator = False
 
     def __freq(self):
-        return self.PARAMETER_VALUES['Lauffrequenz']
+        return self.parameter_values['Lauffrequenz']
 
 
 # if __name__ == '__main__':
-#     # config0 = read_config_from_file0('/Users/prouser/Dropbox/Proging/Python_Projects/MikroskopController/MCC2_Demo_GUI/input/Phytron_Motoren_config.csv')
-#     # config = read_config_from_file('/Users/prouser/Dropbox/Proging/Python_Projects/MikroskopController/MCC2_Demo_GUI/input/Phytron_Motoren_config.csv')
-#     # print(config == config0)
-#
-#     comlist = serial.tools.list_ports.comports()
-#     comlist = [com.device for com in comlist]
-#     print(comlist)
-#
-#     connector1 = SerialConnector(comlist[2])
-#     box1 = Box(connector1)
-#
-#     box1.initialize_with_input_file('/Users/prouser/Dropbox/Proging/Python_Projects/MikroskopController/MCC2_Demo_GUI/input/Phytron_Motoren_config.csv')
-#     # print(box1.save_parameters_in_eprom_fast())
-#
-#     # asyncio.run(box1.get_motor((2, 2)).calibrate())
-#     # box1.calibrate_motors2()

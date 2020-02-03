@@ -171,8 +171,7 @@ class TestMCC2BoxEmulator(TestCase):
                 emulator_box.write(f'\x02{bus:x}{axis}P{20}R\x03'.encode())
                 self.assertEqual(b'\x02\x06600.52\x03', emulator_box.read_until(b'\x03'))
 
-                # TODO Проверить действительно ли текущая позиция изменяется при изменении Umrechnungsfactor
-                # Umrechnungsfactor gleich 0.5 einstellen
+                # Umrechnungsfaktor gleich 0.5 einstellen
                 emulator_box.write(f'\x02{bus:x}{axis}P{3}S{0.5}\x03'.encode())
                 emulator_box.flushInput()
                 emulator_box.write(f'\x02{bus:x}{axis}P{20}R\x03'.encode())

@@ -238,7 +238,7 @@ class ExampleApp(QMainWindow):
 
     def Motor_wechseln(self):
         if self.MotorCBox.currentText() != '':
-            self.Motor = self.Box.get_motor(name=self.MotorCBox.currentText())
+            self.Motor = self.Box.get_motor_by_name(self.MotorCBox.currentText())
             self.init_Soft_Limits()
             self.Position_lesen(single_shot=True)
             if not self.Motor.with_initiators():
