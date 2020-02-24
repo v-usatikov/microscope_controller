@@ -313,5 +313,326 @@ class TestMCC2BoxEmulator(TestCase):
                                  f'Fehler beim Motor ({bus},{axis})')
 
 
+class TestMCC2Communicator(TestCase):
+    def test_read_reply(self):
+        emulator = MCC2BoxEmulator(n_bus=2, n_axes=2)
+        connector = SerialConnector(emulator=emulator)
+        communicator = MCC2Communicator(connector)
+
+        emulator.buffer = b'\x02\x06Antwort\x03'
+        self.assertEqual((True, b'Antwort'), communicator.read_reply())
+
+        emulator.buffer = b'\x02\x06\x03'
+        self.assertEqual((True, b''), communicator.read_reply())
+
+        emulator.buffer = b'\x02\x15\x03'
+        self.assertEqual((False, None), communicator.read_reply())
+
+        emulator.buffer = b''
+        self.assertEqual((None, None), communicator.read_reply())
+
+        with self.assertRaises(ReplyError):
+            emulator.buffer = b'\x02\x15dfsd\x03'
+            communicator.read_reply()
+
+        with self.assertRaises(ReplyError):
+            emulator.buffer = b'\x02dfsd\x03'
+            communicator.read_reply()
+
+        with self.assertRaises(ReplyError):
+            emulator.buffer = b'sdfefef'
+            communicator.read_reply()
+
+    def test_command_to_box(self):
+        emulator = MCC2BoxEmulator(n_bus=2, n_axes=2)
+        connector = SerialConnector(emulator=emulator)
+        communicator = MCC2Communicator(connector)
+
+        communicator.command_to_box(b'Lelouch Vi Brittania commands you')
+        self.assertEqual(b'\x02Lelouch Vi Brittania commands you\x03', emulator.last_command)
+
+    def test_command_to_modul(self):
+        emulator = MCC2BoxEmulator(n_bus=2, n_axes=2)
+        connector = SerialConnector(emulator=emulator)
+        communicator = MCC2Communicator(connector)
+
+        communicator.command_to_modul(b'Obey Me', 2)
+        self.assertEqual(b'\x022Obey Me\x03', emulator.last_command)
+
+        communicator.command_to_modul(b'Obey Me', 13)
+        self.assertEqual(b'\x02dObey Me\x03', emulator.last_command)
+
+    def test_command_to_motor(self):
+        emulator = MCC2BoxEmulator(n_bus=2, n_axes=2)
+        connector = SerialConnector(emulator=emulator)
+        communicator = MCC2Communicator(connector)
+
+        communicator.command_to_motor(b'World', 2, 4)
+        self.assertEqual(b'\x0224World\x03', emulator.last_command)
+
+        communicator.command_to_motor(b'World', 13, 8)
+        self.assertEqual(b'\x02d8World\x03', emulator.last_command)
+
+    def test_command_without_reply(self):
+        emulator = MCC2BoxEmulator(n_bus=2, n_axes=2)
+        connector = SerialConnector(emulator=emulator)
+        communicator = MCC2Communicator(connector)
+
+        communicator.command_without_reply(b'S', 1, 2)
+        self.assertEqual(b'\x0212S\x03', emulator.last_command)
+
+        with self.assertRaises(ReplyError):
+            communicator.command_without_reply(b'S', 5, 2)
+
+        with self.assertRaises(ReplyError):
+            communicator.command_without_reply(b'S', 5, 2)
+
+        with self.assertRaises(ControllerError):
+            communicator.command_without_reply(b'Sdfd', 1, 2)
+
+    def test_command_with_bool_reply(self):
+        emulator = MCC2BoxEmulator(n_bus=2, n_axes=2)
+        connector = SerialConnector(emulator=emulator)
+        communicator = MCC2Communicator(connector)
+
+        self.assertTrue(communicator.command_with_bool_reply(b'=H', 1, 2))
+        self.assertEqual(b'\x0212=H\x03', emulator.last_command)
+
+        emulator.controller[1].motor[2]._stand = False
+        self.assertFalse(communicator.command_with_bool_reply(b'=H', 1, 2))
+
+        with self.assertRaises(NoReplyError):
+            communicator.command_without_reply(b'=H', 5, 2)
+
+        with self.assertRaises(ReplyError):
+            communicator.command_without_reply(b'S', 5, 2)
+
+        with self.assertRaises(ControllerError):
+            communicator.command_without_reply(b'Sdfd', 1, 2)
+
+    def test_command_with_float_reply(self):
+        emulator = MCC2BoxEmulator(n_bus=2, n_axes=2)
+        connector = SerialConnector(emulator=emulator)
+        communicator = MCC2Communicator(connector)
+
+        emulator.controller[1].motor[2].set_position(234.56)
+        self.assertEqual(234.56, communicator.command_with_float_reply(b'P20R', 1, 2))
+        self.assertEqual(b'\x0212P20R\x03', emulator.last_command)
+
+        with self.assertRaises(NoReplyError):
+            communicator.command_without_reply(b'=H', 5, 2)
+
+        with self.assertRaises(ReplyError):
+            communicator.command_without_reply(b'=H', 1, 2)
+
+        with self.assertRaises(ReplyError):
+            communicator.command_without_reply(b'S', 5, 2)
+
+        with self.assertRaises(ControllerError):
+            communicator.command_without_reply(b'Sdfd', 1, 2)
+
+    def test_bus_check(self):
+        emulator = MCC2BoxEmulator(n_bus=4, n_axes=2)
+        del emulator.controller[1]
+        del emulator.controller[3]
+        connector = SerialConnector(emulator=emulator)
+        communicator = MCC2Communicator(connector)
+
+        self.assertEqual((True, b'MCC2 Emulator v1.0'), communicator.bus_check(0))
+        self.assertEqual(b'\x020IVR\x03', emulator.last_command)
+
+        self.assertEqual((False, None), communicator.bus_check(1))
+        self.assertEqual(b'\x021IVR\x03', emulator.last_command)
+
+        self.assertEqual((True, b'MCC2 Emulator v1.0'), communicator.bus_check(2))
+        self.assertEqual(b'\x022IVR\x03', emulator.last_command)
+
+        self.assertEqual((False, None), communicator.bus_check(3))
+        self.assertEqual(b'\x023IVR\x03', emulator.last_command)
+
+    def test_check_connection(self):
+        emulator = MCC2BoxEmulator(n_bus=0, n_axes=2)
+        connector = SerialConnector(emulator=emulator)
+        communicator = MCC2Communicator(connector)
+
+        self.assertEqual((False, None), communicator.check_connection())
+        self.assertEqual(b'\x02fIVR\x03', emulator.last_command)
+
+        emulator = MCC2BoxEmulator(n_bus=2, n_axes=2)
+        connector = SerialConnector(emulator=emulator)
+        communicator = MCC2Communicator(connector)
+
+        self.assertEqual((True, b'MCC2 Emulator v1.0'), communicator.check_connection())
+        self.assertEqual(b'\x020IVR\x03', emulator.last_command)
+
+        emulator = MCC2BoxEmulator(n_bus=3, n_axes=2)
+        del emulator.controller[0]
+        del emulator.controller[1]
+        connector = SerialConnector(emulator=emulator)
+        communicator = MCC2Communicator(connector)
+
+        self.assertEqual((True, b'MCC2 Emulator v1.0'), communicator.check_connection())
+        self.assertEqual(b'\x022IVR\x03', emulator.last_command)
+
+    def test_bus_list(self):
+        emulator = MCC2BoxEmulator(n_bus=15, n_axes=2)
+        del emulator.controller[0]
+        del emulator.controller[5]
+        del emulator.controller[12]
+        connector = SerialConnector(emulator=emulator)
+        communicator = MCC2Communicator(connector)
+
+        self.assertEqual({1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 13, 14}, set(communicator.bus_list()))
+
+    def test_axes_list(self):
+        emulator = MCC2BoxEmulator(n_bus=2, n_axes=5)
+        connector = SerialConnector(emulator=emulator)
+        communicator = MCC2Communicator(connector)
+
+        self.assertEqual({1, 2, 3, 4, 5}, set(communicator.axes_list(1)))
+
+    def test_go(self):
+        emulator = MCC2BoxEmulator(n_bus=16, n_axes=3)
+        connector = SerialConnector(emulator=emulator)
+        communicator = MCC2Communicator(connector)
+
+        communicator.go(234.56, 1, 2)
+        self.assertEqual(b'\x0212234.56\x03', emulator.last_command)
+
+        communicator.go(4354.546, 13, 3)
+        self.assertEqual(b'\x02d34354.546\x03', emulator.last_command)
+
+    def test_go_to(self):
+        emulator = MCC2BoxEmulator(n_bus=16, n_axes=3)
+        connector = SerialConnector(emulator=emulator)
+        communicator = MCC2Communicator(connector)
+
+        communicator.go_to(234.56, 1, 2)
+        self.assertEqual(b'\x0212A234.56\x03', emulator.last_command)
+
+        communicator.go_to(4354.546, 13, 3)
+        self.assertEqual(b'\x02d3A4354.546\x03', emulator.last_command)
+
+    def test_stop(self):
+        emulator = MCC2BoxEmulator(n_bus=16, n_axes=3)
+        connector = SerialConnector(emulator=emulator)
+        communicator = MCC2Communicator(connector)
+
+        communicator.stop(1, 2)
+        self.assertEqual(b'\x0212S\x03', emulator.last_command)
+
+        communicator.stop(13, 3)
+        self.assertEqual(b'\x02d3S\x03', emulator.last_command)
+
+    def test_get_position(self):
+        emulator = MCC2BoxEmulator(n_bus=16, n_axes=3)
+        connector = SerialConnector(emulator=emulator)
+        communicator = MCC2Communicator(connector)
+
+        emulator.controller[1].motor[2].set_position(345.67)
+        self.assertEqual(345.67, communicator.get_position(1, 2))
+        self.assertEqual(b'\x0212P20R\x03', emulator.last_command)
+
+        emulator.controller[14].motor[1].set_position(-3545.68)
+        self.assertEqual(-3545.68, communicator.get_position(14, 1))
+        self.assertEqual(b'\x02e1P20R\x03', emulator.last_command)
+
+    def test_set_position(self):
+        emulator = MCC2BoxEmulator(n_bus=16, n_axes=3)
+        connector = SerialConnector(emulator=emulator)
+        communicator = MCC2Communicator(connector)
+
+        communicator.set_position(345.67, 1, 2)
+        self.assertEqual(345.67, emulator.get_position(1, 2))
+        self.assertEqual(b'\x0212P20S345.67\x03', emulator.last_command)
+
+        communicator.set_position(-3545.68, 14, 1)
+        self.assertEqual(-3545.68, emulator.get_position(14, 1))
+        self.assertEqual(b'\x02e1P20S-3545.68\x03', emulator.last_command)
+
+    def test_set_parameter(self):
+        emulator = MCC2BoxEmulator(n_bus=16, n_axes=3)
+        connector = SerialConnector(emulator=emulator)
+        communicator = MCC2Communicator(connector)
+
+        communicator.set_parameter('Lauffrequenz', 345.67, 1, 2)
+        self.assertEqual(345.67, emulator.get_parameter('Lauffrequenz', 1, 2))
+        self.assertEqual(b'\x0212P14S345.67\x03', emulator.last_command)
+
+        communicator.set_parameter('Lauffrequenz', -3545.68, 14, 1)
+        self.assertEqual(-3545.68, emulator.get_parameter('Lauffrequenz', 14, 1))
+        self.assertEqual(b'\x02e1P14S-3545.68\x03', emulator.last_command)
+
+        with self.assertRaises(ValueError):
+            communicator.set_parameter('Frömmigkeit', -3545.68, 14, 1)
+
+    def test_get_parameter(self):
+        emulator = MCC2BoxEmulator(n_bus=16, n_axes=3)
+        connector = SerialConnector(emulator=emulator)
+        communicator = MCC2Communicator(connector)
+
+        emulator.controller[1].motor[2].set_parameter(14, 345.67)
+        self.assertEqual(345.67, communicator.get_parameter('Lauffrequenz', 1, 2))
+        self.assertEqual(b'\x0212P14R\x03', emulator.last_command)
+
+        emulator.controller[14].motor[1].set_parameter(14, -3545.68)
+        self.assertEqual(-3545.68, communicator.get_parameter('Lauffrequenz', 14, 1))
+        self.assertEqual(b'\x02e1P14R\x03', emulator.last_command)
+
+        with self.assertRaises(ValueError):
+            communicator.get_parameter('Frömmigkeit', 14, 1)
+
+    def test_motor_stand(self):
+        emulator = MCC2BoxEmulator(n_bus=16, n_axes=3)
+        connector = SerialConnector(emulator=emulator)
+        communicator = MCC2Communicator(connector)
+
+        emulator.controller[0].motor[2]._stand = True
+        self.assertEqual(True, communicator.motor_stand(0, 2))
+        self.assertEqual(b'\x0202=H\x03', emulator.last_command)
+
+        emulator.controller[0].motor[2]._stand = False
+        self.assertEqual(False, communicator.motor_stand(0, 2))
+        self.assertEqual(b'\x0202=H\x03', emulator.last_command)
+
+        emulator.controller[14].motor[3]._stand = False
+        self.assertEqual(False, communicator.motor_stand(14, 3))
+        self.assertEqual(b'\x02e3=H\x03', emulator.last_command)
+
+    def test_motor_at_the_beg(self):
+        emulator = MCC2BoxEmulator(n_bus=16, n_axes=3)
+        connector = SerialConnector(emulator=emulator)
+        communicator = MCC2Communicator(connector)
+
+        emulator.controller[0].motor[2]._beg_initiator = True
+        self.assertEqual(True, communicator.motor_at_the_beg(0, 2))
+        self.assertEqual(b'\x0202=I-\x03', emulator.last_command)
+
+        emulator.controller[0].motor[2]._beg_initiator = False
+        self.assertEqual(False, communicator.motor_at_the_beg(0, 2))
+        self.assertEqual(b'\x0202=I-\x03', emulator.last_command)
+
+        emulator.controller[14].motor[3]._beg_initiator = False
+        self.assertEqual(False, communicator.motor_at_the_beg(14, 3))
+        self.assertEqual(b'\x02e3=I-\x03', emulator.last_command)
+
+    def test_motor_at_the_end(self):
+        emulator = MCC2BoxEmulator(n_bus=16, n_axes=3)
+        connector = SerialConnector(emulator=emulator)
+        communicator = MCC2Communicator(connector)
+
+        emulator.controller[0].motor[2]._end_initiator = True
+        self.assertEqual(True, communicator.motor_at_the_end(0, 2))
+        self.assertEqual(b'\x0202=I+\x03', emulator.last_command)
+
+        emulator.controller[0].motor[2]._end_initiator = False
+        self.assertEqual(False, communicator.motor_at_the_end(0, 2))
+        self.assertEqual(b'\x0202=I+\x03', emulator.last_command)
+
+        emulator.controller[14].motor[3]._end_initiator = False
+        self.assertEqual(False, communicator.motor_at_the_end(14, 3))
+        self.assertEqual(b'\x02e3=I+\x03', emulator.last_command)
+
+
 if __name__ == '__main__':
     main()

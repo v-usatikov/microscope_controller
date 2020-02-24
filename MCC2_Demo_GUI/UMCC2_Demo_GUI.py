@@ -418,10 +418,10 @@ class ExampleApp(QMainWindow):
             self.serial_emulation = True
         else:
             self.Box = MCC2BoxSerial(self.PortBox.currentText(), input_file=input_file)
-        # try:
-        #     self.Box.read_saved_motors_data()
-        # except FileNotFoundError:
-        #     pass
+        try:
+            self.Box.read_saved_session_data()
+        except FileNotFoundError:
+            pass
 
         self.Motoren_Namen_laden()
         self.KalibrBtn.setEnabled(True)
@@ -440,7 +440,6 @@ class ExampleApp(QMainWindow):
         if self.Position_erneuern:
             self.Position = self.Motor.position(self.units)
             self.Position_NE = self.Motor.position()
-            # print(__position)
             self.AktPosEdit1.setText(str(round(self.Position, 4)))
             if self.Motor.with_initiators():
                 self.horizontalScrollBar1.setValue(int(self.Position_NE))

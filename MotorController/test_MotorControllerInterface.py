@@ -1,7 +1,10 @@
+import os
+from threading import Thread
 from unittest import TestCase, main
 
 # from MotorController.MotorControllerInterface import *
-from MotorController.MotorControllerInterface import Connector, ReplyError, Controller, Motor, CalibrationError, Box
+from MotorController.MotorControllerInterface import Connector, ReplyError, Controller, Motor, CalibrationError, Box, \
+    read_input_config_from_file, read_saved_session_data_from_file, read_csv
 from MotorController.Phytron_MCC2 import MCC2BoxEmulator, MCC2Communicator
 
 
@@ -60,7 +63,7 @@ def preparation_to_test(realtime=False):
                       'null_position': 273.15  # Position von Anfang in Controller Einheiten
                       })
     step = 0.1
-    emulator.set_parameter('Umrechnungsfaktor', step, 1, 2)
+    emulator.set_parameter('Umrechnungsfaktor(Contr)', step, 1, 2)
 
     motor_emulator = emulator.controller[1].motor[2]
     return motor, step, motor_emulator
@@ -435,8 +438,10 @@ class TestBox(TestCase):
             (12, 3): {'Lauffrequenz': 4001, 'Stoppstrom': 4, 'Laufstrom': 5, 'Booststrom': 6, 'Initiatortyp': 1}}
 
         box.set_parameters(parameters)
-        for coord, param in parameters.items():
-            self.assertEqual(param, box.get_motor(coord).get_parameters())
+        for coord, param_line in parameters.items():
+            param_line_from_box = box.get_motor(coord).get_parameters()
+            for name, value in param_line.items():
+                self.assertEqual(value, param_line_from_box[name])
 
         emulator = MCC2BoxEmulator(n_bus=2, n_axes=2)
         box = Box(emulator)
@@ -448,7 +453,10 @@ class TestBox(TestCase):
             (1, 2): {'Lauffrequenz': 4001, 'Stoppstrom': 4, 'Laufstrom': 5, 'Booststrom': 6, 'Initiatortyp': 1}}
 
         box.set_parameters(parameters)
-        self.assertEqual(parameters, box.get_parameters())
+        for coord, param_line in parameters.items():
+            param_line_from_box = box.get_motor(coord).get_parameters()
+            for name, value in param_line.items():
+                self.assertEqual(value, param_line_from_box[name])
 
     def test_set_motors_config(self):
         emulator = MCC2BoxEmulator(n_bus=15, n_axes=9)
@@ -489,6 +497,61 @@ class TestBox(TestCase):
             motor = box.get_motor(coord)
             self.assertEqual(values, {**motor.config, 'name': motor.name})
 
+    def test_read_input_config_from_file(self):
+        emulator = MCC2BoxEmulator(n_bus=4, n_axes=2)
+
+        controllers_to_init = [0, 1, 2, 3]
+        motors_to_init = [(0, 1), (0, 2), (1, 1), (1, 2), (2, 1), (2, 2), (3, 1), (3, 2)]
+        motors_config = {(0, 1): {'name': 'TestMotor0',
+                                  'with_initiators': 0,
+                                  'display_units': '1',
+                                  'displ_per_contr': 1.0,},
+                         (0, 2): {'name': 'TestMotor1',
+                                  'with_initiators': 1,
+                                  'display_units': 'Schritte',
+                                  'displ_per_contr': 1.0},
+                         (1, 1): {'name': 'TestMotor2',
+                                  'with_initiators': 1,
+                                  'display_units': '1',
+                                  'displ_per_contr': 1.0},
+                         (1, 2): {'name': 'TestMotor3',
+                                  'with_initiators': 1,
+                                  'display_units': '1',
+                                  'displ_per_contr': 1.0},
+                         (2, 1): {'name': 'TestMotor4',
+                                  'with_initiators': 1,
+                                  'display_units': '1',
+                                  'displ_per_contr': 1.0},
+                         (2, 2): {'name': 'TestMotor5',
+                                  'with_initiators': 1,
+                                  'display_units': '1',
+                                  'displ_per_contr': 1.0},
+                         (3, 1): {'name': 'TestMotor6',
+                                  'with_initiators': 1,
+                                  'display_units': '1',
+                                  'displ_per_contr': 1.0},
+                         (3, 2): {'name': 'TestMotor7',
+                                  'with_initiators': 1,
+                                  'display_units': '1',
+                                  'displ_per_contr': 1.0}}
+        motors_parameters = {
+            (0, 1): {'Lauffrequenz': 1.0, 'Stoppstrom': 1.0, 'Laufstrom': 1.0, 'Booststrom': 1.0, 'Initiatortyp': 1.0},
+            (0, 2): {'Lauffrequenz': 1.0, 'Stoppstrom': 1.0, 'Laufstrom': 1.0, 'Booststrom': 1.0, 'Initiatortyp': 1.0},
+            (1, 1): {'Lauffrequenz': 1.0, 'Stoppstrom': 1.0, 'Laufstrom': 1.0, 'Booststrom': 1.0, 'Initiatortyp': 1.0},
+            (1, 2): {'Lauffrequenz': 400, 'Stoppstrom': 1.0, 'Laufstrom': 1.0, 'Booststrom': 1.0, 'Initiatortyp': 1.0},
+            (2, 1): {'Lauffrequenz': 1.0, 'Stoppstrom': 2, 'Laufstrom': 1.0, 'Booststrom': 1.0, 'Initiatortyp': 1.0},
+            (2, 2): {'Lauffrequenz': 1.0, 'Stoppstrom': 1.0, 'Laufstrom': 2, 'Booststrom': 1.0, 'Initiatortyp': 1.0},
+            (3, 1): {'Lauffrequenz': 1.0, 'Stoppstrom': 1.0, 'Laufstrom': 1.0, 'Booststrom': 2, 'Initiatortyp': 1.0},
+            (3, 2): {'Lauffrequenz': 1.0, 'Stoppstrom': 1.0, 'Laufstrom': 1.0, 'Booststrom': 1.0, 'Initiatortyp': 0.0}}
+
+        controllers_to_init_f, motors_to_init_f, motors_config_f, motors_parameters_f = \
+            read_input_config_from_file(emulator, 'test_input/test_input_file2.csv')
+
+        self.assertEqual(controllers_to_init, controllers_to_init_f)
+        self.assertEqual(motors_to_init, motors_to_init_f)
+        self.assertEqual(motors_config, motors_config_f)
+        self.assertEqual(motors_parameters, motors_parameters_f)
+
     def test_initialize_with_input_file(self):
         emulator = MCC2BoxEmulator(n_bus=13, n_axes=7)
         box = Box(emulator, input_file='test_input/test_input_file.csv')
@@ -523,7 +586,7 @@ class TestBox(TestCase):
                                 'displ_null': 0.0,
                                 'null_position': 0.0}}
         parameters = {
-            (0, 1): {'Lauffrequenz': 1000, 'Stoppstrom': 1, 'Laufstrom': 2, 'Booststrom': 3, 'Initiatortyp': 0},
+            (0, 1): {'Lauffrequenz': 1000, 'Stoppstrom': 1, 'Laufstrom': 2, 'Booststrom': 3, 'Initiatortyp': 1},
             (12, 4): {'Lauffrequenz': 2000, 'Stoppstrom': 2, 'Laufstrom': 3, 'Booststrom': 4, 'Initiatortyp': 1},
             (3, 6): {'Lauffrequenz': 3000, 'Stoppstrom': 3, 'Laufstrom': 4, 'Booststrom': 5, 'Initiatortyp': 0},
             (12, 3): {'Lauffrequenz': 4000, 'Stoppstrom': 4, 'Laufstrom': 5, 'Booststrom': 6, 'Initiatortyp': 1}}
@@ -545,7 +608,11 @@ class TestBox(TestCase):
         self.assertEqual(1, len(box.controller[3].motor))
         self.assertEqual(0, len(box.controller[5].motor))
 
-        self.assertEqual(parameters, box.get_parameters())
+        for coord, param_line in parameters.items():
+            param_line_from_box = box.get_motor(coord).get_parameters()
+            for name, value in param_line.items():
+                self.assertEqual(value, param_line_from_box[name])
+
         for i, coord in enumerate(motors_list):
             motor = box.get_motor(coord)
             self.assertEqual(config_from_file[i], {**motor.config, 'name': motor.name})
@@ -568,10 +635,122 @@ class TestBox(TestCase):
         self.assertTrue(box.all_motors_stand())
 
     def test_calibrate_motors(self):
-        emulator = MCC2BoxEmulator(n_bus=13, n_axes=7)
-        box = Box(emulator, input_file='test_input/test_input_file.csv')
+        emulator = MCC2BoxEmulator(n_bus=2, n_axes=2, realtime=True)
+        box = Box(emulator, input_file='test_input/test_input_calibr.csv')
+        emulator.controller[0].motor[1].beginning = -500
+        emulator.controller[0].motor[1].end = 500
 
-        box.calibrate_motors()
+        calibr_thread = Thread(target=box.calibrate_motors)
+        calibr_thread.start()
+        emulator.controller[0].motor[1].sleep_steps(4)
+        self.assertFalse(emulator.controller[0].motor[1].stand())
+        self.assertTrue(emulator.controller[0].motor[2].stand())
+        self.assertFalse(emulator.controller[1].motor[1].stand())
+        self.assertFalse(emulator.controller[1].motor[2].stand())
+        emulator.realtime = False
+        calibr_thread.join()
+
+        self.assertEqual(-500, box.get_motor((0, 1)).config['null_position'])
+        self.assertEqual(0, box.get_motor((0, 2)).config['null_position'])
+        self.assertEqual(-10000, box.get_motor((1, 1)).config['null_position'])
+        self.assertEqual(-10000, box.get_motor((1, 2)).config['null_position'])
+
+        self.assertEqual(1, round(box.get_motor((0, 1)).config['norm_per_contr'], 4))
+        self.assertEqual(1, round(box.get_motor((0, 2)).config['norm_per_contr'], 4))
+        self.assertEqual(0.05, round(box.get_motor((1, 1)).config['norm_per_contr'], 4))
+        self.assertEqual(0.05, round(box.get_motor((1, 2)).config['norm_per_contr'], 4))
+
+    def test_read_saved_session_data_from_file(self):
+        emulator = MCC2BoxEmulator(n_bus=2, n_axes=2)
+
+        data = {(0, 1): (153.0, 0.05, (None, None)),
+                (0, 2): (253.0, 1.0, (100, None)),
+                (1, 1): (353.0, 1.0, (None, 200)),
+                (1, 2): (463.5, 0.05, (50.5, 200.56))}
+
+        self.assertEqual(data, read_saved_session_data_from_file('test_data/test_saved_motors_data.txt'))
+
+    def test_read_saved_session_data(self):
+        emulator = MCC2BoxEmulator(n_bus=3, n_axes=3)
+        box = Box(emulator)
+
+        data = {(0, 1): (153.0, 0.05, (None, None)),
+                (0, 2): (253.0, 1.0, (100, None)),
+                (1, 1): (353.0, 1.0, (None, 200)),
+                (1, 2): (463.5, 0.05, (50.5, 200.56))}
+
+        list_to_calibration = [(0, 3), (1, 3), (2, 1), (2, 2), (2, 3)]
+        self.assertEqual(list_to_calibration, box.read_saved_session_data('test_data/test_saved_motors_data.txt'))
+
+        for coord in data:
+            motor = box.get_motor(coord)
+            motor_data = (motor.position(), motor.config['norm_per_contr'], motor.soft_limits)
+            self.assertEqual(data[coord], motor_data)
+
+    def test_save_session_data(self):
+        emulator = MCC2BoxEmulator(n_bus=2, n_axes=2)
+        box = Box(emulator)
+        if os.path.isfile('test_data/test_saved_motors_data2.txt'):
+            os.remove('test_data/test_saved_motors_data2.txt')
+        data = read_saved_session_data_from_file('test_data/test_saved_motors_data.txt')
+
+        box.read_saved_session_data('test_data/test_saved_motors_data.txt')
+        box.save_session_data('test_data/test_saved_motors_data2.txt')
+        self.assertEqual(data, read_saved_session_data_from_file('test_data/test_saved_motors_data2.txt'))
+
+        emulator = MCC2BoxEmulator(n_bus=1, n_axes=1)
+        box = Box(emulator)
+        box.read_saved_session_data('test_data/test_saved_motors_data.txt')
+        box.save_session_data('test_data/test_saved_motors_data2.txt')
+        self.assertEqual(data, read_saved_session_data_from_file('test_data/test_saved_motors_data2.txt'))
+
+    def test_make_empty_input_file(self):
+        emulator = MCC2BoxEmulator(n_bus=2, n_axes=2)
+        box = Box(emulator)
+        if os.path.isfile('test_input/test_input_data(Vorlage).csv'):
+            os.remove('test_input/test_input_data(Vorlage).csv')
+
+        box.make_empty_input_file('test_input/test_input_data(Vorlage).csv')
+
+        header = ['Motor Name', 'Bus', 'Achse', 'Mit Initiatoren(0 oder 1)', 'Einheiten', 'Umrechnungsfaktor']
+        for parameter_name in MCC2Communicator.PARAMETER_DEFAULT.keys():
+            header.append(parameter_name)
+
+        file = read_csv('test_input/test_input_data(Vorlage).csv')
+        self.assertEqual(4, len(file))
+        self.assertEqual(header, list(file[0].keys()))
+        self.assertEqual(('Motor0.1', '0', '1'), (file[0]['Motor Name'], file[0]['Bus'], file[0]['Achse']))
+        self.assertEqual(('Motor0.2', '0', '2'), (file[1]['Motor Name'], file[1]['Bus'], file[1]['Achse']))
+        self.assertEqual(('Motor1.1', '1', '1'), (file[2]['Motor Name'], file[2]['Bus'], file[2]['Achse']))
+        self.assertEqual(('Motor1.2', '1', '2'), (file[3]['Motor Name'], file[3]['Bus'], file[3]['Achse']))
+
+    def test_motors_names_list(self):
+        emulator = MCC2BoxEmulator(n_bus=2, n_axes=3)
+        box = Box(emulator)
+
+        names_list = {'Motor0.1', 'Motor0.2', 'Motor0.3', 'Motor1.1', 'Motor1.2', 'Motor1.3'}
+        self.assertEqual(names_list, set(box.motors_names_list()))
+
+    def test_controllers_list(self):
+        emulator = MCC2BoxEmulator(n_bus=14, n_axes=3)
+        box = Box(emulator)
+
+        controller_list = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13}
+        self.assertEqual(controller_list, set(box.controllers_list()))
+
+    def test_motors_without_initiators(self):
+        emulator = MCC2BoxEmulator(n_bus=2, n_axes=2, realtime=True)
+        box = Box(emulator, input_file='test_input/test_input_file3.csv')
+
+        motors_without_initiators = {(0, 2), (1, 1)}
+        self.assertEqual(motors_without_initiators, set(box.motors_without_initiators()))
+
+    def test_motors_with_initiators(self):
+        emulator = MCC2BoxEmulator(n_bus=3, n_axes=2, realtime=True)
+        box = Box(emulator, input_file='test_input/test_input_file3.csv')
+
+        motors_with_initiators = {(0, 1), (1, 2), (2, 1), (2, 2)}
+        self.assertEqual(motors_with_initiators, set(box.motors_with_initiators()))
 
 
 if __name__ == '__main__':

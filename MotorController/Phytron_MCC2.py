@@ -16,15 +16,18 @@ class MCC2Communicator(ContrCommunicator):
     Hier sind alle MCC2-spezifische Eigenschaften zusammen gesammelt"""
 
     # Dict, der für jeder Parameter dazugehöriger Nummer ausgibt.
-    PARAMETER_NUMBER = {'Lauffrequenz': 14, 'Stoppstrom': 40, 'Laufstrom': 41, 'Booststrom': 42, 'Initiatortyp': 27}
+    PARAMETER_NUMBER = {'Lauffrequenz': 14, 'Stoppstrom': 40, 'Laufstrom': 41, 'Booststrom': 42, 'Initiatortyp': 27,
+                        'Umrechnungsfaktor(Contr)': 3}
     # Dict, mit den Beschreibungen der Parametern.
     PARAMETER_DESCRIPTION = {'Lauffrequenz': 'ein int Wert in Hz (max 40 000)',
                              'Stoppstrom': '',
                              'Laufstrom': '',
                              'Booststrom': '',
-                             'Initiatortyp': '0 = PNP-Öffner oder 1 = PNP-Schließer'}
+                             'Initiatortyp': '0 = PNP-Öffner oder 1 = PNP-Schließer',
+                             'Umrechnungsfaktor(Contr)': ''}
     # Dict, mit den Defaultwerten der Parametern.
-    PARAMETER_DEFAULT = {'Lauffrequenz': 400.0, 'Stoppstrom': 2, 'Laufstrom': 2, 'Booststrom': 2, 'Initiatortyp': 0}
+    PARAMETER_DEFAULT = {'Lauffrequenz': 400.0, 'Stoppstrom': 2, 'Laufstrom': 2, 'Booststrom': 2, 'Initiatortyp': 0,
+                         'Umrechnungsfaktor(Contr)': 1}
 
     def __init__(self, connector: Connector):
         self.connector = connector
@@ -65,12 +68,18 @@ class MCC2Communicator(ContrCommunicator):
     def get_parameter(self, parameter_name: str, bus: int, axis: int) -> float:
         """Liest den Wert des angegebenen Parameters."""
 
+        if parameter_name not in self.PARAMETER_NUMBER.keys():
+            raise ValueError(f'Falscher Name des Parameters: "{parameter_name}"')
+
         param_number = self.PARAMETER_NUMBER[parameter_name]
         command = f"P{param_number}R".encode()
         return self.command_with_float_reply(command, bus, axis)
 
     def set_parameter(self, parameter_name: str, neu_value: float, bus: int, axis: int):
         """Ändert den Wert des angegebenen Parameters."""
+
+        if parameter_name not in self.PARAMETER_NUMBER.keys():
+            raise ValueError(f'Falscher Name des Parameters: "{parameter_name}"')
 
         param_number = self.PARAMETER_NUMBER[parameter_name]
         command = f"P{param_number}S{neu_value}".encode()
@@ -111,8 +120,8 @@ class MCC2Communicator(ContrCommunicator):
         """Gibt die Liste der allen verfügbaren Bus-Nummern zurück."""
 
         bus_list = []
-        for i in range(5):
-            for j in range(4):
+        for i in range(16):
+            for j in range(2):
                 check = self.bus_check(i)
                 if check[0]:
                     bus_list.append(i)
@@ -135,7 +144,7 @@ class MCC2Communicator(ContrCommunicator):
         """Prüft ob es bei dem Com-Port tatsächlich ein Controller gibt, und gibt die Version davon zurück."""
 
         check = False
-        for i in range(15):
+        for i in range(16):
             for j in range(4):
                 check = self.bus_check(i)
                 # print(check)
@@ -243,7 +252,7 @@ class MCC2Communicator(ContrCommunicator):
         """Prüft die Antwort vom Controller für ein Befehl ohne erwartete Antwort."""
 
         if reply[0] is None:
-            raise ReplyError('Der Controller antwortet nicht!')
+            raise NoReplyError('Der Controller antwortet nicht!')
         elif reply[0] is False:
             raise ControllerError('Controller hat den Befehl negativ quittiert!')
         elif reply[0] is True:
@@ -256,7 +265,7 @@ class MCC2Communicator(ContrCommunicator):
         """
 
         if reply[0] is None:
-            raise ReplyError('Der Controller antwortet nicht!')
+            raise NoReplyError('Der Controller antwortet nicht!')
         elif reply[0] is False:
             raise ControllerError('Controller hat den Befehl negativ quittiert!')
         elif reply[0] is True:
@@ -271,7 +280,7 @@ class MCC2Communicator(ContrCommunicator):
         """
 
         if reply[0] is None:
-            raise ReplyError('Der Controller antwortet nicht!')
+            raise NoReplyError('Der Controller antwortet nicht!')
         elif reply[0] is False:
             raise ControllerError('Controller hat den Befehl negativ quittiert!')
         elif reply[1] == b'E':
@@ -319,8 +328,6 @@ class MCC2BoxEmulator(SerialEmulator, ContrCommunicator):
     PARAMETER_NUMBER = deepcopy(MCC2Communicator.PARAMETER_NUMBER)
     PARAMETER_DEFAULT = deepcopy(MCC2Communicator.PARAMETER_DEFAULT)
 
-    PARAMETER_NUMBER['Umrechnungsfaktor'] = 3
-
     def __init__(self, n_bus: int = 3, n_axes: int = 2, realtime: bool = False):
         self.realtime = realtime
         self.controller: Dict[int, MCC2ControllerEmulator] = {}
@@ -328,6 +335,7 @@ class MCC2BoxEmulator(SerialEmulator, ContrCommunicator):
             self.controller[i] = MCC2ControllerEmulator(self, n_axes)
 
         self.buffer: bytes = b''
+        self.last_command = b''
 
     def go(self, shift: float, bus: int, axis: int):
         """Verschiebt den angegeben Motor um die angegebene Verschiebung."""
@@ -446,6 +454,8 @@ class MCC2BoxEmulator(SerialEmulator, ContrCommunicator):
                 return True
             except ValueError:
                 return False
+
+        self.last_command = command
 
         confirm = b'\x06'
         denial = b'\x15'
@@ -582,7 +592,6 @@ class MCC2MotorEmulator:
         self.__stop = False
 
         self.parameter_values = deepcopy(MCC2BoxEmulator.PARAMETER_DEFAULT)
-        self.parameter_values['Umrechnungsfaktor'] = 1
 
         self.beginning = -10000
         self.end = 10000
@@ -597,10 +606,10 @@ class MCC2MotorEmulator:
         return self._end_initiator
 
     def get_position(self):
-        return self.__position * self.parameter_values['Umrechnungsfaktor']
+        return self.__position * self.parameter_values['Umrechnungsfaktor(Contr)']
 
     def set_position(self, value: float):
-        self.__position = value/self.parameter_values['Umrechnungsfaktor']
+        self.__position = value/self.parameter_values['Umrechnungsfaktor(Contr)']
 
     def set_parameter(self, n: int, value: Union[float, int]):
         if n == 20:
@@ -615,7 +624,7 @@ class MCC2MotorEmulator:
             return self.parameter_values[self.PARAMETER_NAME[n]]
 
     def go_to(self, destination: float):
-        self.__destination = destination/self.parameter_values['Umrechnungsfaktor']
+        self.__destination = destination/self.parameter_values['Umrechnungsfaktor(Contr)']
         if self.stand():
             threading.Thread(target=self.__move).start()
 

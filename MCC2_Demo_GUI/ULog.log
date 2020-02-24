@@ -2290,3 +2290,391 @@ Controller 4 (2 Achsen)
 2020-01-26 00:42:51,329  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
 2020-01-26 00:42:51,329  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
 2020-01-26 00:42:51,331  MotorControllerInterface  save_session_data  [INFO]  Kalibrierungsdaten fÃ¼r  Motoren ((0, 1), (1, 1), (1, 2), (2, 1), (2, 2)) wurde gespeichert.
+2020-02-10 19:38:24,202  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-02-10 19:38:25,002  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 0 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-10 19:38:25,804  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 1 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-10 19:38:26,606  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 2 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-10 19:38:27,408  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 3 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-10 19:38:28,210  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 4 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-10 19:38:55,745  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-02-10 19:38:56,547  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 0 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-10 19:38:57,351  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 1 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-10 19:38:58,152  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 2 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-10 19:38:58,954  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 3 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-10 19:38:59,755  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 4 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-10 19:39:31,948  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-02-10 19:39:32,751  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 0 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-10 19:39:33,553  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 1 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-10 19:39:34,354  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 2 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-10 19:39:35,156  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 3 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-10 19:39:35,959  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 4 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-10 19:45:12,834  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-02-10 19:45:13,637  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 0 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-10 19:45:14,440  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 1 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-10 19:45:15,243  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 2 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-10 19:45:16,044  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 3 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-10 19:45:16,846  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 4 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-10 20:07:35,726  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-02-10 20:07:41,763  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 51.0 geschickt.
+2020-02-10 20:07:49,217  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 159.0 geschickt.
+2020-02-10 20:07:51,594  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 141.0 geschickt.
+2020-02-10 20:08:00,355  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 99.0 geschickt.
+2020-02-10 20:08:02,455  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 190.0 geschickt.
+2020-02-10 20:08:04,485  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 274.0 geschickt.
+2020-02-10 20:08:12,197  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor MirrorX wurde angefangen.
+2020-02-10 20:08:12,198  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor Fokus wurde angefangen.
+2020-02-10 20:08:12,199  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor TestMotor wurde angefangen.
+2020-02-10 20:08:12,203  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um 500000.0 verschoben. 
+2020-02-10 20:08:12,207  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-02-10 20:08:12,220  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-02-10 20:08:21,781  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-02-10 20:08:33,353  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor TestMotor wurde abgeschlossen.
+2020-02-10 20:08:50,915  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. 
+2020-02-10 20:09:14,048  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-02-10 20:09:15,061  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-02-10 20:09:33,633  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor MirrorX wurde abgeschlossen.
+2020-02-10 20:10:16,876  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor Fokus wurde abgeschlossen.
+2020-02-10 20:10:16,878  MotorControllerInterface  calibrate_motors  [INFO]  Kalibrierung von allen Motoren wurde abgeschlossen.
+2020-02-10 20:10:24,612  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 558.9293072487999 geschickt.
+2020-02-10 20:10:30,822  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 491.92930724879994 geschickt.
+2020-02-10 20:10:33,601  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 324.92930724879994 geschickt.
+2020-02-10 20:10:43,600  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 307.92930724879994 geschickt.
+2020-02-10 20:10:50,156  MotorControllerInterface  go_to  [ERROR]  Soft Limits Fehler: Obere Grenze ist kleiner als Untere! (Motor 2 beim Controller 2:)
+2020-02-10 20:10:50,752  MotorControllerInterface  go_to  [ERROR]  Soft Limits Fehler: Obere Grenze ist kleiner als Untere! (Motor 2 beim Controller 2:)
+2020-02-10 20:10:51,364  MotorControllerInterface  go_to  [ERROR]  Soft Limits Fehler: Obere Grenze ist kleiner als Untere! (Motor 2 beim Controller 2:)
+2020-02-10 20:11:06,838  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 307.92930724879994 geschickt.
+2020-02-10 20:11:07,970  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 327.92930724879994 geschickt.
+2020-02-10 20:11:09,054  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 372.92930724879994 geschickt.
+2020-02-10 20:11:10,714  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 407.92930724879994 geschickt.
+2020-02-10 20:11:12,812  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 369.92930724879994 geschickt.
+2020-02-10 20:11:14,300  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 307.92930724879994 geschickt.
+2020-02-10 20:11:22,054  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 8.787187132188393 geschickt.
+2020-02-10 20:11:30,186  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -0.2013587232272016 geschickt.
+2020-02-10 20:11:32,537  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 69.70955348556078 geschickt.
+2020-02-10 20:11:42,574  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 141.61792032888556 geschickt.
+2020-02-10 20:13:14,281  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 340.92930724879994 geschickt.
+2020-02-10 20:13:53,988  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-02-10 20:13:53,990  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-02-10 20:13:53,991  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-02-10 20:13:53,993  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-02-10 20:13:53,995  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-02-10 20:13:54,013  MotorControllerInterface  save_session_data  [INFO]  Kalibrierungsdaten für  Motoren ((0, 1), (1, 1), (1, 2), (2, 1), (2, 2)) wurde gespeichert.
+2020-02-10 20:14:00,937  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-02-10 20:14:09,793  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 321.0 geschickt.
+2020-02-10 20:14:11,423  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 289.0 geschickt.
+2020-02-10 20:14:16,395  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 141.0 geschickt.
+2020-02-10 20:14:24,170  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 200.0 geschickt.
+2020-02-10 20:14:26,513  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 200.0 geschickt.
+2020-02-10 20:14:27,069  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 200.0 geschickt.
+2020-02-10 20:14:27,692  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 274.0 geschickt.
+2020-02-10 20:14:28,981  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 200.0 geschickt.
+2020-02-10 20:14:31,367  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 200.0 geschickt.
+2020-02-10 20:14:32,872  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-02-10 20:14:32,874  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-02-10 20:14:32,875  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-02-10 20:14:32,877  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-02-10 20:14:32,879  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-02-10 20:14:32,893  MotorControllerInterface  save_session_data  [INFO]  Kalibrierungsdaten für  Motoren ((0, 1), (1, 1), (1, 2), (2, 1), (2, 2)) wurde gespeichert.
+2020-02-10 20:14:39,980  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-02-10 20:14:44,329  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 153.0 geschickt.
+2020-02-10 20:18:29,186  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-02-10 20:18:29,188  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-02-10 20:18:29,190  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-02-10 20:18:29,191  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-02-10 20:18:29,193  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-02-10 20:18:29,210  MotorControllerInterface  save_session_data  [INFO]  Kalibrierungsdaten für  Motoren ((0, 1), (1, 1), (1, 2), (2, 1), (2, 2)) wurde gespeichert.
+2020-02-10 20:23:35,048  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-02-10 20:23:44,541  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 110.0 geschickt.
+2020-02-10 20:23:50,620  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 204.0 geschickt.
+2020-02-10 20:23:59,223  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 100.0 geschickt.
+2020-02-10 20:24:02,583  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 100.0 geschickt.
+2020-02-10 20:24:03,467  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 159.0 geschickt.
+2020-02-10 20:24:04,757  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 100.0 geschickt.
+2020-02-10 20:24:10,751  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 170.0 geschickt.
+2020-02-10 20:24:13,070  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 202.0 geschickt.
+2020-02-10 20:24:22,833  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-02-10 20:24:22,835  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-02-10 20:24:22,837  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-02-10 20:24:22,839  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-02-10 20:24:22,841  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-02-10 20:24:22,859  MotorControllerInterface  save_session_data  [INFO]  Kalibrierungsdaten für  Motoren ((0, 1), (1, 1), (1, 2), (2, 1), (2, 2)) wurde gespeichert.
+2020-02-10 20:24:27,827  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-02-10 20:24:33,321  MotorControllerInterface  go_to  [INFO]  Motor 2 beim Controller 2 wurde zu 245.0 geschickt.
+2020-02-10 20:25:02,692  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-02-10 20:25:02,693  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-02-10 20:25:02,695  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-02-10 20:25:02,698  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-02-10 20:25:02,700  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-02-10 20:25:02,717  MotorControllerInterface  save_session_data  [INFO]  Kalibrierungsdaten für  Motoren ((0, 1), (1, 1), (1, 2), (2, 1), (2, 2)) wurde gespeichert.
+2020-02-10 20:27:06,889  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-02-10 20:27:09,241  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 150.0 geschickt.
+2020-02-10 20:27:16,223  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 200.0 geschickt.
+2020-02-10 20:27:20,394  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-02-10 20:27:20,396  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-02-10 20:27:20,398  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-02-10 20:27:20,400  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-02-10 20:27:20,401  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-02-10 20:27:20,416  MotorControllerInterface  save_session_data  [INFO]  Kalibrierungsdaten für  Motoren ((0, 1), (1, 1), (1, 2), (2, 1), (2, 2)) wurde gespeichert.
+2020-02-10 20:27:20,418  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-02-10 20:27:20,419  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-02-10 20:27:20,421  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-02-10 20:27:20,422  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-02-10 20:27:20,424  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-02-10 20:27:20,439  MotorControllerInterface  save_session_data  [INFO]  Kalibrierungsdaten für  Motoren ((0, 1), (1, 1), (1, 2), (2, 1), (2, 2)) wurde gespeichert.
+2020-02-10 20:27:28,259  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-02-10 20:27:28,404  MotorControllerInterface  read_saved_session_data  [INFO]  Gesicherte Daten für Motoren [(0, 1), (1, 1), (1, 2), (2, 1), (2, 2)] wurde geladen.
+2020-02-10 20:27:30,823  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 166.0 geschickt.
+2020-02-10 20:27:50,913  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-02-10 20:27:50,916  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-02-10 20:27:50,919  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-02-10 20:27:50,921  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-02-10 20:27:50,922  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-02-10 20:27:50,938  MotorControllerInterface  save_session_data  [INFO]  Kalibrierungsdaten für  Motoren ((0, 1), (1, 1), (1, 2), (2, 1), (2, 2)) wurde gespeichert.
+2020-02-10 20:27:50,940  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-02-10 20:27:50,942  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-02-10 20:27:50,943  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-02-10 20:27:50,945  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-02-10 20:27:50,947  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-02-10 20:27:50,962  MotorControllerInterface  save_session_data  [INFO]  Kalibrierungsdaten für  Motoren ((0, 1), (1, 1), (1, 2), (2, 1), (2, 2)) wurde gespeichert.
+2020-02-10 20:30:04,483  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-02-10 20:30:04,627  MotorControllerInterface  read_saved_session_data  [INFO]  Gesicherte Daten für Motoren [(0, 1), (1, 1), (1, 2), (2, 1), (2, 2)] wurde geladen.
+2020-02-10 20:30:09,230  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 177.0 geschickt.
+2020-02-10 20:30:16,087  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 211.0 geschickt.
+2020-02-10 20:30:19,027  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-02-10 20:30:19,029  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-02-10 20:30:19,032  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-02-10 20:30:19,034  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-02-10 20:30:19,036  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-02-10 20:30:19,051  MotorControllerInterface  save_session_data  [INFO]  Kalibrierungsdaten für  Motoren ((0, 1), (1, 1), (1, 2), (2, 1), (2, 2)) wurde gespeichert.
+2020-02-10 20:30:23,301  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-02-10 20:30:23,446  MotorControllerInterface  read_saved_session_data  [INFO]  Gesicherte Daten für Motoren [(0, 1), (1, 1), (1, 2), (2, 1), (2, 2)] wurde geladen.
+2020-02-10 20:30:39,494  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-02-10 20:30:39,495  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-02-10 20:30:39,497  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-02-10 20:30:39,499  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-02-10 20:30:39,501  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-02-10 20:30:39,517  MotorControllerInterface  save_session_data  [INFO]  Kalibrierungsdaten für  Motoren ((0, 1), (1, 1), (1, 2), (2, 1), (2, 2)) wurde gespeichert.
+2020-02-24 23:03:06,742  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-02-24 23:03:06,744  MotorControllerInterface  read_saved_session_data  [INFO]  Gesicherte Daten fÃ¼r Motoren [(0, 1), (1, 1), (1, 2), (2, 1), (2, 2)] wurde geladen.
+2020-02-24 23:03:10,001  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 54.003543196500004 geschickt.
+2020-02-24 23:03:11,092  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -30.996456803499996 geschickt.
+2020-02-24 23:03:13,657  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 161.0035431965 geschickt.
+2020-02-24 23:03:15,536  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -20.996456803499996 geschickt.
+2020-02-24 23:03:25,132  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 123.0035431965 geschickt.
+2020-02-24 23:03:27,101  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 189.0035431965 geschickt.
+2020-02-24 23:03:36,362  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 1 wurde um 100.0 verschoben. 
+2020-02-24 23:03:37,498  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 1 wurde um 100.0 verschoben. 
+2020-02-24 23:03:38,589  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 1 wurde um 100.0 verschoben. 
+2020-02-24 23:03:41,357  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um 100.0 verschoben. 
+2020-02-24 23:03:42,031  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um 100.0 verschoben. 
+2020-02-24 23:03:42,718  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um 100.0 verschoben. 
+2020-02-24 23:03:43,931  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu 415.8327472689 geschickt.
+2020-02-24 23:03:50,486  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-02-24 23:03:50,486  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-02-24 23:03:50,486  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-02-24 23:03:50,486  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-02-24 23:03:50,486  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-02-24 23:03:50,487  MotorControllerInterface  save_session_data  [INFO]  Kalibrierungsdaten fÃ¼r  Motoren ((0, 1), (1, 1), (1, 2), (2, 1), (2, 2)) wurde gespeichert.
+2020-02-24 23:05:31,701  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-02-24 23:05:31,702  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 5 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-24 23:05:31,702  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 6 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-24 23:05:31,702  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 7 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-24 23:05:31,702  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 8 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-24 23:05:31,702  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 9 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-24 23:05:31,702  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 10 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-24 23:05:31,703  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 11 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-24 23:05:31,703  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 12 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-24 23:05:31,703  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 13 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-24 23:05:31,703  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 14 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-24 23:05:31,703  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 15 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-24 23:05:31,705  MotorControllerInterface  read_saved_session_data  [INFO]  Gesicherte Daten fÃ¼r Motoren [(0, 1), (1, 1), (1, 2), (2, 1), (2, 2)] wurde geladen.
+2020-02-24 23:05:37,344  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -99.9964568035 geschickt.
+2020-02-24 23:05:38,244  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -201.9964568035 geschickt.
+2020-02-24 23:05:39,357  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -114.9964568035 geschickt.
+2020-02-24 23:05:41,945  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -181.9964568035 geschickt.
+2020-02-24 23:05:42,902  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -243.9964568035 geschickt.
+2020-02-24 23:05:43,801  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -82.9964568035 geschickt.
+2020-02-24 23:05:53,916  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -183.9964568035 geschickt.
+2020-02-24 23:05:56,627  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -94.9964568035 geschickt.
+2020-02-24 23:05:58,416  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -193.9964568035 geschickt.
+2020-02-24 23:06:01,464  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -132.9964568035 geschickt.
+2020-02-24 23:06:02,566  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -75.9964568035 geschickt.
+2020-02-24 23:06:04,367  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -35.996456803499996 geschickt.
+2020-02-24 23:06:17,345  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-02-24 23:06:17,346  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-02-24 23:06:17,346  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-02-24 23:06:17,346  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-02-24 23:06:17,346  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-02-24 23:06:17,347  MotorControllerInterface  save_session_data  [INFO]  Kalibrierungsdaten fÃ¼r  Motoren ((0, 1), (1, 1), (1, 2), (2, 1), (2, 2)) wurde gespeichert.
+2020-02-25 00:00:49,994  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-02-25 00:00:49,997  MotorControllerInterface  read_saved_session_data  [INFO]  Gesicherte Daten fÃ¼r Motoren [(0, 1), (1, 1), (1, 2), (2, 1), (2, 2)] wurde geladen.
+2020-02-25 00:00:52,510  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -93.9964568035 geschickt.
+2020-02-25 00:00:53,736  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -197.9964568035 geschickt.
+2020-02-25 00:00:54,995  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -59.996456803499996 geschickt.
+2020-02-25 00:00:56,819  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -175.9964568035 geschickt.
+2020-02-25 00:01:02,230  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -86.9964568035 geschickt.
+2020-02-25 00:01:03,377  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 36.003543196500004 geschickt.
+2020-02-25 00:01:04,670  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -142.9964568035 geschickt.
+2020-02-25 00:01:06,044  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -263.9964568035 geschickt.
+2020-02-25 00:01:07,394  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -125.9964568035 geschickt.
+2020-02-25 00:01:11,050  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -209.9964568035 geschickt.
+2020-02-25 00:01:16,109  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-02-25 00:01:16,109  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-02-25 00:01:16,109  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-02-25 00:01:16,109  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-02-25 00:01:16,109  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-02-25 00:01:16,110  MotorControllerInterface  save_session_data  [INFO]  Kalibrierungsdaten fÃ¼r  Motoren ((0, 1), (1, 1), (1, 2), (2, 1), (2, 2)) wurde gespeichert.
+2020-02-25 00:04:44,672  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-02-25 00:04:44,675  MotorControllerInterface  read_saved_session_data  [INFO]  Gesicherte Daten fÃ¼r Motoren [(0, 1), (1, 1), (1, 2), (2, 1), (2, 2)] wurde geladen.
+2020-02-25 00:04:50,269  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 59.003543196500004 geschickt.
+2020-02-25 00:04:53,509  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 128.0035431965 geschickt.
+2020-02-25 00:04:56,220  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 39.003543196500004 geschickt.
+2020-02-25 00:04:58,594  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 101.0035431965 geschickt.
+2020-02-25 00:05:02,280  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-02-25 00:05:02,280  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-02-25 00:05:02,280  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-02-25 00:05:02,280  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-02-25 00:05:02,281  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-02-25 00:05:02,281  MotorControllerInterface  save_session_data  [INFO]  Kalibrierungsdaten fÃ¼r  Motoren ((0, 1), (1, 1), (1, 2), (2, 1), (2, 2)) wurde gespeichert.
+2020-02-25 00:05:33,958  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-02-25 00:05:33,960  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 5 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-25 00:05:33,960  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 6 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-25 00:05:33,960  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 7 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-25 00:05:33,961  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 8 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-25 00:05:33,961  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 9 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-25 00:05:33,961  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 10 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-25 00:05:33,961  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 11 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-25 00:05:33,961  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 12 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-25 00:05:33,962  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 13 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-25 00:05:33,962  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 14 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-25 00:05:33,962  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 15 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-25 00:05:33,965  MotorControllerInterface  read_saved_session_data  [INFO]  Gesicherte Daten fÃ¼r Motoren [(0, 1), (1, 1), (1, 2), (2, 1), (2, 2)] wurde geladen.
+2020-02-25 00:05:41,873  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 72.0035431965 geschickt.
+2020-02-25 00:05:44,787  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -71.9964568035 geschickt.
+2020-02-25 00:05:49,118  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -6.996456803499996 geschickt.
+2020-02-25 00:05:53,230  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-02-25 00:05:53,231  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-02-25 00:05:53,231  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-02-25 00:05:53,231  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-02-25 00:05:53,231  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-02-25 00:05:53,232  MotorControllerInterface  save_session_data  [INFO]  Kalibrierungsdaten fÃ¼r  Motoren ((0, 1), (1, 1), (1, 2), (2, 1), (2, 2)) wurde gespeichert.
+2020-02-25 00:08:43,655  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-02-25 00:08:43,657  MotorControllerInterface  read_saved_session_data  [INFO]  Gesicherte Daten fÃ¼r Motoren [(0, 1), (1, 1), (1, 2), (2, 1), (2, 2)] wurde geladen.
+2020-02-25 00:08:54,712  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -49.996456803499996 geschickt.
+2020-02-25 00:09:00,381  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -88.9964568035 geschickt.
+2020-02-25 00:09:02,766  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -119.9964568035 geschickt.
+2020-02-25 00:09:05,028  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 49.003543196500004 geschickt.
+2020-02-25 00:09:07,491  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 91.0035431965 geschickt.
+2020-02-25 00:09:16,693  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -29.996456803499996 geschickt.
+2020-02-25 00:09:18,022  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 15.003543196500004 geschickt.
+2020-02-25 00:09:26,447  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-02-25 00:09:26,447  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-02-25 00:09:26,447  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-02-25 00:09:26,448  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-02-25 00:09:26,448  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-02-25 00:09:26,449  MotorControllerInterface  save_session_data  [INFO]  Kalibrierungsdaten fÃ¼r  Motoren ((0, 1), (1, 1), (1, 2), (2, 1), (2, 2)) wurde gespeichert.
+2020-02-25 00:09:44,396  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-02-25 00:09:44,399  MotorControllerInterface  read_saved_session_data  [INFO]  Gesicherte Daten fÃ¼r Motoren [(0, 1), (1, 1), (1, 2), (2, 1), (2, 2)] wurde geladen.
+2020-02-25 00:10:00,310  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -62.996456803499996 geschickt.
+2020-02-25 00:14:50,555  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-02-25 00:14:50,557  MotorControllerInterface  read_saved_session_data  [INFO]  Gesicherte Daten fÃ¼r Motoren [(0, 1), (1, 1), (1, 2), (2, 1), (2, 2)] wurde geladen.
+2020-02-25 00:14:54,210  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor MirrorX wurde angefangen.
+2020-02-25 00:14:54,217  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um 500000.0 verschoben. 
+2020-02-25 00:14:54,217  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor Fokus wurde angefangen.
+2020-02-25 00:14:54,224  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor TestMotor wurde angefangen.
+2020-02-25 00:14:54,238  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-02-25 00:14:54,261  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-02-25 00:14:54,276  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-02-25 00:14:54,281  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-02-25 00:14:54,737  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. 
+2020-02-25 00:14:54,782  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor Fokus wurde abgeschlossen.
+2020-02-25 00:14:54,782  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor TestMotor wurde abgeschlossen.
+2020-02-25 00:14:55,244  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor MirrorX wurde abgeschlossen.
+2020-02-25 00:14:55,245  MotorControllerInterface  calibrate_motors  [INFO]  Kalibrierung von allen Motoren wurde abgeschlossen.
+2020-02-25 00:15:01,430  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -6480.0 geschickt.
+2020-02-25 00:15:18,609  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -5680.0 geschickt.
+2020-02-25 00:15:22,487  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-02-25 00:15:22,487  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-02-25 00:15:22,487  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-02-25 00:15:22,487  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-02-25 00:15:22,487  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-02-25 00:15:22,489  MotorControllerInterface  save_session_data  [INFO]  Kalibrierungsdaten fÃ¼r  Motoren ((0, 1), (1, 1), (1, 2), (2, 1), (2, 2)) wurde gespeichert.
+2020-02-25 00:16:33,785  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-02-25 00:16:33,786  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 5 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-25 00:16:33,787  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 6 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-25 00:16:33,787  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 7 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-25 00:16:33,787  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 8 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-25 00:16:33,787  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 9 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-25 00:16:33,787  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 10 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-25 00:16:33,787  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 11 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-25 00:16:33,787  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 12 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-25 00:16:33,787  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 13 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-25 00:16:33,787  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 14 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-25 00:16:33,788  Phytron_MCC2  bus_list  [ERROR]  Bei Bus Nummer 15 keinen Kontroller gefunden. Controller Antwort:None
+2020-02-25 00:16:33,790  MotorControllerInterface  read_saved_session_data  [INFO]  Gesicherte Daten fÃ¼r Motoren [(0, 1), (1, 1), (1, 2), (2, 1), (2, 2)] wurde geladen.
+2020-02-25 00:16:36,245  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 1180.0 geschickt.
+2020-02-25 00:16:42,631  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor MirrorX wurde angefangen.
+2020-02-25 00:16:42,631  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor Fokus wurde angefangen.
+2020-02-25 00:16:42,637  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um 500000.0 verschoben. 
+2020-02-25 00:16:42,637  MotorControllerInterface  calibrate  [INFO]  Kalibrierung vom Motor TestMotor wurde angefangen.
+2020-02-25 00:16:42,650  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-02-25 00:16:42,674  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 0 wurde um -500000.0 verschoben. 
+2020-02-25 00:16:42,693  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um 500000.0 verschoben. 
+2020-02-25 00:16:42,712  MotorControllerInterface  go  [INFO]  Motor 2 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-02-25 00:16:42,718  MotorControllerInterface  go  [INFO]  Motor 1 beim Controller 2 wurde um -500000.0 verschoben. 
+2020-02-25 00:16:42,731  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor TestMotor wurde abgeschlossen.
+2020-02-25 00:16:42,732  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor MirrorX wurde abgeschlossen.
+2020-02-25 00:16:43,234  MotorControllerInterface  calibrate  [INFO]  Kalibrierung von Motor Fokus wurde abgeschlossen.
+2020-02-25 00:16:43,235  MotorControllerInterface  calibrate_motors  [INFO]  Kalibrierung von allen Motoren wurde abgeschlossen.
+2020-02-25 00:16:52,975  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -8000.0 geschickt.
+2020-02-25 00:16:54,550  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -7120.0 geschickt.
+2020-02-25 00:17:03,085  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-02-25 00:17:03,085  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-02-25 00:17:03,085  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-02-25 00:17:03,085  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-02-25 00:17:03,085  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-02-25 00:17:03,086  MotorControllerInterface  save_session_data  [INFO]  Kalibrierungsdaten fÃ¼r  Motoren ((0, 1), (1, 1), (1, 2), (2, 1), (2, 2)) wurde gespeichert.
+2020-02-25 00:17:26,558  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-02-25 00:17:26,560  MotorControllerInterface  read_saved_session_data  [INFO]  Gesicherte Daten fÃ¼r Motoren [(0, 1), (1, 1), (1, 2), (2, 1), (2, 2)] wurde geladen.
+2020-02-25 00:17:28,749  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 1380.0 geschickt.
+2020-02-25 00:17:30,077  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 3360.0 geschickt.
+2020-02-25 00:17:34,803  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 4680.0 geschickt.
+2020-02-25 00:17:36,569  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 5120.0 geschickt.
+2020-02-25 00:17:40,090  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 2160.0 geschickt.
+2020-02-25 00:17:44,590  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 1080.0 geschickt.
+2020-02-25 00:17:45,952  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 380.0 geschickt.
+2020-02-25 00:17:47,032  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 140.0 geschickt.
+2020-02-25 00:17:47,696  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 3420.0 geschickt.
+2020-02-25 00:17:52,586  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-02-25 00:17:52,586  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-02-25 00:17:52,587  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-02-25 00:17:52,587  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-02-25 00:17:52,587  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-02-25 00:17:52,588  MotorControllerInterface  save_session_data  [INFO]  Kalibrierungsdaten fÃ¼r  Motoren ((0, 1), (1, 1), (1, 2), (2, 1), (2, 2)) wurde gespeichert.
+2020-02-25 00:18:10,166  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-02-25 00:18:10,168  MotorControllerInterface  read_saved_session_data  [INFO]  Gesicherte Daten fÃ¼r Motoren [(0, 1), (1, 1), (1, 2), (2, 1), (2, 2)] wurde geladen.
+2020-02-25 00:18:12,266  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -840.0 geschickt.
+2020-02-25 00:18:16,767  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu 2820.0 geschickt.
+2020-02-25 00:18:23,481  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu 5400.0 geschickt.
+2020-02-25 00:18:24,471  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu 4000.0 geschickt.
+2020-02-25 00:18:25,653  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu 5940.0 geschickt.
+2020-02-25 00:18:26,801  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu 8380.0 geschickt.
+2020-02-25 00:18:29,125  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-02-25 00:18:29,125  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-02-25 00:18:29,125  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-02-25 00:18:29,126  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-02-25 00:18:29,126  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-02-25 00:18:29,126  MotorControllerInterface  save_session_data  [INFO]  Kalibrierungsdaten fÃ¼r  Motoren ((0, 1), (1, 1), (1, 2), (2, 1), (2, 2)) wurde gespeichert.
+2020-02-25 00:18:34,782  MotorControllerInterface  initialize_with_input_file  [INFO]  Box Initialisierung wurde gestartet.
+2020-02-25 00:18:34,783  MotorControllerInterface  read_saved_session_data  [INFO]  Gesicherte Daten fÃ¼r Motoren [(0, 1), (1, 1), (1, 2), (2, 1), (2, 2)] wurde geladen.
+2020-02-25 00:18:37,320  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu -1260.0 geschickt.
+2020-02-25 00:18:38,456  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 1460.0 geschickt.
+2020-02-25 00:18:39,805  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 2540.0 geschickt.
+2020-02-25 00:18:41,087  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 0 wurde zu 220.0 geschickt.
+2020-02-25 00:18:43,664  MotorControllerInterface  go_to  [INFO]  Motor 1 beim Controller 2 wurde zu -1500.0 geschickt.
+2020-02-25 00:18:44,920  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 0 wurde gestoppt.
+2020-02-25 00:18:44,920  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 1 wurde gestoppt.
+2020-02-25 00:18:44,920  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 1 wurde gestoppt.
+2020-02-25 00:18:44,921  MotorControllerInterface  stop  [INFO]  Motor 1 beim Controller 2 wurde gestoppt.
+2020-02-25 00:18:44,921  MotorControllerInterface  stop  [INFO]  Motor 2 beim Controller 2 wurde gestoppt.
+2020-02-25 00:18:44,921  MotorControllerInterface  save_session_data  [INFO]  Kalibrierungsdaten fÃ¼r  Motoren ((0, 1), (1, 1), (1, 2), (2, 1), (2, 2)) wurde gespeichert.

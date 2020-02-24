@@ -25,6 +25,8 @@ class Connector:
         return self.beg_symbol + message + self.end_symbol
 
     def reply_format(self, reply: bytes) -> Union[bytes, None]:
+        if reply == b'':
+            return None
         f_reply = deepcopy(reply)
         err = ReplyError(f'Unerwartete Antwort: "{reply}""')
         if not reply:
@@ -116,7 +118,7 @@ class SerialConnector(Connector):
             self.clear_buffer()
         self.ser.write(self.message_format(message))
 
-    def read(self) -> bytes:
+    def read(self) -> Union[bytes, None]:
         """Liest ein Nachricht von dem Controller bis zum bestimmten End-Symbol und gibt das zurück."""
 
         return self.reply_format(self.ser.read_until(self.end_symbol))
@@ -330,7 +332,9 @@ def __transform_raw_input_data(raw_config_data: List[dict], communicator: ContrC
             motor_line['Umrechnungsfaktor'] = Motor.DEFAULT_MOTOR_CONFIG['displ_per_contr']
 
         for parameter_name in communicator.PARAMETER_DEFAULT.keys():
-            if motor_line[parameter_name] != '':
+            if parameter_name not in motor_line.keys():
+                pass
+            elif motor_line[parameter_name] != '':
                 motor_line[parameter_name] = float(motor_line[parameter_name])
             else:
                 motor_line[parameter_name] = communicator.PARAMETER_DEFAULT[parameter_name]
@@ -370,7 +374,8 @@ def read_input_config_from_file(communicator: ContrCommunicator, address: str = 
 
         motor_parameters = {}
         for parameter_name in communicator.PARAMETER_DEFAULT.keys():
-            motor_parameters[parameter_name] = motor_line[parameter_name]
+            if parameter_name in motor_line.keys():
+                motor_parameters[parameter_name] = motor_line[parameter_name]
         motors_parameters[motor_coord] = motor_parameters
 
     return controllers_to_init, motors_to_init, motors_config, motors_parameters
@@ -569,25 +574,23 @@ class Motor:
         if self.with_initiators():
             logging.info(f'Kalibrierung vom Motor {self.name} wurde angefangen.')
 
-            motor = self
-
             # Bis zum Ende laufen
             while not self.at_the_end():
-                motor.go(500000, units='contr', calibrate=True)
+                self.go(500000, units='contr', calibrate=True)
                 self.wait_motor_stop(stop_indicator)
                 if stop_indicator is not None:
                     if stop_indicator.has_stop_requested():
                         return
-            end = motor.position('contr')
+            end = self.position('contr')
 
             # Bis zum Anfang laufen
             while not self.at_the_beginning():
-                motor.go(-500000, units='contr', calibrate=True)
+                self.go(-500000, units='contr', calibrate=True)
                 self.wait_motor_stop(stop_indicator)
                 if stop_indicator is not None:
                     if stop_indicator.has_stop_requested():
                         return
-            beginning = motor.position('contr')
+            beginning = self.position('contr')
 
             # Skala normieren
             self.config['norm_per_contr'] = 1000 / (end - beginning)
@@ -962,7 +965,7 @@ class Box:
         f.close()
         logging.info(f'Kalibrierungsdaten für  Motoren {self.motors_list()} wurde gespeichert.')
 
-    def read_saved_motors_data(self, address: str = "data/saved_session_data.txt"):
+    def read_saved_session_data(self, address: str = "data/saved_session_data.txt"):
         """Liest die gesicherte Positionen der Motoren aus einer Datei"""
 
         saved_data = read_saved_session_data_from_file(address)
@@ -988,14 +991,14 @@ class Box:
 
         return list_to_calibration
 
-    def make_empty_input_file(self, address: str = 'input/Phytron_Motoren_config(Vorlage).csv'):
+    def make_empty_input_file(self, address: str = 'input/input_data(Vorlage).csv'):
         """Erstellt eine Vorlage-Datei mit einer leeren Konfigurationstabelle"""
 
         f = open(address, "wt")
         separator = ';'
 
         # Motor liste schreiben
-        header = ['Motor Name', 'Bus', 'Achse', 'Mit Initiatoren(0 oder 1)', 'Einheiten', 'Einheiten pro Schritt']
+        header = ['Motor Name', 'Bus', 'Achse', 'Mit Initiatoren(0 oder 1)', 'Einheiten', 'Umrechnungsfaktor']
         for parameter_name in self.communicator.PARAMETER_DEFAULT.keys():
             header.append(parameter_name)
         header_length = len(header)
@@ -1057,17 +1060,15 @@ class Box:
         motors_list = []
         for controller in self:
             for motor in controller:
-                print(motor.coord(), motor.with_initiators())
                 if motor.with_initiators():
                     motors_list.append(motor.coord())
-        print(motors_list)
         return motors_list
 
     def close(self, data_folder: str = 'data/'):
         """Alle nötige am Ende der Arbeit Operationen ausführen."""
 
         self.stop()
-        self.save_session_data(address=data_folder + 'saved_motors_data.txt')
+        self.save_session_data(address=data_folder + 'saved_session_data.txt')
         del self
 
     # def calibrate_motors0(self, list_to_calibration: List[M_Coord] = None,
@@ -1153,7 +1154,11 @@ class ReplyError(Exception):
     """Grundklasse für die Fehler bei der Verbindung mit einem Controller"""
 
 
-class ControllerError(Exception):
+class NoReplyError(ReplyError):
+    """Grundklasse für die Fehler bei der Verbindung mit einem Controller"""
+
+
+class ControllerError(ReplyError):
     """Grundklasse für alle Fehler mit den Controllern"""
 
 
