@@ -1,6 +1,8 @@
 import concurrent.futures
 import csv
 import logging
+import socket
+import telnetlib
 import time
 from copy import deepcopy
 from typing import Dict, List, Tuple, Union, Set
@@ -29,8 +31,6 @@ class Connector:
             return None
         f_reply = deepcopy(reply)
         err = ReplyError(f'Unerwartete Antwort: "{reply}""')
-        if not reply:
-            return None
 
         if self.beg_symbol:
             if reply[:len(self.beg_symbol)] == self.beg_symbol:
@@ -49,7 +49,7 @@ class Connector:
         raise NotImplementedError
 
     def read(self) -> Union[bytes, None]:
-        """Liest ein Nachricht von dem Controller bis zum bestimmten End-Symbol oder bis zum maximale Anzahl von Bytes
+        """Liest ein Nachricht von dem Controller bis zum End-Symbol oder bis zum maximale Anzahl von Bytes
          und gibt das zurück."""
         raise NotImplementedError
 
@@ -63,6 +63,10 @@ class Connector:
 
     def get_timeout(self) -> float:
         """Einstellt das Time-out"""
+        raise NotImplementedError
+
+    def close(self):
+        """Führt alle nötige Aktivitäten am Ende der Arbeit durch."""
         raise NotImplementedError
 
 
@@ -89,6 +93,9 @@ class SerialEmulator:
 
     # noinspection PyPep8Naming
     def flushInput(self):
+        raise NotImplementedError
+
+    def close(self):
         raise NotImplementedError
 
 
@@ -129,7 +136,7 @@ class SerialConnector(Connector):
         self.ser.flushInput()
 
     def set_timeout(self, timeout: float):
-        """Einstellt das Time-out"""
+        """Stellt das Time-out ein"""
 
         self.ser.timeout = timeout
 
@@ -138,24 +145,45 @@ class SerialConnector(Connector):
 
         return self.ser.timeout
 
+    def close(self):
+        """Führt alle nötige Aktivitäten am Ende der Arbeit durch."""
+        self.ser.close()
 
-# class EthernetConnector(Connector):
-#     """Connector Objekt für eine Verbindung durch Ethernet."""
-#     beg_symbol = b''
-#     end_symbol = b'\r\n'
-#
-#     def __init__(self, ip: str, port: str, timeout: float = 1):
-#         self.socket = socket.socket()
-#         self.socket.connect((ip, port))
-#         self.socket.settimeout(timeout)
-#
-#     def send(self, message: bytes):
-#         """Schickt ein Nachricht zum Controller."""
-#         self.socket.send(message)
-#
-#     def read(self, end_symbol: bytes = None, max_bytes: int = 1024) -> bytes:
-#         """Liest ein Nachricht von dem Controller und gibt das zurück."""
-#         return self.socket.recv(max_bytes)
+
+class EthernetConnector(Connector):
+    """Connector Objekt für eine Verbindung durch Ethernet."""
+
+    def __init__(self, ip: str, port: int, timeout: float = 1, beg_symbol: bytes = b'', end_symbol: bytes = b'\r\n'):
+        self.tn = telnetlib.Telnet(ip, port)
+        self.__timeout = timeout
+        self.beg_symbol = beg_symbol
+        self.end_symbol = end_symbol
+
+    def send(self, message: bytes, clear_buffer=True):
+        """Schickt ein Nachricht zum Controller."""
+        if clear_buffer:
+            self.clear_buffer()
+        self.tn.write(self.message_format(message))
+
+    def read(self) -> bytes:
+        """Liest ein Nachricht von dem Controller und gibt das zurück."""
+        return self.reply_format(self.tn.read_until(self.end_symbol, self.__timeout))
+
+    def clear_buffer(self):
+        """Löscht alle vorher empfangene information aus Buffer"""
+        self.tn.read_very_eager()
+
+    def set_timeout(self, timeout: float):
+        """Stellt das Time-out ein"""
+        self.__timeout = timeout
+
+    def get_timeout(self) -> float:
+        """Gibt den Wert des Time-outs zurück"""
+        return self.__timeout
+
+    def close(self):
+        """Führt alle nötige Aktivitäten am Ende der Arbeit durch."""
+        self.tn.close()
 
 
 class ContrCommunicator:
@@ -163,6 +191,7 @@ class ContrCommunicator:
     Hier sind alle herstellerspezifische Eigenschaften und Algorithmen zusammen gesammelt"""
 
     PARAMETER_DEFAULT: Dict
+    tolerance: float  # Für diese Controller akzeptabele Abweichung bei Positionierung der Motoren (in Controller Einheiten)
 
     def go(self, shift: float, bus: int, axis: int):
         """Verschiebt den angegeben Motor um die angegebene Verschiebung."""
@@ -287,9 +316,8 @@ def __raw_saved_session_data_is_ok(raw_motors_data: List[dict]) -> bool:
     return True
 
 
-def __transform_raw_saved_session_data(raw_motors_data: List[dict])\
+def __transform_raw_saved_session_data(raw_motors_data: List[dict]) \
         -> Dict[Tuple[int, int], Tuple[float, float, tuple]]:
-
     transformed_motors_data = {}
     for motor_line in raw_motors_data:
         coord = (int(motor_line['bus']), int(motor_line['axis']))
@@ -389,13 +417,12 @@ class StopIndicator:
         raise NotImplementedError
 
 
-class CalibrationReporter:
+class WaitReporter:
     """Durch dieses Objekt kann man die Liste der im Moment laufenden Motoren bekommen.
-        Es wird als argument für PBox.wait_all_motors_stop() verwendet."""
-
-    wait_list: Set[str] = set()
+        Es wird als argument für PBox.wait_all_motors_stop() und andere Funktionen verwendet."""
 
     def set_wait_list(self, wait_list: Set[str]):
+        """Wird am Anfang angerufen. und es wird dadurch """
         raise NotImplementedError
 
     def motor_is_done(self, motor_name: str):
@@ -403,7 +430,7 @@ class CalibrationReporter:
 
 
 class Controller:
-    """Diese Klasse entspricht einem MCC-2 Controller"""
+    """Diese Klasse entspricht einem Controller-Modul mit Busnummer 'bus' innerhalb eines Boxes."""
 
     def __init__(self, communicator: ContrCommunicator, bus: int):
 
@@ -457,7 +484,7 @@ class Controller:
 
 
 class Motor:
-    """Diese Klasse entspricht einem Motor, der mit einem MCC-2 Controller verbunden ist."""
+    """Diese Klasse entspricht einem Motor, der mit einem Controller verbunden ist."""
 
     DEFAULT_MOTOR_CONFIG = {'with_initiators': 0,
                             'display_units': 'Schritte',
@@ -483,38 +510,79 @@ class Motor:
 
         return self.controller.bus, self.axis
 
-    def go_to(self, destination: float, units: str = 'norm'):
-        """Bewegt den motor zur absoluten __position, die als destination gegeben wird."""
+    def go_to(self, destination: float,
+              units: str = 'norm',
+              wait: bool = False,
+              check: bool = False,
+              stop_indicator: StopIndicator = None,
+              reporter: WaitReporter = None) -> (bool, str):
+        """Bewegt den motor zur absoluten Position, die als destination gegeben wird."""
 
-        destination = float(destination)
+        # zu normierte einheiten transformieren
         destination = self.transform_units(destination, units, to='norm')
 
+        # Soft Limits prüfen
         bottom, top = self.soft_limits
+        if bottom is not None and top is not None:
+            if top - bottom < 0:
+                err_mess = f'Soft Limits Fehler: Obere Grenze ist kleiner als Untere! ' \
+                           f'(Motor {self.axis} beim Controller {self.controller.bus})'
+                logging.error(err_mess)
+                return False, err_mess
         if bottom is not None:
             if destination < bottom:
                 destination = bottom
+                if check:
+                    return False, f'Der Zielpunkt des Motors "{self.name}" liegt außerhalb der Soft Limits!'
         if top is not None:
             if destination > top:
                 destination = top
-        if bottom is not None and top is not None:
-            if top - bottom < 0:
-                logging.error(f'Soft Limits Fehler: Obere Grenze ist kleiner als Untere! '
-                              f'(Motor {self.axis} beim Controller {self.controller.bus}:)')
-                return False
+                if check:
+                    return False, f'Der Zielpunkt des Motors "{self.name}" liegt außerhalb der Soft Limits!'
 
-        destination = self.transform_units(destination, 'norm', to='contr')
+        if not wait:
+            self.__go_to(destination, 'norm')
+            return True, ""
+        else:
+            for _ in range(3):
+                self.__go_to(destination, 'norm')
+                self.wait_motor_stop(stop_indicator)
+                if stop_indicator is not None:
+                    if stop_indicator.has_stop_requested():
+                        return False, "Der Vorgang wurde vom Benutzer abgebrochen."
+
+                if not check:
+                    if reporter is not None:
+                        reporter.motor_is_done(self.name)
+                    return True, ""
+                else:
+                    tolerance_n = self.transform_units(self.communicator.tolerance, 'contr', to='norm', rel=True)
+                    if abs(self.position('norm') - destination) <= tolerance_n:
+                        if reporter is not None:
+                            reporter.motor_is_done(self.name)
+                        return True, ""
+            return False, f'Der Zielpunkt des Motors "{self.name}" wurde nicht erreicht.'
+
+    def __go_to(self, destination: float, units: str = 'norm'):
+        destination = self.transform_units(destination, units, to='contr')
         self.communicator.go_to(destination, *self.coord())
         logging.info(f'Motor {self.axis} beim Controller {self.controller.bus} wurde zu {destination} geschickt.')
 
-    def go(self, shift: float, units: str = 'norm', calibrate: bool = False):
+    def go(self, shift: float,
+           units: str = 'norm',
+           wait: bool = False,
+           check: bool = False,
+           stop_indicator: StopIndicator = None,
+           reporter: WaitReporter = None,
+           calibrate: bool = False) -> (bool, str):
         """Bewegt den motor relativ um gegebener Verschiebung."""
 
         shift = float(shift)
-        if self.soft_limits != (None, None) and not calibrate:
+        if (self.soft_limits != (None, None) and not calibrate) or wait or check:
             shift = self.transform_units(shift, units, to='norm')
             position = self.position('norm')
             destination = position + shift
-            return self.go_to(destination, 'norm')
+            return self.go_to(destination, 'norm', wait, check, stop_indicator, reporter)
 
         shift = self.transform_units(shift, units, to='contr', rel=True)
         self.communicator.go(shift, *self.coord())
@@ -568,7 +636,7 @@ class Motor:
         self.communicator.set_position(self.transform_units(position, units, to='contr'), *self.coord())
         logging.info(f'__position wurde eingestellt. ({position})')
 
-    def calibrate(self, stop_indicator: StopIndicator = None, reporter: CalibrationReporter = None):
+    def calibrate(self, stop_indicator: StopIndicator = None, reporter: WaitReporter = None):
         """Kalibrierung von den gegebenen Motoren"""
 
         if self.with_initiators():
@@ -604,6 +672,7 @@ class Motor:
 
     def soft_limits_einstellen(self, soft_limits: Tuple[Union[float, None], Union[float, None]], units: str = 'norm'):
         """soft limits einstellen"""
+
         def transform(val):
             return self.transform_units(val, units, to='norm') if val is not None else None
 
@@ -727,13 +796,18 @@ class Motor:
 
 
 class Box:
-    """Diese Klasse entspricht einem Box mit einem oder mehreren MCC-2 Controller"""
+    """Diese Klasse entspricht einer Box, die mehrere Controller-Modulen im Busbetrieb enthaltet."""
 
-    def __init__(self, communicator: ContrCommunicator, input_file: str = None):
+    def __init__(self, communicator: ContrCommunicator, input_file: str = None, tolerance: float = None):
         self.communicator = communicator
 
         self.report = ""
         self.controller: Dict[int, Controller] = {}
+
+        if tolerance is None:
+            self.tolerance = communicator.tolerance
+        else:
+            self.tolerance = tolerance
 
         if input_file is not None:
             self.initialize_with_input_file(input_file)
@@ -742,6 +816,16 @@ class Box:
 
     def __iter__(self):
         return (controller for controller in self.controller.values())
+
+    def set_tolerance(self, tolerance: float):
+        """stellt """
+        self.communicator.tolerance = tolerance
+
+    def motors(self):
+        """Ein Iterator, der durch alle Motoren des Boxes läuft."""
+        for controller in self:
+            for motor in controller:
+                yield motor
 
     def command(self, text: bytes) -> bytes:
         """Befehl für die Box ausführen"""
@@ -774,6 +858,7 @@ class Box:
 
     def initialize_with_input_file(self, config_file: str = 'input/Phytron_Motoren_config.csv'):
         """Sucht und macht Objekte für alle verfügbare Controller und Motoren. Gibt ein Bericht zurück."""
+
         def del_motor_from_init(bus: int, axis: int):
             del motors_config[bus, axis]
             del motors_parameters[bus, axis]
@@ -904,7 +989,7 @@ class Box:
     def calibrate_motors(self, list_to_calibration: List[M_Coord] = None,
                          motors_to_calibration: List[Motor] = None,
                          stop_indicator: StopIndicator = None,
-                         reporter: CalibrationReporter = None):
+                         reporter: WaitReporter = None):
         """Kalibrierung von den gegebenen Motoren"""
 
         if list_to_calibration is None and motors_to_calibration is None:
@@ -1033,7 +1118,7 @@ class Box:
             for motor in controller:
                 names.append(motor.name)
         if len(names) < len(set(names)):
-            raise MotorNameError('Es gibt wiederholte Namen der Motoren!')
+            raise MotorNamesError('Es gibt wiederholte Namen der Motoren!')
         return tuple(names)
 
     def controllers_list(self) -> List[int]:
@@ -1142,6 +1227,135 @@ class Box:
     #         logging.info(f'Kalibrierung von Motoren {list_to_calibration} wurde abgeschlossen.')
 
 
+class BoxCluster:
+    """Diese Klasse vereint mehrere Kontroller-Boxen und lässt die bequem zusammen steuern."""
+
+    def __init__(self, boxes: Dict[str, Box], add_box_prefix: bool = False):
+        self.boxes = boxes
+
+        if add_box_prefix:
+            self.__add_box_prefix()
+
+        self.motors: Dict[str, Motor] = {}
+        self.__motoren_init()
+
+    def __iter__(self):
+        return self.motors.values()
+
+    def __check_motors_names(self):
+        """Prüft, dass die Namen der Motoren in den Boxen sich nicht wiederholen."""
+        names = []
+        for box in self.boxes.values():
+            for controller in box:
+                for motor in controller:
+                    if motor.name not in names:
+                        names.append(motor.name)
+                    else:
+                        return False, motor.name
+        return True, None
+
+    def __add_box_prefix(self):
+        """Addiert die Namen der Boxen als Präfixe zu den Namen der Motoren."""
+
+        for box_name, box in self.boxes.items():
+            for controller in box:
+                for motor in controller:
+                    motor.name = box_name + "|" + motor.name
+
+    def __motoren_init(self):
+        """Initialisiert die Motoren von BoxCluster."""
+
+        # zurücksetzen
+        self.motors: Dict[str, Motor] = {}
+
+        # prüfen, dass die Namen der Motoren in den Boxen sich nicht wiederholen
+        ok, name = self.__check_motors_names()
+        if not ok:
+            raise MotorNamesError(f'Es gibt die wiederholte Namen der Motoren! '
+                                  f'Der Name "{name}" ist mehrmals getroffen.')
+
+        # Motoren initialisieren
+        for box in self.boxes.values():
+            for controller in box:
+                for motor in controller:
+                    self.motors[motor.name] = motor
+
+    def stop(self):
+        """Stoppt alle Motoren im Cluster."""
+        for box in self.boxes.values():
+            box.stop()
+
+    def go_to(self, destinations: Dict[str, float],
+              units: str = 'norm',
+              wait: bool = False,
+              check: bool = True,
+              stop_indicator: StopIndicator = None,
+              reporter: WaitReporter = None
+              ) -> (bool, str):
+        """Schickt die angegebene Motoren zu den angegebenen Positionen. Nimmt neue Ziel-Koordinaten im Format von
+        Dict {Motorname: Zielposition, ...}
+        """
+
+        return self.__move(destinations, 'go_to', units, wait, check, stop_indicator, reporter)
+
+    def go(self, shifts: Dict[str, float],
+           units: str = 'norm',
+           wait: bool = False,
+           check: bool = True,
+           stop_indicator: StopIndicator = None,
+           reporter: WaitReporter = None
+           ) -> (bool, str):
+        """Verschiebt die angegebene Motoren zu den angegebenen Verschiebungen im Format von
+        Dict {Motorname: Verschiebung, ...}
+        """
+
+        return self.__move(shifts, 'go', units, wait, check, stop_indicator, reporter)
+
+    def __move(self, values: Dict[str, float],
+               m_type: str,
+               units: str = 'norm',
+               wait: bool = False,
+               check: bool = True,
+               stop_indicator: StopIndicator = None,
+               reporter: WaitReporter = None
+               ) -> (bool, str):
+        """Schickt die angegebene Motoren zu den angegebenen Positionen. Nimmt neue Ziel-Koordinaten im Format von
+        Dict {Motorname: Zielposition, ...}
+        """
+
+        def call_movement(name: str, value: float) -> (bool, str):
+            if m_type == 'go_to':
+                return self.motors[name].go_to(value, units, wait, check, stop_indicator, reporter)
+            elif m_type == 'go':
+                return self.motors[name].go(value, units, wait, check, stop_indicator, reporter)
+            else:
+                raise ValueError
+
+        # Namen in Dict prüfen
+        motors_not_in_cluster = set(values.keys()) - set(self.motors.keys())
+        if motors_not_in_cluster:
+            raise ValueError(f"Es gibt keine Motoren mit den Namen: {motors_not_in_cluster}")
+
+        # Motoren zu den Ziel-Koordinaten schicken
+        if not wait:
+            for name, destination in values:
+                call_movement(name, destination)
+            return True, ""
+        else:
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                results = executor.map(call_movement, values.keys(), values.values())
+
+                success = True
+                message = ""
+                for result in results:
+                    if not result[0]:
+                        message += result[1] + '\n'
+                return success, message
+
+    def path_travel(self, path: List[Dict[str, float]]):
+        """"""
+
+
 class SerialError(Exception):
     """Base class for serial port related exceptions."""
 
@@ -1170,8 +1384,8 @@ class NoMotorError(MotorError):
     """Grundklasse für die Fehler wann Motor nicht verbunden oder kaputt ist"""
 
 
-class MotorNameError(Exception):
-    """Grundklasse für die Fehler wann Motor nicht verbunden oder kaputt ist"""
+class MotorNamesError(Exception):
+    """Grundklasse für die Fehler, wann es Problemen mit den Namen der Motoren gibt."""
 
 
 class FileReadError(Exception):

@@ -1,11 +1,64 @@
+import concurrent.futures
 import os
+import socket
+import threading
 from threading import Thread
+from time import sleep
+from typing import Set
 from unittest import TestCase, main
 
 # from MotorController.MotorControllerInterface import *
 from MotorController.MotorControllerInterface import Connector, ReplyError, Controller, Motor, CalibrationError, Box, \
-    read_input_config_from_file, read_saved_session_data_from_file, read_csv
+    read_input_config_from_file, read_saved_session_data_from_file, read_csv, EthernetConnector, MotorNamesError, \
+    BoxCluster, StopIndicator, WaitReporter
 from MotorController.Phytron_MCC2 import MCC2BoxEmulator, MCC2Communicator
+
+
+class TCPServerEmulator(threading.Thread):
+
+    def __init__(self, ip: str = 'localhost', port: int = 8001, listen=True):
+        super().__init__()
+        self.s_out = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.s_out.bind((ip, port))
+        self.__stop_signal = False
+        self.last_message = b''
+        self.conn = None
+        self.listen = listen
+        self.start()
+
+    def run(self) -> None:
+        self.s_out.listen(1)
+        self.conn, addr = self.s_out.accept()
+        self.s_out.settimeout(0.01)
+        while not self.__stop_signal:
+            if self.listen:
+                try:
+                    message = self.conn.recv(1000)
+                    print('server got: ', message)
+                except socket.timeout:
+                    pass
+                else:
+                    for line in message.split(b'\r\n'):
+                        if line:
+                            self.last_message = line
+                            self.conn.send(b'Reply to:' + line + b'\r\n')
+                            print('server got line: ', line)
+            else:
+                sleep(0.01)
+        self.conn.close()
+        self.s_out.close()
+
+    def send(self, message: bytes):
+        if self.conn is None:
+            raise Exception('There is no connection!')
+        self.conn.send(message)
+
+    def close(self):
+        self.__stop_signal = True
+        sleep(0.015)
+        # self.conn.shutdown(socket.SHUT_RDWR)
+        # self.conn.close()
+        # self.s_out.close()
 
 
 class TestConnector(TestCase):
@@ -32,6 +85,63 @@ class TestConnector(TestCase):
     def test_false_reply2(self):
         with self.assertRaises(ReplyError):
             self.connector.reply_format(b'bgg hello! eg')
+
+
+class TestEthernetConnector(TestCase):
+    def test_read(self):
+        port = 8005
+        server = TCPServerEmulator(port=port, listen=False)
+        connector = EthernetConnector('localhost', port, 0.01, end_symbol=b'\r\n')
+        try:
+            sleep(0.01)
+            server.send(b'hello!\r\n')
+            self.assertEqual(b'hello!', connector.read())
+            self.assertEqual(None, connector.read())
+
+            with self.assertRaises(ReplyError):
+                server.send(b'hello!')
+                print(connector.read())
+
+            server.send(b'hello1\r\nhello2\r\nhello3\r\n')
+            self.assertEqual(b'hello1', connector.read())
+            self.assertEqual(b'hello2', connector.read())
+            self.assertEqual(b'hello3', connector.read())
+        finally:
+            connector.close()
+            server.close()
+
+    def test_clear_buffer(self):
+        port = 8005
+        server = TCPServerEmulator(port=port, listen=False)
+        connector = EthernetConnector('localhost', port, 0.01, end_symbol=b'\r\n')
+        try:
+            sleep(0.01)
+            server.send(b'junk')
+            server.send(b'hello!\r\n')
+            self.assertEqual(b'junkhello!', connector.read())
+
+            server.send(b'junk')
+            sleep(0.01)
+            connector.clear_buffer()
+            server.send(b'hello!\r\n')
+            self.assertEqual(b'hello!', connector.read())
+        finally:
+            connector.close()
+            server.close()
+
+    def test_send(self):
+        port = 8005
+        server = TCPServerEmulator(port=port)
+        connector = EthernetConnector('localhost', port, 0.01, end_symbol=b'\r\n')
+        try:
+            connector.send(b'hello1', clear_buffer=False)
+            connector.send(b'hello2', clear_buffer=False)
+            sleep(0.1)
+            self.assertEqual(b'Reply to:hello1', connector.read())
+            self.assertEqual(b'Reply to:hello2', connector.read())
+        finally:
+            connector.close()
+            server.close()
 
 
 class TestController(TestCase):
@@ -67,6 +177,30 @@ def preparation_to_test(realtime=False):
 
     motor_emulator = emulator.controller[1].motor[2]
     return motor, step, motor_emulator
+
+
+class StopTestIndicator(StopIndicator):
+    """StopIndocator für Testen"""
+
+    def __init__(self):
+        self.stop = False
+
+    def has_stop_requested(self) -> bool:
+        return self.stop
+
+
+class WaitTestReporter(WaitReporter):
+    """WaitReporter für Testen"""
+    def __init__(self):
+        self.wait_list = []
+        self.motors_done = []
+
+    def set_wait_list(self, wait_list: Set[str]):
+        """Wird am Anfang angerufen. und es wird dadurch """
+        self.wait_list = wait_list
+
+    def motor_is_done(self, motor_name: str):
+        self.motors_done.append(motor_name)
 
 
 class TestMotor(TestCase):
@@ -150,7 +284,7 @@ class TestMotor(TestCase):
         motor.set_position(212, 'displ')
         self.assertEqual(100, round(motor.position('norm'), 4))
 
-    def test_go_to(self):
+    def test_go_to_units(self):
         motor, step, motor_emulator = preparation_to_test()
 
         motor.go_to(373.15, 'contr')
@@ -165,20 +299,111 @@ class TestMotor(TestCase):
         motor_emulator.wait_stop()
         self.assertTrue(abs(100 - motor.position('norm')) < 2 * step, f"Ist bei {motor.position('norm')} statt 100")
 
+    def test_go_to_wait(self):
+        motor, step, motor_emulator = preparation_to_test()
+        reporter = WaitTestReporter()
+        stoper = StopTestIndicator()
+
+        # Test wait-option
+        motor_emulator.set_position(-1000)
+        motor.go_to(373.15, 'contr')
+        self.assertTrue(motor.position('contr') < 200)
+
+        motor_emulator.set_position(-1000)
+        motor.go_to(373.15, 'contr', wait=True)
+        self.assertAlmostEqual(100, motor.position('norm'), delta=2*step)
+
+        # Test stop
+        motor_emulator.box.realtime = True
+        motor_emulator.set_position(0)
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            res = executor.submit(motor.go_to, 373.15, 'contr', True, False, stoper, reporter)
+            stoper.stop = True
+            self.assertEqual((False, 'Der Vorgang wurde vom Benutzer abgebrochen.'), res.result())
+            self.assertTrue(motor.position('contr') < 200)
+
+        # Test Reporter
+        motor_emulator.box.realtime = True
+        stoper.stop = False
+        motor_emulator.set_position(0)
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            res = executor.submit(motor.go_to, 373.15, 'contr', True, False, stoper, reporter)
+            sleep(0.1)
+            self.assertEqual([], reporter.motors_done)
+            motor_emulator.box.realtime = False
+            self.assertEqual((True, ''), res.result())
+            self.assertEqual([motor.name], reporter.motors_done)
+            self.assertAlmostEqual(100, motor.position('norm'), delta=2 * step)
+
+    def test_go_to_check(self):
+        emulator = MCC2BoxEmulator(n_bus=2, n_axes=2, realtime=True)
+        motor_emulator = emulator.controller[1].motor[2]
+        motor_emulator.beginning = -10
+        motor_emulator.end = 10
+        controller = Controller(emulator, 1)
+        motor = Motor(controller, 2)
+        emulator.set_parameter('Lauffrequenz', 50, 1, 2)
+
+        # Test normal case
+        motor_emulator.set_position(0)
+        self.assertEqual((True, ''), motor.go_to(5, 'contr', True, True))
+        self.assertAlmostEqual(5, motor.position('contr'), delta=2)
+
+        # Test mit unerwartete Abbruch
+        motor_emulator.set_position(-10)
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            # ohne check
+            res = executor.submit(motor.go_to, 9, 'contr', True, False)
+            motor_emulator.stop()
+            self.assertEqual((True, ''), res.result())
+            self.assertTrue(motor.position('contr') < 7)
+
+            # mit check
+            res = executor.submit(motor.go_to, 9, 'contr', True, True)
+            motor_emulator.stop()
+            self.assertEqual((True, ''), res.result())
+            self.assertAlmostEqual(9, motor.position('contr'), delta=2)
+
+        # Test mit einer unerreichbaren Zielposition
+        motor_emulator.set_position(0)
+        self.assertEqual((False, f'Der Zielpunkt des Motors "{motor.name}" wurde nicht erreicht.'),
+                         motor.go_to(2000, 'contr', True, True))
+        self.assertAlmostEqual(10, motor.position('contr'), delta=2)
+
+        # Test mit Soft Limits
+        motor_emulator.set_position(0)
+        motor.soft_limits = (-6.2, 3.2)
+        self.assertEqual((False, f'Der Zielpunkt des Motors "{motor.name}" liegt außerhalb der Soft Limits!'),
+                         motor.go_to(100, 'contr', True, True))
+        self.assertAlmostEqual(0, motor.position('contr'), delta=2)
+
+        self.assertEqual((False, f'Der Zielpunkt des Motors "{motor.name}" liegt außerhalb der Soft Limits!'),
+                         motor.go_to(-50.2, 'contr', True, True))
+        self.assertAlmostEqual(0, motor.position('contr'), delta=2)
+
+        self.assertEqual((True, ''), motor.go_to(-5, 'contr', True, True))
+        self.assertAlmostEqual(-5, motor.position('contr'), delta=2)
+
+        motor_emulator.set_position(0)
+        motor.soft_limits = (3, -2)
+        self.assertEqual((False, 'Soft Limits Fehler: '
+                                 'Obere Grenze ist kleiner als Untere! (Motor 2 beim Controller 1)'),
+                         motor.go_to(9, 'contr', True, True))
+        self.assertAlmostEqual(0, motor.position('contr'), delta=2)
+
     def test_go(self):
         motor, step, motor_emulator = preparation_to_test()
         motor.set_position(0, 'norm')
 
         motor.go(-10.4, 'contr')
         motor_emulator.wait_stop()
-        self.assertTrue(abs(-10.4 - motor.position('norm')) < 2 * step)
+        self.assertAlmostEqual(-10.4, motor.position('norm'), delta=2 * step)
         motor.go(30.4, 'norm')
         motor_emulator.wait_stop()
-        self.assertTrue(abs(20 - motor.position('norm')) < 2 * step, f"Ist bei {motor.position('norm')} statt 20")
+        self.assertAlmostEqual(20, motor.position('norm'), delta=2 * step)
         motor.go(10, 'displ')
         motor_emulator.wait_stop()
-        self.assertTrue(abs(20 + 10 * 5 / 9 - motor.position('norm')) < 2 * step,
-                        f"Ist bei {motor.position('norm')} statt {20 + 10 * 5 / 9}")
+        self.assertAlmostEqual(20 + 10 * 5 / 9, motor.position('norm'), delta=2 * step)
 
     def test_stand(self):
         motor, step, motor_emulator = preparation_to_test(realtime=True)
@@ -505,7 +730,7 @@ class TestBox(TestCase):
         motors_config = {(0, 1): {'name': 'TestMotor0',
                                   'with_initiators': 0,
                                   'display_units': '1',
-                                  'displ_per_contr': 1.0,},
+                                  'displ_per_contr': 1.0, },
                          (0, 2): {'name': 'TestMotor1',
                                   'with_initiators': 1,
                                   'display_units': 'Schritte',
@@ -751,6 +976,49 @@ class TestBox(TestCase):
 
         motors_with_initiators = {(0, 1), (1, 2), (2, 1), (2, 2)}
         self.assertEqual(motors_with_initiators, set(box.motors_with_initiators()))
+
+
+class TestBoxCluster(TestCase):
+    def test__check_motors_names(self):
+        box_emulator1 = MCC2BoxEmulator(n_bus=2, n_axes=2, realtime=False)
+        box_emulator2 = MCC2BoxEmulator(n_bus=2, n_axes=2, realtime=False)
+        box1 = Box(box_emulator1)
+        box2 = Box(box_emulator2)
+
+        with self.assertRaises(MotorNamesError):
+            BoxCluster({"box1": box1, "box2": box2})
+
+        box2.get_motor((0, 1)).name = "Axe01"
+        box2.get_motor((0, 2)).name = "Axe02"
+        box2.get_motor((1, 1)).name = "Axe11"
+        box2.get_motor((1, 2)).name = "Axe12"
+        cluster = BoxCluster({"box1": box1, "box2": box2})
+        self.assertEqual(8, len(cluster.motors))
+
+        box2.get_motor((0, 2)).name = "Axe11"
+        with self.assertRaises(MotorNamesError) as err:
+            BoxCluster({"box1": box1, "box2": box2})
+        err_mess = 'Es gibt die wiederholte Namen der Motoren! Der Name "Axe11" ist mehrmals getroffen.'
+        self.assertEqual(err.exception.args[0], err_mess)
+
+    def test___init__with_prefix(self):
+        box_emulator1 = MCC2BoxEmulator(n_bus=2, n_axes=2, realtime=False)
+        box_emulator2 = MCC2BoxEmulator(n_bus=16, n_axes=3, realtime=False)
+        box_emulator3 = MCC2BoxEmulator(n_bus=5, n_axes=2, realtime=False)
+        box1 = Box(box_emulator1)
+        box2 = Box(box_emulator2)
+        box3 = Box(box_emulator3)
+
+        cluster = BoxCluster({"box1": box1, "box2": box2, "box3": box3}, add_box_prefix=True)
+        self.assertEqual(2*2 + 16*3 + 5*2, len(cluster.motors))
+        self.assertEqual("box2|Motor3.3", box2.controller[3].motor[3].name)
+
+        for box_name, box in cluster.boxes.items():
+            for controller in box:
+                for motor in controller:
+                    self.assertEqual(f"{box_name}|Motor{controller.bus}.{motor.axis}", motor.name)
+
+
 
 
 if __name__ == '__main__':

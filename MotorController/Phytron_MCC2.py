@@ -29,6 +29,8 @@ class MCC2Communicator(ContrCommunicator):
     PARAMETER_DEFAULT = {'Lauffrequenz': 400.0, 'Stoppstrom': 2, 'Laufstrom': 2, 'Booststrom': 2, 'Initiatortyp': 0,
                          'Umrechnungsfaktor(Contr)': 1}
 
+    rec_tolerance = 1 # Empfohlene für MCC2 akzeptabele Abweichung bei Positionierung der Motoren (in Controller Einheiten)
+
     def __init__(self, connector: Connector):
         self.connector = connector
         self.connector.beg_symbol = b"\x02"
@@ -327,6 +329,7 @@ class MCC2BoxEmulator(SerialEmulator, ContrCommunicator):
 
     PARAMETER_NUMBER = deepcopy(MCC2Communicator.PARAMETER_NUMBER)
     PARAMETER_DEFAULT = deepcopy(MCC2Communicator.PARAMETER_DEFAULT)
+    tolerance = MCC2Communicator.rec_tolerance
 
     def __init__(self, n_bus: int = 3, n_axes: int = 2, realtime: bool = False):
         self.realtime = realtime
@@ -412,6 +415,9 @@ class MCC2BoxEmulator(SerialEmulator, ContrCommunicator):
 
     def flushInput(self):
         self.buffer = b''
+
+    def close(self):
+        pass
 
     def read_until(self, end_symbol: bytes) -> bytes:
         if end_symbol in self.buffer:
@@ -584,7 +590,7 @@ class MCC2MotorEmulator:
 
     def __init__(self, box: MCC2BoxEmulator):
         self.box = box
-        self.__position = 0  # aktuelle Position in Schritten
+        self.__position_steps = 0  # aktuelle Position in Schritten
         self._stand = True
         self._beg_initiator = False
         self._end_initiator = False
@@ -606,10 +612,10 @@ class MCC2MotorEmulator:
         return self._end_initiator
 
     def get_position(self):
-        return self.__position * self.parameter_values['Umrechnungsfaktor(Contr)']
+        return self.__position_steps * self.parameter_values['Umrechnungsfaktor(Contr)']
 
     def set_position(self, value: float):
-        self.__position = value/self.parameter_values['Umrechnungsfaktor(Contr)']
+        self.__position_steps = value / self.parameter_values['Umrechnungsfaktor(Contr)']
 
     def set_parameter(self, n: int, value: Union[float, int]):
         if n == 20:
@@ -626,6 +632,7 @@ class MCC2MotorEmulator:
     def go_to(self, destination: float):
         self.__destination = destination/self.parameter_values['Umrechnungsfaktor(Contr)']
         if self.stand():
+            self._stand = False
             threading.Thread(target=self.__move).start()
 
     def go(self, shift: float):
@@ -648,8 +655,8 @@ class MCC2MotorEmulator:
     def __move(self):
         self.__stop = False
         self._stand = False
-        while abs(self.__position - self.__destination) > 0.5:
-            if self.__position > self.__destination:
+        while abs(self.__position_steps - self.__destination) > 0.5:
+            if self.__position_steps > self.__destination:
                 self.__step_back()
             else:
                 self.__step_forward()
@@ -660,24 +667,26 @@ class MCC2MotorEmulator:
         self._stand = True
 
     def __step_forward(self):
-        if not self._end_initiator:
-            self.__position += 1
         self.__initiators_sensor()
+        if not self._end_initiator:
+            self.__position_steps += 1
+        else:
+            self.stop()
 
     def __step_back(self):
-        if not self._beg_initiator:
-            self.__position -= 1
         self.__initiators_sensor()
+        if not self._beg_initiator:
+            self.__position_steps -= 1
+        else:
+            self.stop()
 
     def __initiators_sensor(self):
-        if self.__position >= self.end:
-            self.stop()
+        if self.__position_steps >= self.end:
             self._end_initiator = True
         else:
             self._end_initiator = False
 
-        if self.__position <= self.beginning:
-            self.stop()
+        if self.__position_steps <= self.beginning:
             self._beg_initiator = True
         else:
             self._beg_initiator = False

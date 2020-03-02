@@ -14,7 +14,7 @@ import serial, serial.tools.list_ports
 from PyQt5.uic import loadUi
 
 from MotorController.MotorControllerInterface import SerialConnector
-from MotorController.Phytron_MCC2 import Box, StopIndicator, CalibrationReporter, MCC2BoxSerial, MCC2BoxEmulator, \
+from MotorController.Phytron_MCC2 import Box, StopIndicator, WaitReporter, MCC2BoxSerial, MCC2BoxEmulator, \
     MCC2Communicator
 import ULoggingConfig
 
@@ -128,12 +128,13 @@ class KalibrierungThread(QThread):
         self.Kalibrierung_Status_Nachricht.emit()
 
 
-class GuiCalibrationReporter(CalibrationReporter):
+class GuiCalibrationReporter(WaitReporter):
     """Durch dieses Objekt kann man während eine Kalibrierung die Liste der im Moment laufenden Motoren bekommen.
             Es wird als argument für PBox.calibrate_motors() verwendet."""
 
     def __init__(self, kal_thread: KalibrierungThread):
         self.kal_thread = kal_thread
+        self.wait_list = set()
 
     def set_wait_list(self, wait_list: Set[str]):
         self.wait_list = wait_list
