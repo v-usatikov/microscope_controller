@@ -2,6 +2,7 @@ import concurrent.futures
 import os
 import socket
 import threading
+from copy import deepcopy
 from threading import Thread
 from time import sleep
 from typing import Set
@@ -10,7 +11,7 @@ from unittest import TestCase, main
 # from MotorController.MotorControllerInterface import *
 from MotorController.MotorControllerInterface import Connector, ReplyError, Controller, Motor, CalibrationError, Box, \
     read_input_config_from_file, read_saved_session_data_from_file, read_csv, EthernetConnector, MotorNamesError, \
-    BoxCluster, StopIndicator, WaitReporter
+    BoxCluster, StopIndicator, WaitReporter, FileReadError
 from MotorController.Phytron_MCC2 import MCC2BoxEmulator, MCC2Communicator
 
 
@@ -191,6 +192,7 @@ class StopTestIndicator(StopIndicator):
 
 class WaitTestReporter(WaitReporter):
     """WaitReporter für Testen"""
+
     def __init__(self):
         self.wait_list = []
         self.motors_done = []
@@ -201,6 +203,23 @@ class WaitTestReporter(WaitReporter):
 
     def motor_is_done(self, motor_name: str):
         self.motors_done.append(motor_name)
+
+
+class TrevelTestReporter(WaitReporter):
+    """WaitReporter für Testen"""
+
+    def __init__(self):
+        self.wait_list = set()
+        self.history = []
+
+    def set_wait_list(self, wait_list: Set[str]):
+        """Wird am Anfang angerufen. und es wird dadurch """
+        self.wait_list = wait_list
+        self.history.append(deepcopy(self.wait_list))
+
+    def motor_is_done(self, motor_name: str):
+        self.wait_list -= {motor_name}
+        self.history.append(deepcopy(self.wait_list))
 
 
 class TestMotor(TestCase):
@@ -311,7 +330,7 @@ class TestMotor(TestCase):
 
         motor_emulator.set_position(-1000)
         motor.go_to(373.15, 'contr', wait=True)
-        self.assertAlmostEqual(100, motor.position('norm'), delta=2*step)
+        self.assertAlmostEqual(100, motor.position('norm'), delta=2 * step)
 
         # Test stop
         motor_emulator.box.realtime = True
@@ -1010,7 +1029,7 @@ class TestBoxCluster(TestCase):
         box3 = Box(box_emulator3)
 
         cluster = BoxCluster({"box1": box1, "box2": box2, "box3": box3}, add_box_prefix=True)
-        self.assertEqual(2*2 + 16*3 + 5*2, len(cluster.motors))
+        self.assertEqual(2 * 2 + 16 * 3 + 5 * 2, len(cluster.motors))
         self.assertEqual("box2|Motor3.3", box2.controller[3].motor[3].name)
 
         for box_name, box in cluster.boxes.items():
@@ -1018,7 +1037,214 @@ class TestBoxCluster(TestCase):
                 for motor in controller:
                     self.assertEqual(f"{box_name}|Motor{controller.bus}.{motor.axis}", motor.name)
 
+    def test_go_to(self):
+        box_emulator1 = MCC2BoxEmulator(n_bus=2, n_axes=2, realtime=False)
+        box_emulator2 = MCC2BoxEmulator(n_bus=16, n_axes=3, realtime=False)
+        box_emulator3 = MCC2BoxEmulator(n_bus=5, n_axes=2, realtime=False)
+        box1 = Box(box_emulator1)
+        box2 = Box(box_emulator2)
+        box3 = Box(box_emulator3)
 
+        cluster = BoxCluster({"box1": box1, "box2": box2, "box3": box3}, add_box_prefix=True)
+
+        dest = {'box1|Motor1.1': 3000, 'box2|Motor9.1': 300, 'box2|Motor15.3': 10, 'box3|Motor4.2': 10000}
+
+        self.assertEqual((True, ''), cluster.go_to(dest, 'contr'))
+        box1.wait_all_motors_stop()
+        box2.wait_all_motors_stop()
+        box3.wait_all_motors_stop()
+        self.assertAlmostEqual(3000, cluster.motors['box1|Motor1.1'].position('contr'))
+        self.assertAlmostEqual(300, cluster.motors['box2|Motor9.1'].position('contr'))
+        self.assertAlmostEqual(10, cluster.motors['box2|Motor15.3'].position('contr'))
+        self.assertAlmostEqual(10000, cluster.motors['box3|Motor4.2'].position('contr'))
+
+        dest = {'box1|Motor1.1': 3000, 'box2|Motor9.1': 300, 'box2|Motor155.3': 10, 'box3|Motor4.2': 10000}
+        with self.assertRaises(ValueError) as err:
+            cluster.go_to(dest, 'contr')
+        err_mess = "Es gibt keine Motoren mit den Namen: {'box2|Motor155.3'}"
+        self.assertEqual(err_mess, err.exception.args[0])
+
+    def test_go_to_wait(self):
+        box_emulator1 = MCC2BoxEmulator(n_bus=2, n_axes=2, realtime=True)
+        box_emulator2 = MCC2BoxEmulator(n_bus=16, n_axes=3, realtime=True)
+        box_emulator3 = MCC2BoxEmulator(n_bus=5, n_axes=2, realtime=True)
+        box1 = Box(box_emulator1)
+        box2 = Box(box_emulator2)
+        box3 = Box(box_emulator3)
+        freq = 10
+        box_emulator1.set_parameter('Lauffrequenz', freq, 1, 1)
+        box_emulator2.set_parameter('Lauffrequenz', freq, 9, 1)
+        box_emulator2.set_parameter('Lauffrequenz', freq, 15, 3)
+        box_emulator3.set_parameter('Lauffrequenz', freq, 4, 2)
+
+        cluster = BoxCluster({"box1": box1, "box2": box2, "box3": box3}, add_box_prefix=True)
+
+        dest = {'box1|Motor1.1': 30, 'box2|Motor9.1': 10, 'box2|Motor15.3': 1, 'box3|Motor4.2': 45}
+
+        reporter = WaitTestReporter()
+        self.assertEqual((True, ''), cluster.go_to(dest, 'contr', True, True, reporter=reporter))
+        self.assertAlmostEqual(30, cluster.motors['box1|Motor1.1'].position('contr'))
+        self.assertAlmostEqual(10, cluster.motors['box2|Motor9.1'].position('contr'))
+        self.assertAlmostEqual(1, cluster.motors['box2|Motor15.3'].position('contr'))
+        self.assertAlmostEqual(45, cluster.motors['box3|Motor4.2'].position('contr'))
+        self.assertEqual(['box2|Motor15.3', 'box2|Motor9.1', 'box1|Motor1.1', 'box3|Motor4.2'], reporter.motors_done)
+
+    def test_go_to_check(self):
+        box_emulator1 = MCC2BoxEmulator(n_bus=2, n_axes=2, realtime=False)
+        box_emulator2 = MCC2BoxEmulator(n_bus=16, n_axes=3, realtime=False)
+        box_emulator3 = MCC2BoxEmulator(n_bus=5, n_axes=2, realtime=False)
+        box1 = Box(box_emulator1)
+        box2 = Box(box_emulator2)
+        box3 = Box(box_emulator3)
+
+        cluster = BoxCluster({"box1": box1, "box2": box2, "box3": box3}, add_box_prefix=True)
+
+        dest = {'box1|Motor1.1': 3000, 'box2|Motor9.1': 300, 'box2|Motor15.3': 10, 'box3|Motor4.2': 10000}
+        box_emulator3.controller[4].motor[2].end = 9800
+        cluster.motors['box2|Motor9.1'].soft_limits = (-10, 20)
+        self.assertEqual((False, 'Der Zielpunkt des Motors "box2|Motor9.1" liegt außerhalb der Soft Limits!\n'
+                                 'Der Zielpunkt des Motors "box3|Motor4.2" wurde nicht erreicht.\n'),
+                         cluster.go_to(dest, 'contr', True, True))
+
+    def test_positions(self):
+        box_emulator1 = MCC2BoxEmulator(n_bus=2, n_axes=2, realtime=False)
+        box_emulator2 = MCC2BoxEmulator(n_bus=2, n_axes=1, realtime=False)
+        box1 = Box(box_emulator1)
+        box2 = Box(box_emulator2)
+
+        cluster = BoxCluster({"box1": box1, "box2": box2}, add_box_prefix=True)
+
+        positions = {'box1|Motor0.1': 100, 'box1|Motor0.2': 50, 'box1|Motor1.1': -60, 'box1|Motor1.2': 1000,
+                     'box2|Motor0.1': -745, 'box2|Motor1.1': 356}
+        cluster.go_to(positions, 'contr', wait=True)
+        self.assertEqual(positions, cluster.positions('contr'))
+
+        positions2 = {'box1|Motor0.1': 100, 'box1|Motor0.2': 50, 'box1|Motor1.2': 1000, 'box2|Motor0.1': -745}
+        self.assertEqual(positions2, cluster.positions('contr', list(positions2.keys())))
+
+    def test_path_travel(self):
+        box_emulator1 = MCC2BoxEmulator(n_bus=2, n_axes=2, realtime=False)
+        box_emulator2 = MCC2BoxEmulator(n_bus=2, n_axes=1, realtime=False)
+        box1 = Box(box_emulator1)
+        box2 = Box(box_emulator2)
+
+        cluster = BoxCluster({"box1": box1, "box2": box2}, add_box_prefix=True)
+        reporter = TrevelTestReporter()
+        stoper = StopTestIndicator()
+
+        path = [{'box1|Motor0.1': 100, 'box1|Motor0.2': 50, 'box1|Motor1.1': -60, 'box1|Motor1.2': 1000,
+                     'box2|Motor0.1': -745, 'box2|Motor1.1': 356},
+
+                {'box1|Motor0.1': 200, 'box1|Motor0.2': -550, 'box1|Motor1.1': 70, 'box1|Motor1.2': 500,
+                 'box2|Motor0.1': -400, 'box2|Motor1.1': -5},
+
+                {'box1|Motor0.1': 10, 'box1|Motor0.2': -50, 'box1|Motor1.1': 80, 'box1|Motor1.2': -250,
+                 'box2|Motor0.1': 30, 'box2|Motor1.1': -467}]
+
+        def action():
+            return cluster.positions('contr')
+
+        self.assertEqual(path, cluster.path_travel(path, action, 'contr', reporter=reporter))
+
+        # Prüfung von reporter
+        self.assertEqual((6 + 1)*3, len(reporter.history))
+        len_history = list(map(len, reporter.history))
+        right_len_history = [6, 5, 4, 3, 2, 1, 0]*3
+        self.assertEqual(right_len_history, len_history)
+
+        def action2():
+            self.index += 3
+            return self.index
+
+        self.index = 0
+        self.assertEqual([3, 6, 9], cluster.path_travel(path, action2, 'contr'))
+
+        # Stop prüfen
+        box_emulator1.realtime = True
+        box_emulator2.realtime = True
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            res = executor.submit(cluster.path_travel, path, action, 'contr', stoper)
+            stoper.stop = True
+            self.assertEqual([], res.result())
+
+    def test_read_path_from_file(self):
+        box_emulator1 = MCC2BoxEmulator(n_bus=2, n_axes=2, realtime=False)
+        box_emulator2 = MCC2BoxEmulator(n_bus=2, n_axes=1, realtime=False)
+        box1 = Box(box_emulator1)
+        box2 = Box(box_emulator2)
+        cluster = BoxCluster({"box1": box1, "box2": box2}, add_box_prefix=True)
+
+        path = [{'box1|Motor0.1': 100, 'box1|Motor0.2': 50.1, 'box1|Motor1.1': -60, 'box1|Motor1.2': 1000,
+                 'box2|Motor0.1': -745, 'box2|Motor1.1': 356},
+
+                {'box1|Motor0.1': 200, 'box1|Motor0.2': -550, 'box1|Motor1.1': 70, 'box1|Motor1.2': 500,
+                 'box2|Motor0.1': -400, 'box2|Motor1.1': -5},
+
+                {'box1|Motor0.1': 10, 'box1|Motor0.2': -50, 'box1|Motor1.1': 80.1, 'box1|Motor1.2': -250,
+                 'box2|Motor0.1': 30, 'box2|Motor1.1': -467}]
+
+        self.assertEqual(path, cluster.read_path_from_file('test_input/test_path.csv', decimal=',', check=True))
+
+        # with wrong motor name
+        with self.assertRaises(FileReadError) as err:
+            cluster.read_path_from_file('test_input/test_positions_wrong.csv', check=True)
+        err_mess = "Es gibt keine Motoren mit den Namen: {'box111|Motor1.1'}"
+        self.assertEqual(err_mess, err.exception.args[0])
+
+    def test_read_positions_from_file(self):
+        box_emulator1 = MCC2BoxEmulator(n_bus=2, n_axes=2, realtime=False)
+        box_emulator2 = MCC2BoxEmulator(n_bus=2, n_axes=1, realtime=False)
+        box1 = Box(box_emulator1)
+        box2 = Box(box_emulator2)
+        cluster = BoxCluster({"box1": box1, "box2": box2}, add_box_prefix=True)
+
+        positions = {'box1|Motor0.1': 100, 'box1|Motor0.2': 50.1, 'box1|Motor1.1': -60, 'box1|Motor1.2': 1000,
+                     'box2|Motor0.1': -745, 'box2|Motor1.1': 356}
+
+        self.assertEqual(positions, cluster.read_positions_from_file('test_input/test_positions.csv', decimal=','))
+
+        # mit mehrere Zeilen
+        with self.assertRaises(FileReadError) as err:
+            self.assertEqual(positions, cluster.read_positions_from_file('test_input/test_path.csv', decimal=','))
+        err_mess = 'Es ist mehr als eine Zeile in Datei, nämlich 3 statt eine.'
+        self.assertEqual(err_mess, err.exception.args[0])
+
+    def test_save_current_positions_in_file(self):
+        box_emulator1 = MCC2BoxEmulator(n_bus=2, n_axes=2, realtime=False)
+        box_emulator2 = MCC2BoxEmulator(n_bus=2, n_axes=1, realtime=False)
+        box1 = Box(box_emulator1)
+        box2 = Box(box_emulator2)
+        cluster = BoxCluster({"box1": box1, "box2": box2}, add_box_prefix=True)
+
+        positions = {'box1|Motor0.1': 100, 'box1|Motor0.2': 50.1, 'box1|Motor1.1': -60, 'box1|Motor1.2': 1000,
+                     'box2|Motor0.1': -745, 'box2|Motor1.1': 356}
+        cluster.go_to(positions, 'contr', wait=True)
+        cluster.motors['box1|Motor0.2'].set_position(50.1)
+
+        cluster.save_current_positions_in_file('test_input/test_positions_saved.csv', 'contr')
+        self.assertEqual(positions, cluster.read_positions_from_file('test_input/test_positions_saved.csv'))
+
+    def test_path_travel_from_file(self):
+        box_emulator1 = MCC2BoxEmulator(n_bus=2, n_axes=2, realtime=False)
+        box_emulator2 = MCC2BoxEmulator(n_bus=2, n_axes=1, realtime=False)
+        box1 = Box(box_emulator1)
+        box2 = Box(box_emulator2)
+
+        cluster = BoxCluster({"box1": box1, "box2": box2}, add_box_prefix=True)
+
+        path = [{'box1|Motor0.1': 100, 'box1|Motor0.2': 50, 'box1|Motor1.1': -60, 'box1|Motor1.2': 1000,
+                     'box2|Motor0.1': -745, 'box2|Motor1.1': 356},
+
+                {'box1|Motor0.1': 200, 'box1|Motor0.2': -550, 'box1|Motor1.1': 70, 'box1|Motor1.2': 500,
+                 'box2|Motor0.1': -400, 'box2|Motor1.1': -5},
+
+                {'box1|Motor0.1': 10, 'box1|Motor0.2': -50, 'box1|Motor1.1': 80, 'box1|Motor1.2': -250,
+                 'box2|Motor0.1': 30, 'box2|Motor1.1': -467}]
+
+        def action():
+            return cluster.positions('contr')
+
+        self.assertEqual(path, cluster.path_travel_from_file('test_input/test_path.csv', action, 'contr', decimal=','))
 
 
 if __name__ == '__main__':

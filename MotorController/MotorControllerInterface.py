@@ -5,7 +5,7 @@ import socket
 import telnetlib
 import time
 from copy import deepcopy
-from typing import Dict, List, Tuple, Union, Set
+from typing import Dict, List, Tuple, Union, Set, Callable
 
 import serial.tools.list_ports
 import serial.tools.list_ports
@@ -270,7 +270,7 @@ M_Coord = Tuple[int, int]
 Param_Val = Dict[str, float]
 
 
-def read_csv(address: str, delimiter: str = ';') -> List[dict]:
+def read_csv(address: str, delimiter: str = ';') -> List[Dict[str, str]]:
     """Liest CSV-Datei, und gibt die Liste von Dicts für jede Reihe."""
 
     with open(address, newline='') as config_file:
@@ -288,6 +288,15 @@ def read_csv(address: str, delimiter: str = ';') -> List[dict]:
             raise defect_error
 
     return data_from_file
+
+
+def write_csv_from_dict(addres: str, dict_to_save: dict, delimiter: str = ';'):
+    """Schreibt das angegebenes Dict in die CSV-Datei"""
+    with open(addres, 'w', newline='') as csvfile:
+        csv.register_dialect('my', delimiter=delimiter)
+        writer = csv.DictWriter(csvfile, fieldnames=dict_to_save.keys(), dialect='my')
+        writer.writeheader()
+        writer.writerow(dict_to_save)
 
 
 def __raw_saved_session_data_is_ok(raw_motors_data: List[dict]) -> bool:
@@ -1017,7 +1026,7 @@ class Box:
             logging.info('Kalibrierung von allen Motoren wurde abgeschlossen.')
 
     def save_session_data(self, address: str = "data/saved_session_data.txt"):
-        """Sichert die aktuelle Positionen der Motoren in einer Datei"""
+        """Sichert die Daten der jetzigen Sitzung (wie Soft Limits, Positionen, Kalibrierungsdaten) in einer Datei."""
 
         def make_csv_row(list_to_convert: list) -> str:
             str_list = list(map(str, list_to_convert))
@@ -1050,8 +1059,10 @@ class Box:
         f.close()
         logging.info(f'Kalibrierungsdaten für  Motoren {self.motors_list()} wurde gespeichert.')
 
-    def read_saved_session_data(self, address: str = "data/saved_session_data.txt"):
-        """Liest die gesicherte Positionen der Motoren aus einer Datei"""
+    def read_saved_session_data(self, address: str = "data/saved_session_data.txt") -> List[Tuple[int, int]]:
+        """Liest die gesicherte Sitzung aus einer Datei und gibt die Liste der Motoren zurück,
+        für die keine Daten gefunden wurde.
+        """
 
         saved_data = read_saved_session_data_from_file(address)
         list_to_calibration = []
@@ -1319,9 +1330,7 @@ class BoxCluster:
                stop_indicator: StopIndicator = None,
                reporter: WaitReporter = None
                ) -> (bool, str):
-        """Schickt die angegebene Motoren zu den angegebenen Positionen. Nimmt neue Ziel-Koordinaten im Format von
-        Dict {Motorname: Zielposition, ...}
-        """
+        """Ruft go oder go_to Methode für die angegebene Motoren."""
 
         def call_movement(name: str, value: float) -> (bool, str):
             if m_type == 'go_to':
@@ -1332,13 +1341,11 @@ class BoxCluster:
                 raise ValueError
 
         # Namen in Dict prüfen
-        motors_not_in_cluster = set(values.keys()) - set(self.motors.keys())
-        if motors_not_in_cluster:
-            raise ValueError(f"Es gibt keine Motoren mit den Namen: {motors_not_in_cluster}")
+        self.__check_names_list(values.keys())
 
         # Motoren zu den Ziel-Koordinaten schicken
         if not wait:
-            for name, destination in values:
+            for name, destination in values.items():
                 call_movement(name, destination)
             return True, ""
         else:
@@ -1349,11 +1356,97 @@ class BoxCluster:
                 message = ""
                 for result in results:
                     if not result[0]:
+                        success = False
                         message += result[1] + '\n'
                 return success, message
 
-    def path_travel(self, path: List[Dict[str, float]]):
-        """"""
+    def path_travel(self, path: List[Dict[str, float]],
+                    action: Callable,
+                    units: str = 'norm',
+                    stop_indicator: StopIndicator = None,
+                    reporter: WaitReporter = None) -> list:
+        """Bewegt die Motoren zu den Punkten in 'path' und ausführt 'action' in jedem Punkt."""
+
+        res = []
+        for point in path:
+            if reporter is not None:
+                reporter.set_wait_list(set(point.keys()))
+            success, mess = self.go_to(point, units, True, True, stop_indicator, reporter)
+            if stop_indicator is not None:
+                if stop_indicator.has_stop_requested():
+                    return res
+            if not success:
+                raise TravelError(mess)
+            res.append(action())
+        return res
+
+    def positions(self, units: str = 'norm', motors_list: List[str] = None) -> Dict[str, float]:
+        """Gibt zurück die Posotionen der angegebene Motoren. Wenn nichts angegeben wird, dann von allen Motoren."""
+
+        if motors_list is None:
+            motors_list = self.motors.keys()
+        else:
+            # Namen in der Liste prüfen
+            self.__check_names_list(motors_list)
+
+        positions = {}
+        for motor_name in motors_list:
+            positions[motor_name] = self.motors[motor_name].position(units)
+        return positions
+
+    def __check_names_list(self, motors_list: List[str]):
+        """Prüft ob die Motoren mit angegebenen Namen vorhanden sind."""
+
+        motors_not_in_cluster = set(motors_list) - set(self.motors.keys())
+        if motors_not_in_cluster:
+            raise ValueError(f"Es gibt keine Motoren mit den Namen: {motors_not_in_cluster}")
+
+    def save_current_positions_in_file(self, address: str, units: str = 'norm', delimiter: str = ';'):
+        """Schreibt die jetzige Positionen der Motoren in eine Datei"""
+
+        write_csv_from_dict(address, self.positions(units))
+
+    def read_path_from_file(self, address: str,
+                            delimiter: str = ';',
+                            decimal: str = '.',
+                            check: bool = False) -> List[Dict[str, float]]:
+        """Liest die Positionen der Motoren aus einer Datei"""
+
+        data = read_csv(address, delimiter)
+        if check:
+            try:
+                self.__check_names_list(list(data[0].keys()))
+            except ValueError as err:
+                raise FileReadError(err.args[0])
+        for positions in data:
+            for key in positions:
+                if decimal != '.':
+                    positions[key] = positions[key].replace(decimal, '.')
+                positions[key] = float(positions[key])
+        return data
+
+    def read_positions_from_file(self, address: str,
+                                 delimiter: str = ';',
+                                 decimal: str = '.',
+                                 check: bool = True) -> Dict[str, float]:
+        """Liest die Positionen der Motoren aus einer Datei"""
+
+        path = self.read_path_from_file(address, delimiter, decimal, check)
+        if len(path) > 1:
+            raise FileReadError(f'Es ist mehr als eine Zeile in Datei, nämlich {len(path)} statt eine.')
+        return path[0]
+
+    def path_travel_from_file(self, address: str,
+                              action: Callable,
+                              units: str = 'norm',
+                              stop_indicator: StopIndicator = None,
+                              reporter: WaitReporter = None,
+                              delimiter: str = ';',
+                              decimal: str = '.') -> list:
+        """Bewegt die Motoren zu den Punkten aus der Datei und ausführt 'action' in jedem Punkt."""
+
+        path = self.read_path_from_file(address, delimiter, decimal)
+        return self.path_travel(path, action, units, stop_indicator, reporter)
 
 
 class SerialError(Exception):
@@ -1406,3 +1499,7 @@ class UnitsTransformError(Exception):
 
 class CalibrationError(Exception):
     """Grundklasse für alle Fehler mit Transformation der Einheiten"""
+
+
+class TravelError(Exception):
+    """Grundklasse für die Fehler bei der Ausführung von path_travel Methode"""
