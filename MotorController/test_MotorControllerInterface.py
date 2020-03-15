@@ -35,7 +35,7 @@ class TCPServerEmulator(threading.Thread):
             if self.listen:
                 try:
                     message = self.conn.recv(1000)
-                    print('server got: ', message)
+                    # print('server got: ', message)
                 except socket.timeout:
                     pass
                 else:
@@ -43,7 +43,7 @@ class TCPServerEmulator(threading.Thread):
                         if line:
                             self.last_message = line
                             self.conn.send(b'Reply to:' + line + b'\r\n')
-                            print('server got line: ', line)
+                            # print('server got line: ', line)
             else:
                 sleep(0.01)
         self.conn.close()
@@ -375,7 +375,7 @@ class TestMotor(TestCase):
             res = executor.submit(motor.go_to, 9, 'contr', True, False)
             motor_emulator.stop()
             self.assertEqual((True, ''), res.result())
-            self.assertTrue(motor.position('contr') < 7)
+            self.assertTrue(motor.position('contr') < 8)
 
             # mit check
             res = executor.submit(motor.go_to, 9, 'contr', True, True)
@@ -886,7 +886,7 @@ class TestBox(TestCase):
 
         calibr_thread = Thread(target=box.calibrate_motors)
         calibr_thread.start()
-        emulator.controller[0].motor[1].sleep_steps(4)
+        emulator.controller[0].motor[1].sleep_steps(8)
         self.assertFalse(emulator.controller[0].motor[1].stand())
         self.assertTrue(emulator.controller[0].motor[2].stand())
         self.assertFalse(emulator.controller[1].motor[1].stand())
@@ -986,15 +986,15 @@ class TestBox(TestCase):
         emulator = MCC2BoxEmulator(n_bus=2, n_axes=2, realtime=True)
         box = Box(emulator, input_file='test_input/test_input_file3.csv')
 
-        motors_without_initiators = {(0, 2), (1, 1)}
-        self.assertEqual(motors_without_initiators, set(box.motors_without_initiators()))
+        motors_without_initiators = [(0, 2), (1, 1)]
+        self.assertEqual(set(box.get_motors(motors_without_initiators)), set(box.motors_without_initiators()))
 
     def test_motors_with_initiators(self):
         emulator = MCC2BoxEmulator(n_bus=3, n_axes=2, realtime=True)
         box = Box(emulator, input_file='test_input/test_input_file3.csv')
 
-        motors_with_initiators = {(0, 1), (1, 2), (2, 1), (2, 2)}
-        self.assertEqual(motors_with_initiators, set(box.motors_with_initiators()))
+        motors_with_initiators = [(0, 1), (1, 2), (2, 1), (2, 2)]
+        self.assertEqual(set(box.get_motors(motors_with_initiators)), set(box.motors_with_initiators()))
 
 
 class TestBoxCluster(TestCase):

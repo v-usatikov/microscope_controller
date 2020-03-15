@@ -9,6 +9,7 @@ from typing import Dict, List, Tuple, Union, Set, Callable
 
 import serial.tools.list_ports
 import serial.tools.list_ports
+from math import isclose
 from serial import Serial
 
 import ULoggingConfig
@@ -153,9 +154,11 @@ class SerialConnector(Connector):
 class EthernetConnector(Connector):
     """Connector Objekt für eine Verbindung durch Ethernet."""
 
-    def __init__(self, ip: str, port: int, timeout: float = 1, beg_symbol: bytes = b'', end_symbol: bytes = b'\r\n'):
-        self.tn = telnetlib.Telnet(ip, port)
+    def __init__(self, ip: str, port: int, timeout: float = 1, reply_delay: float = 0.002,
+                 beg_symbol: bytes = b'', end_symbol: bytes = b'\r\n'):
+        self.tn = telnetlib.Telnet(ip, port, timeout=timeout)
         self.__timeout = timeout
+        self.reply_delay = reply_delay
         self.beg_symbol = beg_symbol
         self.end_symbol = end_symbol
 
@@ -171,10 +174,12 @@ class EthernetConnector(Connector):
 
     def clear_buffer(self):
         """Löscht alle vorher empfangene information aus Buffer"""
+        time.sleep(self.reply_delay)
         self.tn.read_very_eager()
 
     def set_timeout(self, timeout: float):
         """Stellt das Time-out ein"""
+        self.tn.timeout = timeout
         self.__timeout = timeout
 
     def get_timeout(self) -> float:
@@ -233,10 +238,6 @@ class ContrCommunicator:
         """Zeigt, ob der End-Initiator im Moment aktiviert ist."""
         raise NotImplementedError
 
-    def read_reply(self) -> (bool, bytes):
-        """Antwort lesen, der nach einem Befehl erscheint."""
-        raise NotImplementedError
-
     def bus_list(self) -> Tuple[int]:
         """Gibt die Liste der allen verfügbaren Bus-Nummern zurück."""
         raise NotImplementedError
@@ -246,7 +247,7 @@ class ContrCommunicator:
         raise NotImplementedError
 
     def check_connection(self) -> (bool, bytes):
-        """Prüft ob es bei dem Com-Port tatsächlich ein Controller gibt, und gibt die Version davon zurück."""
+        """Prüft ob es bei dem Port tatsächlich ein Controller gibt, und gibt die Version davon zurück."""
         raise NotImplementedError
 
     def command_to_box(self, command: bytes) -> (bool, Union[bytes, None]):
@@ -264,6 +265,10 @@ class ContrCommunicator:
     def check_raw_input_data(self, raw_input_data: List[dict]) -> (bool, str):
         """Prüft ob die rohe Daten aus der input-Datei kompatibel sind."""
         raise NotImplementedError
+
+    def calibrate(self, bus: int, axis: int):
+        """Die standarte Justierungmaßnahmen durchführen, wenn der Kontroller welche unterstützt."""
+        pass
 
 
 M_Coord = Tuple[int, int]
@@ -645,29 +650,42 @@ class Motor:
         self.communicator.set_position(self.transform_units(position, units, to='contr'), *self.coord())
         logging.info(f'__position wurde eingestellt. ({position})')
 
+    def base_calibration(self):
+        """Die standarte Justierungmaßnahmen für den Motor durchführen, wenn der Kontroller welche unterstützt."""
+        self.communicator.calibrate(*self.coord())
+
     def calibrate(self, stop_indicator: StopIndicator = None, reporter: WaitReporter = None):
         """Kalibrierung von den gegebenen Motoren"""
-
         if self.with_initiators():
             logging.info(f'Kalibrierung vom Motor {self.name} wurde angefangen.')
 
+            self.base_calibration()
+            self.wait_motor_stop()
             # Bis zum Ende laufen
-            while not self.at_the_end():
+            while True:
                 self.go(500000, units='contr', calibrate=True)
                 self.wait_motor_stop(stop_indicator)
                 if stop_indicator is not None:
                     if stop_indicator.has_stop_requested():
                         return
+                if self.at_the_end():
+                    break
             end = self.position('contr')
 
             # Bis zum Anfang laufen
-            while not self.at_the_beginning():
+            while True:
                 self.go(-500000, units='contr', calibrate=True)
                 self.wait_motor_stop(stop_indicator)
                 if stop_indicator is not None:
                     if stop_indicator.has_stop_requested():
                         return
+                if self.at_the_beginning():
+                    break
             beginning = self.position('contr')
+
+            if isclose(end, beginning):
+                raise CalibrationError(
+                    "Kalibrierung ist fehlgeschlagen, die Endposition ist gleich die Anfangsposition!")
 
             # Skala normieren
             self.config['norm_per_contr'] = 1000 / (end - beginning)
@@ -936,7 +954,7 @@ class Box:
         return self.controller[bus].motor[axis]
 
     def get_motor_by_name(self, name: str) -> Motor:
-        """Gibt den Motor objekt zurück aus Koordinaten in Format (bus, Achse)"""
+        """Gibt den Motor objekt zurück aus dem Name davon."""
 
         for controller in self:
             for motor in controller:
@@ -995,22 +1013,42 @@ class Box:
 
         return motors_parameters
 
-    def calibrate_motors(self, list_to_calibration: List[M_Coord] = None,
-                         motors_to_calibration: List[Motor] = None,
+    def base_calibration(self, motors_to_calibration: List[Motor] = None):
+        """Die standarte Justierungmaßnahmen für die angegebene Motoren durchführen,
+        wenn der Kontroller welche unterstützt. Wenn nichts angegeben ist, dan von allen Motoren.
+        """
+
+        if motors_to_calibration is None:
+            motors_to_calibration = self.motors()
+        for motor in motors_to_calibration:
+            motor.base_calibration()
+
+    def get_motors(self, coords: List[M_Coord] = None):
+        """Gibt zurück die Liste der Motoren anhand von der Liste der Koordinaten davon."""
+        motors = []
+        for coord in coords:
+            motors.append(self.get_motor(coord))
+        return motors
+
+    def get_motors_by_names(self, names: List[str] = None):
+        """Gibt zurück die Liste der Motoren anhand von der Liste der Namen davon."""
+        motors = []
+        for name in names:
+            motors.append(self.get_motor_by_name(name))
+        return motors
+
+    def calibrate_motors(self, motors_to_calibration: List[Motor] = None,
+                         list_to_calibration: List[M_Coord] = None,
                          stop_indicator: StopIndicator = None,
                          reporter: WaitReporter = None):
-        """Kalibrierung von den gegebenen Motoren"""
-
+        """Kalibrierung von den gegebenen Motoren. Wenn nichts angegeben ist, dan von allen Motoren."""
+        all_motors = False
         if list_to_calibration is None and motors_to_calibration is None:
-            list_to_calibration = self.motors_with_initiators()
+            motors_to_calibration = self.motors_with_initiators()
+            self.base_calibration(self.motors_without_initiators())
             all_motors = True
-        else:
-            all_motors = False
-
-        # Motoren ohne Initiatoren aus der Liste entfernen
-        if motors_to_calibration is None:
-            motors_to_calibration = [self.controller[bus].motor[axis] for bus, axis in list_to_calibration
-                                     if self.controller[bus].motor[axis].with_initiators()]
+        elif motors_to_calibration is None:
+            motors_to_calibration = self.get_motors(list_to_calibration)
 
         wait_list = set()
         for motor in motors_to_calibration:
@@ -1140,24 +1178,24 @@ class Box:
             controllers_list.append(controller.bus)
         return controllers_list
 
-    def motors_without_initiators(self) -> List[M_Coord]:
-        """Gibt zurück eine Liste der allen Motoren ohne Initiatoren in Format: [(bus, Achse), …]"""
+    def motors_without_initiators(self) -> List[Motor]:
+        """Gibt zurück eine Liste der allen Motoren ohne Initiatoren."""
 
         motors_list = []
         for controller in self:
             for motor in controller:
                 if not motor.with_initiators():
-                    motors_list.append(motor.coord())
+                    motors_list.append(motor)
         return motors_list
 
-    def motors_with_initiators(self) -> List[M_Coord]:
-        """Gibt zurück eine Liste der allen Motoren mit Initiatoren in Format: [(bus, Achse), …]"""
+    def motors_with_initiators(self) -> List[Motor]:
+        """Gibt zurück eine Liste der allen Motoren mit Initiatoren."""
 
         motors_list = []
         for controller in self:
             for motor in controller:
                 if motor.with_initiators():
-                    motors_list.append(motor.coord())
+                    motors_list.append(motor)
         return motors_list
 
     def close(self, data_folder: str = 'data/'):

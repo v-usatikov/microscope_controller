@@ -39,8 +39,8 @@ s.connect((host, port))
 # s.send(b':CHAN0:STAT?\r\n')
 s.send(b':CHAN0:VEL?\r\n')
 
-# s.send(b':SYST:ERR:COUN?\r\n')
-# s.send(b':SYST:ERR:NEXT?\r\n')
+s.send(b':SYST:ERR:COUN?\r\n')
+s.send(b':SYST:ERR:NEXT?\r\n')
 
 
 print('Befehl gesendet')
