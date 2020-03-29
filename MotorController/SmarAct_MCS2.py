@@ -17,9 +17,10 @@ if __name__ == '__main__':
 class MCS2Communicator(ContrCommunicator):
 
     tolerance = 10**6  # Für MCS2 akzeptabele Abweichung bei Positionierung der Motoren (in Controller Einheiten)
+    calibration_shift = 50*10**9
 
     # Dict, mit den Defaultwerten der Parametern.
-    PARAMETER_DEFAULT = {'Positioner Type': 301, 'Velocity': 0, 'Acceleration': 0}
+    PARAMETER_DEFAULT = {'Positioner Type': 300, 'Velocity': 0, 'Acceleration': 0}
     PARAMETER_COMMAND = {'Positioner Type': b':PTYPe', 'Velocity': b':VEL', 'Acceleration': b':ACC'}
 
     def __init__(self, connector: Connector):
@@ -150,7 +151,7 @@ class MCS2Communicator(ContrCommunicator):
 
     def set_parameter(self, parameter_name: str, neu_value: float, bus: int, axis: int):
         """Ändert den Wert des angegebenen Parameters."""
-        self.command_without_reply(f'{self.PARAMETER_COMMAND[parameter_name]} {neu_value}'.encode(), bus, axis)
+        self.command_without_reply(self.PARAMETER_COMMAND[parameter_name] + f' {neu_value}'.encode(), bus, axis)
 
     def __get_chan_prop(self, bus: int, axis: int) -> Tuple[int]:
         int32 = self.command_with_int_reply(b':STATe?', bus, axis)
@@ -239,7 +240,6 @@ class MCS2Communicator(ContrCommunicator):
         self.command_without_reply(f':CHAN{channel}:CAL:OPT 0'.encode())
         self.command_without_reply(f':CAL{channel}'.encode())
         # self.command_without_reply(b'*WAI')
-
 
 
 class MCC2BoxEmulator(SerialEmulator, ContrCommunicator):
@@ -633,4 +633,4 @@ if __name__ == '__main__':
     # time.sleep(3)
     # print(communicator.motor_stand(0, 2))
 
-    # box = Box(communicator)
+    box = Box(communicator)

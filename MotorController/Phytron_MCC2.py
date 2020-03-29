@@ -30,6 +30,7 @@ class MCC2Communicator(ContrCommunicator):
                          'Umrechnungsfaktor(Contr)': 1}
 
     rec_tolerance = 1 # Für MCC2 akzeptabele Abweichung bei Positionierung der Motoren (in Controller Einheiten)
+    calibration_shift = 500000
 
     def __init__(self, connector: Connector):
         self.connector = connector

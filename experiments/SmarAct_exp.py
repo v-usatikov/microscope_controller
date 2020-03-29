@@ -28,9 +28,9 @@ connector.send(b':CHAN0:MMOD 0')
 connector.send(b':CHAN1:MMOD 0')
 connector.send(b':CHAN2:MMOD 0')
 
-pos = 0
+pos =-30
 connector.send(f':MOVE0 {pos*10**9}'.encode())
-connector.send(f':MOVE1 {pos*10**9}'.encode())
+# connector.send(f':MOVE1 {pos*10**9}'.encode())
 connector.send(f':MOVE2 {pos*10**9}'.encode())
 
 
@@ -89,18 +89,17 @@ connector.send(b':SYST:ERR:NEXT?', False)
 print(connector.read())
 print(connector.read())
 
-# b'99'
-# bytearray(b'99')
-# [0 0 1 1 1 0 0 1 0 0 1 1 1 0 0 1]
-# 1
 
-# b'98'
-# bytearray(b'98')
-# [0 0 1 1 1 0 0 1 0 0 1 1 1 0 0 0]
-# 1
-
-
-
-connector.send(b'*IDN?')
 # connector.send(b'*IDN?')
-print(connector.read())
+# # connector.send(b'*IDN?')
+# print(connector.read())
+
+# connector.send(b':CHAN0:VEL 10.5')
+# # connector.send(b'*IDN?')
+# print(connector.read())
+#
+#
+# connector.send(b':SYST:ERR:COUN?', False)
+# connector.send(b':SYST:ERR:NEXT?', False)
+# print(connector.read())
+# print(connector.read())

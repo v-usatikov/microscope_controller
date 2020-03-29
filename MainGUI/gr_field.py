@@ -15,6 +15,7 @@ import serial, serial.tools.list_ports
 # import pyqtgraph
 from PyQt5.uic import loadUi
 
+from MainGUI.MCWidgets import SampleNavigator
 from MotorController.MotorControllerInterface import SerialConnector
 from MotorController.Phytron_MCC2 import Box, StopIndicator, WaitReporter, MCC2BoxSerial, MCC2BoxEmulator, \
     MCC2Communicator
@@ -121,7 +122,7 @@ class MyGraphField(QFrame):
         # size = 600
         self.resize(size, size)
         # self.set_expanding()
-        print(a0.size())
+        # print(a0.size())
 
 
 
@@ -168,24 +169,68 @@ class ExampleApp(QMainWindow):
 
         self.widget.setParent(None)
 
-        self.mygrfield = MyGraphField(self.centralwidget)
-        self.horizontalLayout.addWidget(self.mygrfield)
+        self.sample_navigator = SampleNavigator(self.centralwidget)
+        self.verticalLayout_3.addWidget(self.sample_navigator)
 
-        self.GoButton.clicked.connect(self.mygrfield.go_to)
-        self.FotoButton.clicked.connect(self.mygrfield.make_photo)
+        self.GoButton.clicked.connect(self.go_to)
+        self.FotoButton.clicked.connect(self.make_photo)
+        self.selectButton.clicked.connect(self.select_mode)
+        self.zoomoffButton.clicked.connect(self.zoom_reset)
+        self.moveButton.clicked.connect(self.grab_mode)
+        self.normalButton.clicked.connect(self.normal_mode)
+        self.zoominButton.clicked.connect(lambda: self.sample_navigator.zoom_in())
+        self.zoomoutButton.clicked.connect(lambda: self.sample_navigator.zoom_out())
 
-        self.mygrfield.pos_signal.connect(self.update_pos)
-        self.mygrfield.pos_to_signal.connect(self.update_to_pos)
+
+        self.sample_navigator.pos_to_signal.connect(self.update_to_pos)
+
+        self.x = 0
+        self.y = 0
 
         self.update_pos()
 
     def update_to_pos(self):
-        self.label_x_to.setText(f'{self.mygrfield.x_to}')
-        self.label_y_to.setText(f'{self.mygrfield.y_to}')
+        self.label_x_to.setText(f'{round(self.sample_navigator.fov_to.x, 2)}')
+        self.label_y_to.setText(f'{round(self.sample_navigator.fov_to.y, 2)}')
 
     def update_pos(self):
-        self.label_x.setText(f'x: {self.mygrfield.x}')
-        self.label_y.setText(f'y: {self.mygrfield.y}')
+        self.label_x.setText(f'x: {round(self.x, 2)}')
+        self.label_y.setText(f'y: {round(self.y, 2)}')
+
+    def go_to(self):
+        pixel = self.sample_navigator.pixel_to_norm_rel(1)
+        if abs(self.x - self.sample_navigator.fov_to.x) > pixel/2:
+            if self.x > self.sample_navigator.fov_to.x:
+                self.x -= pixel
+            elif self.x < self.sample_navigator.fov_to.x:
+                self.x += pixel
+
+        if abs(self.y - self.sample_navigator.fov_to.y) > pixel / 2:
+            if self.y > self.sample_navigator.fov_to.y:
+                self.y -= pixel
+            elif self.y < self.sample_navigator.fov_to.y:
+                self.y += pixel
+
+        self.sample_navigator.move_fov(self.x, self.y)
+        self.update_pos()
+
+        if abs(self.y - self.sample_navigator.fov_to.y) > pixel / 2 or abs(self.x - self.sample_navigator.fov_to.x) > pixel/2:
+            QtCore.QTimer.singleShot(int(1000/60), self.go_to)  # QUICKLY repeat
+
+    def make_photo(self):
+        self.sample_navigator.add_photo('img.png')
+
+    def select_mode(self):
+        self.sample_navigator.set_mode('select')
+
+    def grab_mode(self):
+        self.sample_navigator.set_mode('grab')
+
+    def normal_mode(self):
+        self.sample_navigator.set_mode('normal')
+
+    def zoom_reset(self):
+        self.sample_navigator.zoom_reset()
 
 
 if __name__ == "__main__":

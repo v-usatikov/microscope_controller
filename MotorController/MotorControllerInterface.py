@@ -167,6 +167,7 @@ class EthernetConnector(Connector):
         if clear_buffer:
             self.clear_buffer()
         self.tn.write(self.message_format(message))
+        print(self.message_format(message))
 
     def read(self) -> bytes:
         """Liest ein Nachricht von dem Controller und gibt das zurück."""
@@ -197,6 +198,7 @@ class ContrCommunicator:
 
     PARAMETER_DEFAULT: Dict
     tolerance: float  # Für diese Controller akzeptabele Abweichung bei Positionierung der Motoren (in Controller Einheiten)
+    calibration_shift: float
 
     def go(self, shift: float, bus: int, axis: int):
         """Verschiebt den angegeben Motor um die angegebene Verschiebung."""
@@ -659,11 +661,13 @@ class Motor:
         if self.with_initiators():
             logging.info(f'Kalibrierung vom Motor {self.name} wurde angefangen.')
 
+            calibration_shift = self.communicator.calibration_shift
+
             self.base_calibration()
             self.wait_motor_stop()
             # Bis zum Ende laufen
             while True:
-                self.go(500000, units='contr', calibrate=True)
+                self.go(calibration_shift, units='contr', calibrate=True)
                 self.wait_motor_stop(stop_indicator)
                 if stop_indicator is not None:
                     if stop_indicator.has_stop_requested():
@@ -674,7 +678,7 @@ class Motor:
 
             # Bis zum Anfang laufen
             while True:
-                self.go(-500000, units='contr', calibrate=True)
+                self.go(-calibration_shift, units='contr', calibrate=True)
                 self.wait_motor_stop(stop_indicator)
                 if stop_indicator is not None:
                     if stop_indicator.has_stop_requested():
