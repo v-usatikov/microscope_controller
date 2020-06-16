@@ -167,7 +167,7 @@ class EthernetConnector(Connector):
         if clear_buffer:
             self.clear_buffer()
         self.tn.write(self.message_format(message))
-        print(self.message_format(message))
+        # print(self.message_format(message))
 
     def read(self) -> bytes:
         """Liest ein Nachricht von dem Controller und gibt das zurück."""

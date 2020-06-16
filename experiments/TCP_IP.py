@@ -4,7 +4,7 @@ import sys
 # TCP_PORT = 8007
 import time
 
-TCP_IP = '192.168.1.200'
+TCP_IP = '192.168.0.200'
 TCP_PORT = 55551
 BUFFER_SIZE = 20  # Normally 1024, but we want fast response
 

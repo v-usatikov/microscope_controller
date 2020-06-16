@@ -215,8 +215,8 @@ class GraphicField(QFrame):
 
     def zoom_out(self, zoom_k: float = 0.2):
         zoom_w0 = self.zoom_w
-        zoom_k = 1 + zoom_k
-        self.zoom_w = (self.zoom_w + 2*self.margin)*zoom_k - 2*self.margin
+        zoom_k = 1 - zoom_k
+        self.zoom_w = (self.zoom_w + 2*self.margin)/zoom_k - 2*self.margin
         d_z = (zoom_w0 - self.zoom_w) / 2
         self.zoom_x += d_z
         self.zoom_y += d_z
@@ -246,8 +246,12 @@ class GraphicObjekt(QLabel):
         pass
 
     def reposition(self):
+        print('norm', self.x, self.y)
         x, y = self.gr_field.norm_to_pixel_coord(self.x, self.y)
+        print('pixel', x, y)
         self.move(round(x - self.width() / 2), round(y - self.height() / 2))
+        print('угол', round(x - self.width() / 2), round(y - self.height() / 2))
+        print()
 
     def move_to(self, x, y):
         self.x = x
@@ -291,7 +295,6 @@ class SampleNavigator(GraphicField):
         self.fov_to.raise_()
         self.fov.raise_()
 
-
     def mousePressEvent(self, event: QtGui.QMouseEvent) -> None:
         super().mousePressEvent(event)
         if self.mode() == 'normal':
@@ -325,9 +328,10 @@ class FoV(GraphicObjekt):
         return self.s_navig.norm_to_pixel_rel(self.s_navig.fov_d())
 
     def rescale(self):
-        self.setFixedWidth(self.d_pixel() + 2)
-        self.setFixedHeight(self.d_pixel() + 2)
+        self.setFixedWidth(self.d_pixel()+4)
+        self.setFixedHeight(self.d_pixel()+4)
         self.update()
+        self.hello()
 
     def paintEvent(self, a0: QtGui.QPaintEvent) -> None:
         super().paintEvent(a0)
@@ -341,7 +345,10 @@ class FoV(GraphicObjekt):
         pen = QPen(Qt.black, 1, Qt.SolidLine)
         qp.setPen(pen)
         qp.setBrush(Qt.NoBrush)
-        qp.drawEllipse(QPoint(int(self.width() / 2), int(self.height() / 2)), self.d_pixel() / 2, self.d_pixel() / 2)
+        qp.drawEllipse(QPoint(round(self.width() / 2), round(self.height() / 2)), self.d_pixel() / 2, self.d_pixel() / 2)
+
+    def hello(self):
+        print('FoV')
 
 
 class FoVto(FoV):
@@ -350,7 +357,11 @@ class FoVto(FoV):
         pen = QPen(Qt.gray, 1, Qt.DashLine)
         qp.setPen(pen)
         qp.setBrush(Qt.NoBrush)
-        qp.drawEllipse(QPoint(int(self.width()/2), int(self.height()/2)), self.d_pixel()/2, self.d_pixel()/2)
+        qp.drawEllipse(QPoint(round(self.width()/2), round(self.height()/2)), self.d_pixel()/2, self.d_pixel()/2)
+
+    def hello(self):
+        print('FoV_to')
+
 
 
 class SamplePhoto(FoV):
@@ -364,6 +375,7 @@ class SamplePhoto(FoV):
         self.refresh()
 
     def rescale(self):
+        print('Photo')
         self.setFixedWidth(self.d_pixel())
         self.setFixedHeight(self.d_pixel())
         self.update()
@@ -377,3 +389,6 @@ class SamplePhoto(FoV):
 
     def is_in(self, x: float, y: float) -> bool:
         return sqrt((self.x - x)**2 + (self.y - y)**2) <= self.s_navig.fov_d()/2
+
+    def hello(self):
+        print('Photo')

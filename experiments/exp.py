@@ -54,3 +54,6 @@ import sys
 #     app = QApplication(sys.argv)
 #     ex = Example()
 #     sys.exit(app.exec_())
+from math import cos, pi, sin
+
+print(sin(90*pi/180))

@@ -15,7 +15,7 @@ def timer(func: Callable, *args):
     print(f'took {round((end - start)*1000, 1)} ms')
     return res
 
-ip = '192.168.1.200'
+ip = '192.168.0.200'
 port = 55551
 connector = EthernetConnector(ip, port, end_symbol=b'\r\n', timeout=0.004)
 
@@ -28,7 +28,7 @@ connector.send(b':CHAN0:MMOD 0')
 connector.send(b':CHAN1:MMOD 0')
 connector.send(b':CHAN2:MMOD 0')
 
-pos =-30
+pos =0
 connector.send(f':MOVE0 {pos*10**9}'.encode())
 # connector.send(f':MOVE1 {pos*10**9}'.encode())
 connector.send(f':MOVE2 {pos*10**9}'.encode())
