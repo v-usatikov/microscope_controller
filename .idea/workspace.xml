@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="af26340a-193a-4aa8-bbc7-a5c0e335b84c" name="Default Changelist" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="1ds8qmBn1SFfhRorI0fxxHhYUNf" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="af26340a-193a-4aa8-bbc7-a5c0e335b84c" name="Default Changelist" comment="" />
+      <created>1593202632987</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1593202632987</updated>
+      <workItem from="1593202634206" duration="407000" />
+    </task>
+    <task id="LOCAL-00001" summary="restructing with poetry">
+      <created>1593203031464</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1593203031464</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="2" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="restructing with poetry" />
+    <option name="LAST_COMMIT_MESSAGE" value="restructing with poetry" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="259" y="78" key="CommitChangelistDialog2" timestamp="1593203031101">
+      <screen x="0" y="23" width="1680" height="966" />
+    </state>
+    <state x="259" y="78" key="CommitChangelistDialog2/0.23.1680.966@0.23.1680.966" timestamp="1593203031101" />
+    <state x="348" y="142" key="SettingsEditor" timestamp="1593202737123">
+      <screen x="0" y="23" width="1680" height="966" />
+    </state>
+    <state x="348" y="142" key="SettingsEditor/0.23.1680.966@0.23.1680.966" timestamp="1593202737123" />
+  </component>
+</project>

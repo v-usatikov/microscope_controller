@@ -1,0 +1,5 @@
+PyQt5<6.0.0,>=5.15.0
+graphic-ext@ git+https://github.com/v-usatikov/graphic_ext.git@master
+logscolor@ git+https://github.com/v-usatikov/logscolor.git@master
+motor-controller@ git+https://github.com/v-usatikov/motor_controller.git@master
+numpy<2.0.0,>=1.19.0
