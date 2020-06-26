@@ -3,8 +3,6 @@ from statistics import mean
 from time import sleep
 from typing import List, Callable, Optional, Set
 
-# from pymba import Vimba, VimbaException
-
 import numpy as np
 import cv2
 

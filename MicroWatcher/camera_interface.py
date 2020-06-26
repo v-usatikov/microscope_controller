@@ -72,7 +72,7 @@ class CameraInterf:
 
     def start_video_record(self, video_addres: str = 'jet_video.avi', fps: float = 30, start_stream: bool = False):
         fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-        out = cv2.VideoWriter(video_addres, fourcc, fps, (2048, 1088))
+        out = cv2.VideoWriter(video_addres, fourcc, fps, (2048, 1088), 0)
         self._record_on = True
         self._record_fps = fps
         if start_stream:

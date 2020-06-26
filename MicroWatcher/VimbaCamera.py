@@ -8,7 +8,7 @@ import numpy as np
 import cv2
 from pymba.camera import Camera as PymbaCamera
 
-from MicroWatcher.CameraInterface import CameraInterf
+from MicroWatcher.camera_interface import CameraInterf
 
 
 def get_cameras_list():
