@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "MikroskopController"
+name = "MicroscopeController"
 version = "0.1.0"
 description = ""
 authors = ["Vladimir Usatikov <vladimir@usatikov.com>"]
@@ -12,6 +12,9 @@ graphic-ext = {git = "https://github.com/v-usatikov/graphic_ext.git"}
 motor-controller = {git = "https://github.com/v-usatikov/motor_controller.git"}
 numpy = "^1.19.0"
 opencv-python = "^4.2.0"
+Pillow = "^7.1.2"
+pymba = "^0.3.7"
+lmfit = "^1.0.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^4.6"

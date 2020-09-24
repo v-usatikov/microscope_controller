@@ -1,5 +1,0 @@
-Motor Name;Bus;Achse;Mit Initiatoren(0 oder 1);Einheiten;Umrechnungsfaktor;Lauffrequenz;Stoppstrom;Laufstrom;Booststrom;Initiatortyp
-JetX;0;1;1;mm;0.01;100;1;2;3;1
-JetY;0;2;1;mm;0.01;100;2;3;4;1
-LaserY;1;1;1;mm;0.01;100;3;4;5;1
-LaserZ;1;2;1;mm;0.01;100;3;4;5;1

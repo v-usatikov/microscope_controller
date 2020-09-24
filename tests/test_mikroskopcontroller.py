@@ -1,4 +1,4 @@
-from mikroskopcontroller import __version__
+from mscontr import __version__
 
 
 def test_version():
