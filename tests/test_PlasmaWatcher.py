@@ -1,3 +1,4 @@
+import time
 from copy import deepcopy
 from unittest import TestCase
 import numpy as np
@@ -10,16 +11,22 @@ from mscontr.microwatcher.plasma_camera_emulator import paint_circle, paint_line
 from mscontr.microwatcher.plasma_watcher import find_ray, find_plasma, draw_circle, PlasmaWatcher, \
     PlasmaWatcher_BoxInput, NoPlasmaError, merge_close_lines
 
-def prepare_jet_watcher_to_test(phi = 90, psi = 45, g1 = 10, g2 = 10, shift = 43, laser_on = True):
+
+def prepare_jet_watcher_to_test(phi = 90, psi = 45, g1 = 10, g2 = 10, shift = 43, laser_on = True, jet_cal = True,
+                                pl_cal = True):
     jet_emulator = JetEmulator(phi=phi, psi=psi, g1=g1, g2=g2, jet_d=g1 * 7, laser_jet_shift=shift)
     camera1 = CameraEmulator(1, jet_emulator)
     camera2 = CameraEmulator(2, jet_emulator)
     plasma_watcher = PlasmaWatcher_BoxInput(camera1, camera2, jet_emulator.box, phi=phi, psi=psi)
-    plasma_watcher.g1 = g1
-    plasma_watcher.g2 = g2
+    if jet_cal:
+        plasma_watcher.g1 = g1
+        plasma_watcher.g2 = g2
     if laser_on:
         jet_emulator.laser_on = True
         plasma_watcher.laser_on_mode()
+    if pl_cal:
+        plasma_watcher.jett_laser_dx = jet_emulator.laser_jet_shift
+        plasma_watcher.optimize_plasma(keep_position=False)
     return plasma_watcher, jet_emulator, camera1, camera2
 
 class TestExternalFunctions(TestCase):
@@ -94,14 +101,7 @@ class TestExternalFunctions(TestCase):
 class TestPlasmaWatcher(TestCase):
 
     def test_calibrate_enl(self):
-        phi = 90
-        psi = 45
-        g1 = 10
-        g2 = 10
-        jet_emulator = JetEmulator(phi=phi, psi=psi, g1=g1, g2=g2, jet_d=g1 * 7)
-        camera1 = CameraEmulator(1, jet_emulator)
-        camera2 = CameraEmulator(2, jet_emulator)
-        plasma_watcher = PlasmaWatcher_BoxInput(camera1, camera2, jet_emulator.box, phi=phi, psi=psi)
+        plasma_watcher, jet_emulator, camera1, camera2 = prepare_jet_watcher_to_test(laser_on=False, jet_cal=False)
 
         # jet_emulator.realtime(True)
         # camera1.start_video_record(start_stream=True, fps=60)
@@ -111,21 +111,38 @@ class TestPlasmaWatcher(TestCase):
         #     camera1.stop_video_record()
         #     camera1.stop_stream()
 
-        report = plasma_watcher.calibrate_enl(init_step=g1 * 100, n_points=10)
+        report = plasma_watcher.calibrate_enl(init_step=jet_emulator.g1 * 100, n_points=10)
         print(report)
-        self.assertAlmostEqual(g1, plasma_watcher.g1, delta=0.001)
-        self.assertAlmostEqual(g2, plasma_watcher.g2, delta=0.001)
+        self.assertAlmostEqual(jet_emulator.g1, plasma_watcher.g1, delta=0.001)
+        self.assertAlmostEqual(jet_emulator.g2, plasma_watcher.g2, delta=0.001)
 
     def test_move_jet_to(self):
         plasma_watcher, jet_emulator, camera1, camera2 = prepare_jet_watcher_to_test(laser_on=False)
-        destinations = np.array([(123, 456), (367.67, 45.65), (-274.6, 10.5), (-235.6, -56.8)])
+        destinations = np.array([(1230, 4560), (3676.7, 456.5), (-2740.6, 100.5), (-2356.6, -566.8)])
 
         for point in destinations:
             plasma_watcher.move_jet_to(*point, wait=True)
             np.testing.assert_allclose(np.array(plasma_watcher.get_jet_position()), point, 0, plasma_watcher.tol())
 
-    def test_calibrate_plasma(self):
+    def test_move_plasma_to(self):
         plasma_watcher, jet_emulator, camera1, camera2 = prepare_jet_watcher_to_test()
+        destinations = np.array([(1230, 4560, 456.6), (3676.7, 456.5, 2567.67), (-2740.6, 100.5, -1726.4),
+                                 (-2356.6, -566.8, -345.6)])
+
+        jet_emulator.realtime(True)
+        camera1.start_video_record(start_stream=True, fps=60)
+        try:
+            for point in destinations:
+                plasma_watcher.move_plasma_to(*point, wait=True)
+                np.testing.assert_allclose(np.array(plasma_watcher.get_plasma_position()), point, 0,
+                                           plasma_watcher.tol())
+                time.sleep(3)
+        finally:
+            camera1.stop_video_record()
+            camera1.stop_stream()
+
+    def test_calibrate_plasma(self):
+        plasma_watcher, jet_emulator, camera1, camera2 = prepare_jet_watcher_to_test(pl_cal=False)
 
         record_video = False
         if record_video:

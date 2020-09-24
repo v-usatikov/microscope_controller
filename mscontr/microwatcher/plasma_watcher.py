@@ -469,8 +469,7 @@ class PlasmaWatcher:
     def move_jet(self, shift_x: float, shift_z: float, units: str = 'displ', wait: bool = False):
         """Bewegt Jet-Strahl zu den angegebenen Verschiebungen."""
 
-        self.jet_x.go(shift_x, units=units, wait=wait)
-        self.jet_z.go(shift_z, units=units, wait=wait)
+        self.motors_cl.go({'JetX': shift_x, 'JetZ': shift_z}, units=units, wait=wait)
 
     def move_jet_to(self, target_x: Optional[float], target_z: Optional[float], wait: bool = False):
         """Bewegt Jet-Strahl zur absoluten Position, die als target gegeben wird. Wenn als target None gegeben ist,
@@ -647,13 +646,8 @@ class PlasmaWatcher:
         if optimize_plasma:
             self.optimize_plasma(True)
 
-        if shift_x != 0:
-            self.jet_x.go(shift_x, units=units, wait=wait)
-            self.laser_x.go(shift_x, units=units, wait=wait)
-        if shift_z != 0:
-            self.jet_z.go(shift_z, units=units, wait=wait)
-        if shift_y != 0:
-            self.laser_y.go(shift_y, units=units, wait=wait)
+        self.motors_cl.go({'JetX': shift_x, 'JetZ': shift_z, 'LaserX': shift_x, 'LaserY': shift_y},
+                          units=units, wait=wait)
 
     def move_plasma_to(self, target_x: Optional[float], target_y: Optional[float], target_z: Optional[float],
                        wait: bool = False, optimize_plasma: bool = True):
