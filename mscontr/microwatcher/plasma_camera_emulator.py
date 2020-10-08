@@ -1,4 +1,4 @@
-import threading
+import threading, random
 from copy import deepcopy
 from time import sleep
 
@@ -51,10 +51,21 @@ def plasma_radius_from_intens(intens: float, radius_max: float = 1, intens_max: 
     return intens*radius_max/intens_max
 
 
+def flicker(mu: float, sigma: float):
+    if sigma == 0:
+        return mu
+    if mu == 0:
+        return 0
+    res = random.normalvariate(mu, sigma)
+    if res < 0:
+        return 0
+    return res
+
+
 class JetEmulator:
     def __init__(self, jet_x: Motor = None, jet_z: Motor = None, laser_x: Motor = None, laser_y: Motor = None,
                  phi: float = 90, psi: float = 45, g1: float = 10, g2: float = 10,
-                 jet_d: float = 70, laser_d: float = 70, laser_jet_shift: float = 0):
+                 jet_d: float = 70, laser_d: float = 70, laser_jet_shift: float = 0, flicker_sigma: float = 0):
 
         if None in [jet_x, jet_z, laser_x, laser_y]:
             self.box_emulator = MCC2BoxEmulator(n_bus=2, n_axes=2, realtime=False)
@@ -86,6 +97,7 @@ class JetEmulator:
         self.jet_d = jet_d  # Jet Diameter in Mikrometer
         self.laser_d = laser_d  # Laser Diameter in Mikrometer
         self.laser_jet_shift = laser_jet_shift
+        self.flicker_sigma = flicker_sigma
 
         self.exposure = 40000
         self.normal_exposure = 40000
@@ -95,8 +107,25 @@ class JetEmulator:
 
         self.laser_on = False
 
+        self._drift_on = False
+
     def realtime(self, realtime: bool):
         self.box_emulator.realtime = realtime
+
+    def plasma_drift_on(self, speed: float = 2, max_shift: float = 1000, update_freq: float = 4):
+        def drift(self, speed: float, max_shift: float, update_freq: float):
+            direction = 1
+            while self._drift_on:
+                if abs(self.laser_jet_shift) > max_shift:
+                    direction = -self.laser_jet_shift/abs(self.laser_jet_shift)
+                self.laser_jet_shift += direction*speed/update_freq
+                sleep(1/update_freq)
+
+        self._drift_on = True
+        threading.Thread(target=drift, args=(self, speed, max_shift, update_freq)).start()
+
+    def plasma_drift_off(self):
+        self._drift_on = False
 
     def j_x(self):
         return self.jet_x.position('displ')
@@ -136,6 +165,7 @@ class JetEmulator:
 
         if self.laser_on:
             intens = intens_from_dist(dist=abs(self.j_x()-self.l_x()-self.laser_jet_shift), d=self.jet_d)
+            intens = flicker(intens, self.flicker_sigma)
             intens *= self.exposure / self.dark_exposure
             plasma_radius = plasma_radius_from_intens(intens, radius_max=6*self.jet_d/(2*g))
             paint_circle(frame, pl_z, pl_y, plasma_radius)

@@ -26,8 +26,10 @@ def prepare_jet_watcher_to_test(phi = 90, psi = 45, g1 = 10, g2 = 10, shift = 43
         plasma_watcher.laser_on_mode()
     if pl_cal:
         plasma_watcher.jett_laser_dx = jet_emulator.laser_jet_shift
-        plasma_watcher.optimize_plasma(keep_position=False)
+        plasma_watcher.pl_r_max = plasma_watcher.find_plasma()[3]
+        plasma_watcher.optimize_plasma(keep_position=False, br_control=False)
     return plasma_watcher, jet_emulator, camera1, camera2
+
 
 class TestExternalFunctions(TestCase):
     # def test_find_ray(self):
@@ -142,19 +144,40 @@ class TestPlasmaWatcher(TestCase):
             camera1.stop_stream()
 
     def test_calibrate_plasma(self):
-        plasma_watcher, jet_emulator, camera1, camera2 = prepare_jet_watcher_to_test(pl_cal=False)
-
+        mess_per_point = 5
+        plasma_watcher, jet_emulator, camera1, camera2 = prepare_jet_watcher_to_test(pl_cal=False, shift=1500)
+        jet_emulator.flicker_sigma = 0.1
         record_video = False
         if record_video:
             jet_emulator.realtime(True)
             camera1.start_video_record(start_stream=True, fps=60)
             try:
-                plasma_watcher.calibrate_plasma()
+                plasma_watcher.calibrate_plasma(mess_per_point=mess_per_point)
             finally:
                 camera1.stop_video_record()
                 camera1.stop_stream()
         else:
-            plasma_watcher.calibrate_plasma()
+            plasma_watcher.calibrate_plasma(mess_per_point=mess_per_point)
+        self.assertAlmostEqual(plasma_watcher.jett_laser_dx, jet_emulator.laser_jet_shift,
+                               delta=plasma_watcher.laser_x.tol())
+
+    def test_calibrate_plasma_silent(self):
+        mess_per_point = 5
+        plasma_watcher, jet_emulator, camera1, camera2 = prepare_jet_watcher_to_test(pl_cal=True, shift=1500)
+        jet_emulator.flicker_sigma = 0.03
+        record_video = False
+        if record_video:
+            jet_emulator.realtime(True)
+            camera1.start_video_record(start_stream=True, fps=60)
+            try:
+                plasma_watcher.calibrate_plasma(mess_per_point=mess_per_point, on_the_spot=True,
+                                                fine_step=0, brightness_decr=0)
+            finally:
+                camera1.stop_video_record()
+                camera1.stop_stream()
+        else:
+            plasma_watcher.calibrate_plasma(mess_per_point=mess_per_point, on_the_spot=True,
+                                            fine_step=0, brightness_decr=0)
         self.assertAlmostEqual(plasma_watcher.jett_laser_dx, jet_emulator.laser_jet_shift,
                                delta=plasma_watcher.laser_x.tol())
 

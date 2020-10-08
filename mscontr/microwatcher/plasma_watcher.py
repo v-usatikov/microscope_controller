@@ -1,6 +1,8 @@
+import logging
+import threading
 from copy import deepcopy
-from math import pi, cos, sin
-from statistics import mean
+from math import pi, cos, sin, isclose
+from statistics import mean, pstdev
 from time import sleep
 from typing import List, Callable, Optional, Set, Tuple, Union
 from lmfit import models
@@ -198,6 +200,8 @@ def fit_the_data(x: np.ndarray, y: np.ndarray, model: str = 'linear', n_sigma: f
         mod = models.LinearModel()  # definiert das Modell (zB: models.LorentzianModel, models.linear,...)
     elif model == 'quadr':
         mod = models.QuadraticModel()
+    elif model == 'gauss':
+        mod = models.GaussianModel()
     else:
         raise ValueError(f'Unbekanntes Model: "{model}". Probieren Sie "linear" oder "quadr"')
 
@@ -205,7 +209,7 @@ def fit_the_data(x: np.ndarray, y: np.ndarray, model: str = 'linear', n_sigma: f
     out = mod.fit(y, pars, x=x)  # das eigentliche Fitten passiert hier
 
     if plot:
-        fig, gs = out.plot()
+        fig, gs = out.plot(numpoints=100)
         fig.show()
 
     if out.covar is not None:
@@ -217,10 +221,17 @@ def fit_the_data(x: np.ndarray, y: np.ndarray, model: str = 'linear', n_sigma: f
 
 
 def find_plasma_max_from_data(x: np.ndarray, r: np.ndarray) -> float:
-    plt.scatter(x, r)
-    plt.show()
-    maximum = sum(x*r)/sum(r)
-    return maximum
+    # koef, err = fit_the_data(x, r, 'gauss', plot=True)
+
+    # x = x[r > max(r) * 0.8]
+    # r = r[r > max(r)*0.8]
+
+    koef, err = fit_the_data(x, r, 'gauss', plot=True)
+
+    print(koef)
+    # maximum = -koef[1]/(2*koef[0])
+    # return maximum
+    return koef[1]
 
 
 class CameraCoordinates:
@@ -266,7 +277,7 @@ class PlasmaWatcher:
 
     def __init__(self, camera1: CameraInterf, camera2: CameraInterf,
                  jet_x: Motor, jet_z: Motor, laser_x: Motor, laser_y: Motor, phi: float, psi: float,
-                 tol_pixel: float = 1):
+                 brightness_decr: float = 0.2, tol_pixel: float = 1):
         self.camera1 = camera1
         self.camera2 = camera2
 
@@ -286,6 +297,8 @@ class PlasmaWatcher:
         self._phi = pi*phi/180  #Winkel zwischen den Kameras
         self._psi = pi * psi / 180  # Winkel zwischen den Kamera1 und X-Achse
         self.tol_pixel = tol_pixel  # Akzeptable Abweichung der Messungen in pixel
+        self.brightness_decr = brightness_decr
+        self.brightness_tol = 0.2
 
         self.camera1_coord = CameraCoordinates(self._psi, jet_x, jet_z)
         self.camera2_coord = CameraCoordinates(self._phi + self._psi, jet_x, jet_z)
@@ -306,9 +319,12 @@ class PlasmaWatcher:
         self._pl_r2 = 0
 
         self.jett_laser_dx = 0
+        self.pl_r_max = 0
 
         self._frame1_is_new = True
         self._frame2_is_new = True
+
+        self._hold_plasma_is_on = False
 
         self.camera1.connect_to_stream(self._new_frame1_event)
         self.camera2.connect_to_stream(self._new_frame2_event)
@@ -553,8 +569,10 @@ class PlasmaWatcher:
                  f'Kamera2: {koef2[1]} +- {err2[1]}\n'
         return report
 
-    def calibrate_plasma(self, ray_d: float = 70, s_range: float = 1000, max_s_range: float = 10000, n_points: int = 20,
-                         tol: Optional[float] = None, on_the_spot: bool = False):
+    def calibrate_plasma(self, ray_d: float = 70, s_range: float = 500, max_s_range: float = 10000,
+                         fine_step: float = 7, on_the_spot: bool = False, mess_per_point: int = 1,
+                         time_per_point: float = 0,
+                         brightness_decr: float = 0.10, keep_position: bool = False):
 
 
         def jet_x_move_with_check(value: float, mode: str = 'go'):
@@ -569,65 +587,149 @@ class PlasmaWatcher:
                 raise MotorError("Der Motor bewegt sich nicht zum Ziel! "
                                  "Die Kalibrierung kann nicht abgeschlossen werden.")
 
-        start0 = 0
-        if not on_the_spot:
-            self.motors_cl.go_to({'JetX': 0, 'JetZ': 0, 'LaserX': 0, 'LaserY': 0}, 'displ', wait=True)
-        else:
-            start0 = self.jet_x.position('displ')
-        # erstmal Plasma finden
-        step = 2*ray_d/4
-        i = 0
-        stop_search = False
-        while True:
-            start = i*s_range + start0
-            points = np.concatenate((np.arange(start, start + s_range, step), np.arange(-start, -start - s_range, step)))
-            for point in points:
-                self.jet_x.go_to(point, units='displ', wait=True)
-                if self.find_plasma()[0] is not None:
-                    stop_search = True
-                    start_point = point
+        def plasma_search(on_the_spot: bool):
+            start0 = 0
+            if not on_the_spot:
+                self.motors_cl.go_to({'JetX': 0, 'JetZ': 0, 'LaserX': 0, 'LaserY': 0}, 'displ', wait=True)
+            else:
+                start0 = self.jet_x.position('displ')
+
+            step = 2 * ray_d / 4
+            i = 0
+            stop_search = False
+            while True:
+                start = i * s_range + start0
+                points = np.concatenate((np.arange(start, start + s_range, step),
+                                         np.flipud(np.arange(-start - s_range, -start, step))))
+                for point in points:
+                    self.jet_x.go_to(point, units='displ', wait=True)
+                    for _ in range(3):
+                        r = self.find_plasma()[3]
+                        if r is None:
+                            break
+                        sleep(time_per_point / mess_per_point)
+                    if r is not None:
+                        stop_search = True
+                        start_point = point
+                        break
+                if stop_search:
                     break
-            if stop_search:
-                break
-            i += 1
-            if i*s_range < max_s_range:
-                raise NoPlasmaError('Es ist kein Plasma gefunden innerhalb des angegebenen Suchbereichs.'
-                                    'Die Kalibrierung kann nicht abgeschlossen werden.')
+                i += 1
+                if i * s_range > max_s_range:
+                    raise NoPlasmaError('Es ist kein Plasma gefunden innerhalb des angegebenen Suchbereichs.'
+                                        'Die Kalibrierung kann nicht abgeschlossen werden.')
+            return start_point
+
+        def measure_point(repeats: int) -> (float, float, float):
+            position = self.jet_x.position('displ')
+            pl_r_values = []
+            for _ in range(repeats):
+                r = self.find_plasma()[3]
+                if r is not None:
+                    pl_r_values.append(r)
+
+            if len(pl_r_values) >= 3 * mess_per_point / 4:
+                r_mean = mean(pl_r_values)
+                r_sigma = pstdev(pl_r_values)
+            else:
+                r_mean = None
+                r_sigma = None
+
+            return position, r_mean, r_sigma
+
+        # --------------start--------------------
+
+        if keep_position:
+            plasma_position = self.get_plasma_position(error_raise=True)
+
+        if fine_step < self.jet_x.tol():
+            fine_step = self.jet_x.tol()
+            logging.warning('"fine_step" ist kleiner als die Abweichung von den Motoren!'
+                            ' Die Abweichung wird als "fine_step" genommen.')
+
+        # erstmal Plasma finden
+        start_point = plasma_search(on_the_spot=on_the_spot)
 
         # die Kurve messen
-        step = 2*ray_d/n_points
+        step = fine_step
+        direction = -1
+        r_max = 0
+        r_max_sigma = 0
         jet_x_arr = []
         pl_r_arr = []
-           # nach links bis zu dunkle Zone bewegen
+        stop = False
+        # nach links bis zu dunkle Zone bewegen dann zurück zur Startposition und nach rechts bis zu dunkle Zone bewegen
         while True:
-            r = self.find_plasma()[3]
-            if r is None:
-                break
-            jet_x_arr.append(self.jet_x.position('displ'))
-            pl_r_arr.append(r)
-            jet_x_move_with_check(-step)
-        jet_x_arr.reverse()
-        pl_r_arr.reverse()
+            position, r_mean, r_sigma = measure_point(repeats=mess_per_point)
 
-           # zurück zur Startposition und nach rechts bis zu dunkle Zone bewegen
-        jet_x_move_with_check(start_point, 'go_to')
-        while True:
-            jet_x_move_with_check(step)
-            r = self.find_plasma()[3]
-            if r is None:
-                break
-            jet_x_arr.append(self.jet_x.position('displ'))
-            pl_r_arr.append(r)
+            if r_mean is None:
+                if len(pl_r_arr) == 0:
+                    start_point = plasma_search(on_the_spot=True)
+                    continue
+                else:
+                    for _ in range(2):
+                        jet_x_move_with_check(direction * step)
+                        position, r_mean, r_sigma = measure_point(repeats=mess_per_point)
+                        if r_mean is not None:
+                            break
+                    stop = True
+
+            if not stop:
+                if r_mean < r_max - max(r_max * brightness_decr, 3 * r_max_sigma):
+                    r_values = [r_mean, ]
+                    stop = True
+                    for _ in range(2):
+                        jet_x_move_with_check(direction * step)
+                        position, r_mean, r_sigma = measure_point(repeats=mess_per_point)
+                        if r_mean is None:
+                            pass
+                        elif not r_mean < r_max - max(r_max * brightness_decr, 3 * r_max_sigma):
+                            stop = False
+                            break
+                        else:
+                            r_values.append(r_mean)
+                    r_mean = mean(r_values)
+
+            if r_mean is not None:
+                jet_x_arr.append(position)
+                pl_r_arr.append(r_mean)
+                if r_mean > r_max:
+                    r_max = r_mean
+                    r_max_sigma = r_sigma
+
+            if stop:
+                if direction == 1:
+                    break
+
+                jet_x_arr.reverse()
+                pl_r_arr.reverse()
+                # wenn der Start nicht in der dunklen Zone ist, dann zurück zur Startposition und die Richtung wechseln
+                if not pl_r_arr[-1] < r_max - max(r_max * brightness_decr, 3 * r_max_sigma):
+                    jet_x_move_with_check(start_point, 'go_to')
+                    direction = 1
+                stop = False
+
+            jet_x_move_with_check(direction * step)
+
         jet_x_arr = np.array(jet_x_arr)
         pl_r_arr = np.array(pl_r_arr)
 
         # die Kurve auswerten
         max_position = find_plasma_max_from_data(jet_x_arr, pl_r_arr)
         print(max_position, len(jet_x_arr))
+
+        # in die optimale Position fahren
         self.jet_x.go_to(max_position, 'displ', wait=True)
+
+        # alle nötige Daten speichern
+        self.pl_r_max = self.find_plasma()[3]
         self.jett_laser_dx = self.jet_x.position('displ') - self.laser_x.position('displ')
 
-    def optimize_plasma(self, keep_position: bool = True):
+        # plasma Zurück verschieben, wenn nötig
+        if keep_position:
+            self.move_plasma_to(*plasma_position, wait=True, optimize_plasma=False)
+
+    def optimize_plasma(self, keep_position: bool = True, br_control: bool = True):
         """Stellt der optimale Abstand zwischen den Jet- und Laser- Strahlen laut der letzten Kalibrierung"""
 
         if abs(self.laser_x.position('displ') - self.jet_x.position('displ') - self.jett_laser_dx) > self.laser_x.tol():
@@ -639,12 +741,33 @@ class PlasmaWatcher:
             if keep_position:
                 self.move_plasma_to(*plasma_position, wait=True, optimize_plasma=False)
 
+        if br_control:
+            r = self.find_plasma()[3]
+            print(r, self.pl_r_max*(1 - self.brightness_tol))
+            if r is None:
+                self.calibrate_plasma(keep_position=keep_position)
+            elif r < self.pl_r_max*(1 - self.brightness_tol):
+                self.calibrate_plasma(keep_position=keep_position)
+
+    def _hold_plasma(self, freq: float):
+        self._hold_plasma_is_on = True
+        while self._hold_plasma_is_on:
+            self.optimize_plasma(keep_position=True, br_control=True)
+            sleep(1 / freq)
+
+    def hold_plasma(self, freq: float = 1 / 3):
+
+        threading.Thread(target=self._hold_plasma, args=(freq,)).start()
+
+    def stop_hold_plasma(self):
+        self._hold_plasma_is_on = False
+
     def move_plasma(self, shift_x: float, shift_y: float, shift_z: float, units: str = 'displ',
                     wait: bool = False, optimize_plasma: bool = True):
         """Bewegt Plasma zu den angegebenen Verschiebungen."""
 
         if optimize_plasma:
-            self.optimize_plasma(True)
+            self.optimize_plasma(keep_position=True)
 
         self.motors_cl.go({'JetX': shift_x, 'JetZ': shift_z, 'LaserX': shift_x, 'LaserY': shift_y},
                           units=units, wait=wait)
@@ -676,12 +799,12 @@ class PlasmaWatcher:
 
 
 def PlasmaWatcher_BoxInput(camera1: CameraInterf, camera2: CameraInterf,
-                           box: Box, phi: float, psi: float, tol_pixel: float = 1) -> PlasmaWatcher:
+                           box: Box, phi: float, psi: float, brightness_decr: float = 0.2, tol_pixel: float = 1) -> PlasmaWatcher:
     jet_x = box.get_motor_by_name('JetX')
     jet_z = box.get_motor_by_name('JetZ')
     laser_x = box.get_motor_by_name('LaserX')
     laser_y = box.get_motor_by_name('LaserY')
-    return PlasmaWatcher(camera1, camera2, jet_x, jet_z, laser_x, laser_y, phi, psi, tol_pixel)
+    return PlasmaWatcher(camera1, camera2, jet_x, jet_z, laser_x, laser_y, phi, psi, brightness_decr, tol_pixel)
 
 
 class RecognitionError(Exception):
