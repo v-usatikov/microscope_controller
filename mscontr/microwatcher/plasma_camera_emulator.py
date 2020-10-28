@@ -120,6 +120,7 @@ class JetEmulator:
                     direction = -self.laser_jet_shift/abs(self.laser_jet_shift)
                 self.laser_jet_shift += direction*speed/update_freq
                 sleep(1/update_freq)
+            print('drift_on:', self._drift_on)
 
         self._drift_on = True
         threading.Thread(target=drift, args=(self, speed, max_shift, update_freq)).start()
