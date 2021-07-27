@@ -1,0 +1,3 @@
+Motor Name;Bus;Achse;Mit Initiatoren(0 oder 1);Mit Encoder(0 oder 1);Einheiten;Umrechnungsfaktor;Lauffrequenz;Stoppstrom;Laufstrom;Booststrom;Initiatortyp
+JetX;0;1;1;0;;;4000;10;20;20;
+JetY;0;2;1;0;;;4000;10;20;20;

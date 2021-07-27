@@ -6,7 +6,7 @@ from statistics import mean, pstdev
 from time import sleep
 from typing import List, Callable, Optional, Set, Tuple, Union
 from lmfit import models
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 import numpy as np
 import cv2
@@ -14,7 +14,7 @@ from motor_controller import Motor, Box, MotorsCluster
 from motor_controller.interface import MotorError
 
 from mscontr.microwatcher.camera_interface import CameraInterf
-import matplotlib
+# import matplotlib
 
 # from mscontr.microwatcher.plasma_camera_emulator import JetEmulator, CameraEmulator
 
@@ -220,13 +220,13 @@ def fit_the_data(x: np.ndarray, y: np.ndarray, model: str = 'linear', n_sigma: f
     return np.array(list(out.best_values.values())), err
 
 
-def find_plasma_max_from_data(x: np.ndarray, r: np.ndarray) -> float:
+def find_plasma_max_from_data(z: np.ndarray, r: np.ndarray) -> float:
     # koef, err = fit_the_data(x, r, 'gauss', plot=True)
 
     # x = x[r > max(r) * 0.8]
     # r = r[r > max(r)*0.8]
 
-    koef, err = fit_the_data(x, r, 'gauss', plot=True)
+    koef, err = fit_the_data(z, r, 'gauss', plot=True)
 
     print(koef)
     # maximum = -koef[1]/(2*koef[0])
@@ -245,15 +245,15 @@ class CameraCoordinates:
     def cc_to_mc(self, x_: float, z_: float) -> (float, float):
         """Transformiert das Kamera Koordinatensystem ins Mikroskop Koordinatensystem."""
 
-        x = x_ * cos(self.psi) - z_ * sin(self.psi)
-        z = x_ * sin(self.psi) + z_ * cos(self.psi)
+        x = x_ * cos(self.psi) + z_ * sin(self.psi)
+        z = - x_ * sin(self.psi) + z_ * cos(self.psi)
         return x, z
 
     def mc_to_cc(self, x: float, z: float) -> (float, float):
         """Transformiert das Mikroskop Koordinatensystem ins Kamera Koordinatensystem."""
 
-        x_ = x * cos(-self.psi) - z * sin(-self.psi)
-        z_ = x * sin(-self.psi) + z * cos(-self.psi)
+        x_ = x * cos(-self.psi) + z * sin(-self.psi)
+        z_ = - x * sin(-self.psi) + z * cos(-self.psi)
         return x_, z_
 
     def move_jet_in_cc(self, shift_x: float, shift_z: float, wait: bool = False):
@@ -276,29 +276,28 @@ class CameraCoordinates:
 class PlasmaWatcher:
 
     def __init__(self, camera1: CameraInterf, camera2: CameraInterf,
-                 jet_x: Motor, jet_z: Motor, laser_x: Motor, laser_y: Motor, phi: float, psi: float,
-                 brightness_decr: float = 0.2, tol_pixel: float = 1):
+                 jet_x: Motor, jet_z: Motor, laser_z: Motor, laser_y: Motor,
+                 phi: float, psi: float,
+                 tol_pixel: float = 1):
         self.camera1 = camera1
         self.camera2 = camera2
 
         jet_z.name = 'JetZ'
         jet_x.name = 'JetX'
-        laser_x.name = 'LaserX'
+        laser_z.name = 'LaserZ'
         laser_y.name = 'LaserY'
 
         self.jet_z = jet_z
         self.jet_x = jet_x
-        self.laser_x = laser_x
+        self.laser_z = laser_z
         self.laser_y = laser_y
-        self.motors_cl = MotorsCluster([jet_z, jet_x, laser_x, laser_y])
+        self.motors_cl = MotorsCluster([jet_z, jet_x, laser_z, laser_y])
 
         self.g1 = 1  #Vergröserung der ersten Kamera
         self.g2 = 1  #Vergröserung der zweiten Kamera
         self._phi = pi*phi/180  #Winkel zwischen den Kameras
         self._psi = pi * psi / 180  # Winkel zwischen den Kamera1 und X-Achse
         self.tol_pixel = tol_pixel  # Akzeptable Abweichung der Messungen in pixel
-        self.brightness_decr = brightness_decr
-        self.brightness_tol = 0.2
 
         self.camera1_coord = CameraCoordinates(self._psi, jet_x, jet_z)
         self.camera2_coord = CameraCoordinates(self._phi + self._psi, jet_x, jet_z)
@@ -318,12 +317,13 @@ class PlasmaWatcher:
         self._pl_r1 = 0
         self._pl_r2 = 0
 
-        self.jett_laser_dx = 0
+        self.jett_laser_dz = 0
         self.pl_r_max = 0
 
         self._frame1_is_new = True
         self._frame2_is_new = True
 
+        self.plasma_holder = PlasmaHolder(self, freq=1/3, brightness_tol=0.1)
         self._hold_plasma_is_on = False
         self.dont_move = False  # ein Marker um automatische bewegungen wehrend der Messung zu verbitten
 
@@ -576,11 +576,11 @@ class PlasmaWatcher:
                          brightness_decr: float = 0.10, keep_position: bool = False):
 
 
-        def jet_x_move_with_check(value: float, mode: str = 'go'):
+        def jet_z_move_with_check(value: float, mode: str = 'go'):
             if mode == 'go':
-                done, message = self.jet_x.go(value, units='displ', wait=True, check=True)
+                done, message = self.jet_z.go(value, units='displ', wait=True, check=True)
             elif mode == 'go_to':
-                done, message = self.jet_x.go_to(value, units='displ', wait=True, check=True)
+                done, message = self.jet_z.go_to(value, units='displ', wait=True, check=True)
             else:
                 raise ValueError()
 
@@ -591,9 +591,9 @@ class PlasmaWatcher:
         def plasma_search(on_the_spot: bool):
             start0 = 0
             if not on_the_spot:
-                self.motors_cl.go_to({'JetX': 0, 'JetZ': 0, 'LaserX': 0, 'LaserY': 0}, 'displ', wait=True)
+                self.motors_cl.go_to({'JetX': 0, 'JetZ': 0, 'LaserZ': 0, 'LaserY': 0}, 'displ', wait=True)
             else:
-                start0 = self.jet_x.position('displ')
+                start0 = self.jet_z.position('displ')
 
             step = 2 * ray_d / 4
             i = 0
@@ -603,7 +603,7 @@ class PlasmaWatcher:
                 points = np.concatenate((np.arange(start, start + s_range, step),
                                          np.flipud(np.arange(-start - s_range, -start, step))))
                 for point in points:
-                    self.jet_x.go_to(point, units='displ', wait=True)
+                    self.jet_z.go_to(point, units='displ', wait=True)
                     for _ in range(3):
                         r = self.find_plasma()[3]
                         if r is None:
@@ -622,7 +622,7 @@ class PlasmaWatcher:
             return start_point
 
         def measure_point(repeats: int) -> (float, float, float):
-            position = self.jet_x.position('displ')
+            position = self.jet_z.position('displ')
             pl_r_values = []
             for _ in range(repeats):
                 r = self.find_plasma()[3]
@@ -643,8 +643,8 @@ class PlasmaWatcher:
         if keep_position:
             plasma_position = self.get_plasma_position(error_raise=True)
 
-        if fine_step < self.jet_x.tol():
-            fine_step = self.jet_x.tol()
+        if fine_step < self.jet_z.tol():
+            fine_step = self.jet_z.tol()
             logging.warning('"fine_step" ist kleiner als die Abweichung von den Motoren!'
                             ' Die Abweichung wird als "fine_step" genommen.')
 
@@ -656,7 +656,7 @@ class PlasmaWatcher:
         direction = -1
         r_max = 0
         r_max_sigma = 0
-        jet_x_arr = []
+        jet_z_arr = []
         pl_r_arr = []
         stop = False
         # nach links bis zu dunkle Zone bewegen dann zurück zur Startposition und nach rechts bis zu dunkle Zone bewegen
@@ -669,7 +669,7 @@ class PlasmaWatcher:
                     continue
                 else:
                     for _ in range(2):
-                        jet_x_move_with_check(direction * step)
+                        jet_z_move_with_check(direction * step)
                         position, r_mean, r_sigma = measure_point(repeats=mess_per_point)
                         if r_mean is not None:
                             break
@@ -691,7 +691,7 @@ class PlasmaWatcher:
                     r_mean = mean(r_values)
 
             if r_mean is not None:
-                jet_x_arr.append(position)
+                jet_z_arr.append(position)
                 pl_r_arr.append(r_mean)
                 if r_mean > r_max:
                     r_max = r_mean
@@ -701,29 +701,29 @@ class PlasmaWatcher:
                 if direction == 1:
                     break
 
-                jet_x_arr.reverse()
+                jet_z_arr.reverse()
                 pl_r_arr.reverse()
                 # wenn der Start nicht in der dunklen Zone ist, dann zurück zur Startposition und die Richtung wechseln
                 if not pl_r_arr[-1] < r_max - max(r_max * brightness_decr, 3 * r_max_sigma):
-                    jet_x_move_with_check(start_point, 'go_to')
+                    jet_z_move_with_check(start_point, 'go_to')
                     direction = 1
                 stop = False
 
-            jet_x_move_with_check(direction * step)
+            jet_z_move_with_check(direction * step)
 
-        jet_x_arr = np.array(jet_x_arr)
+        jet_z_arr = np.array(jet_z_arr)
         pl_r_arr = np.array(pl_r_arr)
 
         # die Kurve auswerten
-        max_position = find_plasma_max_from_data(jet_x_arr, pl_r_arr)
-        print(max_position, len(jet_x_arr))
+        max_position = find_plasma_max_from_data(jet_z_arr, pl_r_arr)
+        print(max_position, len(jet_z_arr))
 
         # in die optimale Position fahren
-        self.jet_x.go_to(max_position, 'displ', wait=True)
+        self.jet_z.go_to(max_position, 'displ', wait=True)
 
         # alle nötige Daten speichern
         self.pl_r_max = self.find_plasma()[3]
-        self.jett_laser_dx = self.jet_x.position('displ') - self.laser_x.position('displ')
+        self.jett_laser_dz = self.jet_z.position('displ') - self.laser_z.position('displ')
 
         # plasma Zurück verschieben, wenn nötig
         if keep_position:
@@ -732,41 +732,37 @@ class PlasmaWatcher:
     def compensate_motor_error(self):
         """Prüfen, ob der Abstand zwischen Jet- und Laserstrahl sich geändert hat, und korrigieren."""
 
-        if abs(self.laser_x.position('displ') - self.jet_x.position('displ') - self.jett_laser_dx) > self.laser_x.tol():
+        if abs(self.laser_z.position('displ') - self.jet_z.position('displ') - self.jett_laser_dz) > self.laser_z.tol():
             plasma_position = self.get_plasma_position(error_raise=True)
-            self.jet_x.go_to(self.laser_x.position('displ') + self.jett_laser_dx, 'displ', wait=True)
+            self.jet_z.go_to(self.laser_z.position('displ') + self.jett_laser_dz, 'displ', wait=True)
             self.move_plasma_to(*plasma_position, wait=True, br_control=False)
 
-    def check_plasma_brightness(self, keep_position: bool = True):
-        """Helligkeit vom Plasma prüfen und erneut kalibrieren, wenn es dunkler geworden ist."""
+    # def check_plasma_brightness(self, keep_position: bool = True, calibrate: bool = True, actions: List[Callable] = [])\
+    #         -> bool:
+    #     """Helligkeit vom Plasma prüfen und erneut kalibrieren, wenn es dunkler geworden ist."""
+    #
+    #     r = self.find_plasma()[3]
+    #     print(r, self.pl_r_max*(1 - self.brightness_tol))
+    #     if r is None:
+    #         if calibrate:
+    #             self.calibrate_plasma(keep_position=False, on_the_spot=True, fine_step=0,
+    #                                   mess_per_point=4, brightness_decr=0)
+    #         return False
+    #     elif r < self.pl_r_max*(1 - self.brightness_tol):
+    #         if calibrate:
+    #             self.calibrate_plasma(keep_position=keep_position, on_the_spot=True, fine_step=0,
+    #                                   mess_per_point=4, brightness_decr=0)
+    #         return False
+    #     else:
+    #         return True
 
-        r = self.find_plasma()[3]
-        print(r, self.pl_r_max*(1 - self.brightness_tol))
-        if r is None:
-            self.calibrate_plasma(keep_position=False, on_the_spot=True, fine_step=0,
-                                  mess_per_point=4, brightness_decr=0)
-        elif r < self.pl_r_max*(1 - self.brightness_tol):
-            self.calibrate_plasma(keep_position=keep_position, on_the_spot=True, fine_step=0,
-                                  mess_per_point=4, brightness_decr=0)
+    def hold_plasma(self):
 
-    def _hold_plasma(self, freq: float, position: Optional[Tuple[float, float, float]] = None):
-        self._hold_plasma_is_on = True
-        while self._hold_plasma_is_on:
-            if not self.dont_move:
-                if position is not None:
-                    x0, y0, z0 = position
-                    x, y, z = self.get_plasma_position()
-                    self.move_plasma_to(*position, wait=True, br_control=False)
-                self.optimize_plasma(keep_position=True, br_control=True)
-
-            sleep(1 / freq)
-
-    def hold_plasma(self, freq: float = 1 / 3):
-
-        threading.Thread(target=self._hold_plasma, args=(freq,)).start()
+        self.plasma_holder.position = self.get_plasma_position(error_raise=True)
+        self.plasma_holder.start()
 
     def stop_hold_plasma(self):
-        self._hold_plasma_is_on = False
+        self.plasma_holder.stop()
 
     def move_plasma(self, shift_x: float, shift_y: float, shift_z: float, units: str = 'displ',
                     wait: bool = False, br_control: bool = True):
@@ -808,13 +804,143 @@ class PlasmaWatcher:
         self.move_plasma(shift_x, shift_y, shift_z, units='displ', wait=wait, br_control=br_control)
 
 
+class PlasmaHolder(threading.Thread):
+    """Thread-Objekt für PlasmaWatcher, der die Position und Helligkeit des Plasmas aufbewahrt."""
+
+    def __init__(self, pl_watcher: PlasmaWatcher, freq: float = 1 / 3, brightness_tol: float = 0.1):
+        super().__init__()
+        self.pl_watcher = pl_watcher
+        self.freq = freq
+
+        self.brightness_tol = brightness_tol
+
+        self._stop = False
+
+        self.dont_move = False
+        self.br_control = False
+        self.position_control = False
+
+        self.position: List[float, float, float] = [0, 0, 0]
+        self.pl_shift: Tuple[float, float, float] = (0, 0, 0)
+
+        self.actions_by_shift: List[Callable] = []
+        self.actions_by_dimming: List[Callable] = []
+        self.do_shift_actions_in_run = False
+        self.do_dimming_actions_in_run = False
+
+        self._brightness = 1
+
+    def stop(self):
+        self._stop = True
+
+    def is_running(self):
+        return self.is_alive()
+
+    def brightness(self):
+        return self._brightness
+
+    def start(self, do_shift_actions: bool = True, do_dimming_actions: bool = True):
+        self._stop = False
+        self.do_shift_actions_in_run = do_shift_actions
+        self.do_dimming_actions_in_run = do_dimming_actions
+        super().start()
+
+    def run(self):
+        while not self._stop:
+
+            self._check(brightness=True,
+                        calibrate=True,
+                        do_dimming_actions=self.do_dimming_actions_in_run,
+                        position=self.position_control,
+                        do_shift_actions=self.do_shift_actions_in_run)
+
+            sleep(1 / self.freq)
+
+    def _check(self, position: bool = False, brightness: bool = False, brightness_tol: Optional[float] = None,
+               calibrate: bool = False, keep_position_by_cal: bool = False, do_shift_actions: bool = False,
+               do_dimming_actions: bool = False, move_by_shift: bool = False) -> (Optional[bool], Optional[bool]):
+
+        x, y, z, r = self.pl_watcher.find_plasma(error_raise=not brightness)
+        brightness_is_ok = None
+        position_is_ok = None
+
+        if brightness_tol is None:
+            brightness_tol = self.brightness_tol
+
+        # check brightness
+        if brightness:
+            if r is None:
+                if do_dimming_actions:
+                    self._do_actions_by_dimming()
+                if calibrate and not self.dont_move:
+                    self.pl_watcher.calibrate_plasma(keep_position=False, on_the_spot=True, fine_step=0,
+                                          mess_per_point=4, brightness_decr=0)
+                brightness_is_ok = False
+            elif r < self.pl_watcher.pl_r_max*(1 - self.brightness_tol):
+                if do_dimming_actions:
+                    self._do_actions_by_dimming()
+                if calibrate and not self.dont_move:
+                    self.pl_watcher.calibrate_plasma(keep_position=keep_position_by_cal, on_the_spot=True, fine_step=0,
+                                          mess_per_point=4, brightness_decr=0)
+                brightness_is_ok = False
+            else:
+                brightness_is_ok = True
+
+        # check position
+        if position:
+            x0, y0, z0 = self.position
+            self.pl_shift = (x - x0, y - y0, z - z0)
+
+            if not np.all(np.array(self.pl_shift) < self.pl_watcher.jet_x.tol()):
+                if do_shift_actions:
+                    self._do_actions_by_shift()
+                if not self.dont_move and move_by_shift:
+                    self.pl_watcher.move_plasma_to(*self.position, wait=True, br_control=False)
+                position_is_ok = False
+            else:
+                position_is_ok = True
+
+        return brightness_is_ok, position_is_ok
+
+    def check_brightness(self, keep_position: bool = False, calibrate: bool = False, do_actions: bool = False,
+                         brightness_tol: Optional[float] = None) -> bool:
+        """Helligkeit vom Plasma prüfen und erneut kalibrieren, wenn es dunkler geworden ist."""
+
+        return self._check(brightness=True, brightness_tol=brightness_tol, calibrate=calibrate,
+                           keep_position_by_cal=keep_position, do_dimming_actions=do_actions)[0]
+
+    def check_position(self, dont_move: bool = False, do_actions: bool = False) -> bool:
+        """Position vom Plasma prüfen und zurückbewegen, wenn es verschoben ist."""
+
+        return self._check(position=True, do_shift_actions=do_actions, move_by_shift=not dont_move)[1]
+
+    def complete_check(self, calibrate: bool = True,
+                       keep_position_by_cal: bool = False,
+                       do_dimming_actions: bool = True,
+                       do_shift_actions: bool = True,
+                       brightness_tol: Optional[float] = None,
+                       move_by_shift: bool = True) -> (bool, bool):
+
+        return self._check(brightness=True, brightness_tol=brightness_tol, calibrate=calibrate,
+                           keep_position_by_cal=keep_position_by_cal, do_dimming_actions=do_dimming_actions,
+                           position=True, do_shift_actions=do_shift_actions, move_by_shift=move_by_shift)
+
+    def _do_actions_by_shift(self):
+        for action in self.actions_by_shift:
+            action()
+
+    def _do_actions_by_dimming(self):
+        for action in self.actions_by_dimming:
+            action()
+
+
 def PlasmaWatcher_BoxInput(camera1: CameraInterf, camera2: CameraInterf,
-                           box: Box, phi: float, psi: float, brightness_decr: float = 0.2, tol_pixel: float = 1) -> PlasmaWatcher:
+                           box: Box, phi: float, psi: float, tol_pixel: float = 1) -> PlasmaWatcher:
     jet_x = box.get_motor_by_name('JetX')
     jet_z = box.get_motor_by_name('JetZ')
-    laser_x = box.get_motor_by_name('LaserX')
+    laser_z = box.get_motor_by_name('LaserZ')
     laser_y = box.get_motor_by_name('LaserY')
-    return PlasmaWatcher(camera1, camera2, jet_x, jet_z, laser_x, laser_y, phi, psi, brightness_decr, tol_pixel)
+    return PlasmaWatcher(camera1, camera2, jet_x, jet_z, laser_z, laser_y, phi, psi, tol_pixel)
 
 
 class RecognitionError(Exception):

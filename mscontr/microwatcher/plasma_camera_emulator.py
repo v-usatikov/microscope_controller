@@ -63,25 +63,25 @@ def flicker(mu: float, sigma: float):
 
 
 class JetEmulator:
-    def __init__(self, jet_x: Motor = None, jet_z: Motor = None, laser_x: Motor = None, laser_y: Motor = None,
+    def __init__(self, jet_x: Motor = None, jet_z: Motor = None, laser_z: Motor = None, laser_y: Motor = None,
                  phi: float = 90, psi: float = 45, g1: float = 10, g2: float = 10,
                  jet_d: float = 70, laser_d: float = 70, laser_jet_shift: float = 0, flicker_sigma: float = 0):
 
-        if None in [jet_x, jet_z, laser_x, laser_y]:
+        if None in [jet_x, jet_z, laser_z, laser_y]:
             self.box_emulator = MCC2BoxEmulator(n_bus=2, n_axes=2, realtime=False)
             self.box = Box(self.box_emulator, input_file=DATA_FOLDER+'test_motor_input.csv')
-            self.box.calibrate_motors()
+            self.box.motors_cluster.calibrate_motors()
             self.jet_x = self.box.get_motor_by_name('JetX')
             self.jet_z = self.box.get_motor_by_name('JetZ')
-            self.laser_x = self.box.get_motor_by_name('LaserX')
+            self.laser_z = self.box.get_motor_by_name('LaserZ')
             self.laser_y = self.box.get_motor_by_name('LaserY')
         else:
             self.jet_x = jet_x
             self.jet_z = jet_z
-            self.laser_x = laser_x
+            self.laser_z = laser_z
             self.laser_y = laser_y
 
-        self._motors = [self.jet_x, self.jet_z, self.laser_x, self.laser_y]
+        self._motors = [self.jet_x, self.jet_z, self.laser_z, self.laser_y]
 
         for motor in self._motors:
             motor.set_position(500, 'norm')
@@ -134,8 +134,8 @@ class JetEmulator:
     def j_z(self):
         return self.jet_z.position('displ')
 
-    def l_x(self):
-        return self.laser_x.position('displ')
+    def l_z(self):
+        return self.laser_z.position('displ')
 
     def l_y(self):
         return self.laser_y.position('displ')
@@ -165,7 +165,7 @@ class JetEmulator:
         paint_line(frame, line_x=pl_z, d=self.jet_d/g, transp=0.4)
 
         if self.laser_on:
-            intens = intens_from_dist(dist=abs(self.j_x()-self.l_x()-self.laser_jet_shift), d=self.jet_d)
+            intens = intens_from_dist(dist=abs(self.j_z()-self.l_z()-self.laser_jet_shift), d=self.jet_d)
             intens = flicker(intens, self.flicker_sigma)
             intens *= self.exposure / self.dark_exposure
             plasma_radius = plasma_radius_from_intens(intens, radius_max=6*self.jet_d/(2*g))
@@ -213,6 +213,7 @@ class CameraEmulator(CameraInterf):
     def start_stream(self, delay: float = 0):
         self.stream_on = True
         threading.Thread(target=self._stream).start()
+        self.mode = 'stream'
 
     def _stream(self):
         while self.stream_on:
@@ -221,6 +222,7 @@ class CameraEmulator(CameraInterf):
 
     def stop_stream(self):
         self.stream_on = False
+        self.mode = 'single'
 
     def get_frame(self) -> np.ndarray:
         return self.jet_emulator.get_frame(self.id)

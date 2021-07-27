@@ -14,9 +14,9 @@ import sys
 import serial, serial.tools.list_ports
 # import pyqtgraph
 from PyQt5.uic import loadUi
+from motor_controller.interface import SerialConnector
 
 from mscontr.MainGUI.mcwidgets import SampleNavigator
-from motor_controller.MotorControllerInterface import SerialConnector
 from motor_controller.Phytron_MCC2 import Box, StopIndicator, WaitReporter, MCC2BoxSerial, MCC2BoxEmulator, \
     MCC2Communicator
 import logscolor
@@ -166,11 +166,6 @@ class ExampleApp(QMainWindow):
     def __init__(self, parent=None):
         super(ExampleApp, self).__init__(parent)
         loadUi('MainGUI/mainwindow.ui', self)
-
-        self.widget.setParent(None)
-
-        self.sample_navigator = SampleNavigator(self.centralwidget)
-        self.verticalLayout_3.addWidget(self.sample_navigator)
 
         self.GoButton.clicked.connect(self.go_to)
         self.FotoButton.clicked.connect(self.make_photo)

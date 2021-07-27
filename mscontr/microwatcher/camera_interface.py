@@ -80,7 +80,7 @@ class CameraInterf:
         out = cv2.VideoWriter(video_addres, fourcc, fps, self.get_resolution(), 0)
         self._record_on = True
         self._record_fps = fps
-        if start_stream:
+        if start_stream and self.mode != 'stream':
             self.start_stream()
         threading.Thread(target=self._video_record, args=(out,)).start()
 

@@ -24,10 +24,10 @@ def prepare_jet_watcher_to_test(phi = 90, psi = 45, g1 = 10, g2 = 10, shift = 43
     if laser_on:
         jet_emulator.laser_on = True
         plasma_watcher.laser_on_mode()
-    if pl_cal:
-        plasma_watcher.jett_laser_dx = jet_emulator.laser_jet_shift
+    if pl_cal and laser_on:
+        plasma_watcher.jett_laser_dz = jet_emulator.laser_jet_shift
         plasma_watcher.pl_r_max = plasma_watcher.find_plasma()[3]
-        plasma_watcher.optimize_plasma(keep_position=False, br_control=False)
+        plasma_watcher.compensate_motor_error()
     return plasma_watcher, jet_emulator, camera1, camera2
 
 
@@ -158,8 +158,8 @@ class TestPlasmaWatcher(TestCase):
                 camera1.stop_stream()
         else:
             plasma_watcher.calibrate_plasma(mess_per_point=mess_per_point)
-        self.assertAlmostEqual(plasma_watcher.jett_laser_dx, jet_emulator.laser_jet_shift,
-                               delta=plasma_watcher.laser_x.tol())
+        self.assertAlmostEqual(plasma_watcher.jett_laser_dz, jet_emulator.laser_jet_shift,
+                               delta=plasma_watcher.laser_z.tol())
 
     def test_calibrate_plasma_silent(self):
         mess_per_point = 5
@@ -178,6 +178,6 @@ class TestPlasmaWatcher(TestCase):
         else:
             plasma_watcher.calibrate_plasma(mess_per_point=mess_per_point, on_the_spot=True,
                                             fine_step=0, brightness_decr=0)
-        self.assertAlmostEqual(plasma_watcher.jett_laser_dx, jet_emulator.laser_jet_shift,
-                               delta=plasma_watcher.laser_x.tol())
+        self.assertAlmostEqual(plasma_watcher.jett_laser_dz, jet_emulator.laser_jet_shift,
+                               delta=plasma_watcher.laser_z.tol())
 

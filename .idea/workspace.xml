@@ -2,9 +2,30 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="af26340a-193a-4aa8-bbc7-a5c0e335b84c" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/experiments/TCP_IP.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/TCP_IP.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/experiments/TCP_IP_Telnet.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/TCP_IP_Telnet.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mscontr/MainGUI/MainGUI/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/mscontr/MainGUI/ui_forms/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mscontr/MainGUI/MainGUI/MainGUI.qbs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mscontr/MainGUI/MainGUI/MainGUI.qbs.user" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mscontr/MainGUI/MainGUI/main.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mscontr/MainGUI/MainGUI/mainwindow.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mscontr/MainGUI/MainGUI/mainwindow.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mscontr/MainGUI/MainGUI/mainwindow.ui" beforeDir="false" afterPath="$PROJECT_DIR$/mscontr/MainGUI/ui_forms/mainwindow.ui" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mscontr/MainGUI/MainGUI/name.py" beforeDir="false" afterPath="$PROJECT_DIR$/mscontr/MainGUI/ui_forms/name.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mscontr/MainGUI/MainGUI/ui.py" beforeDir="false" afterPath="$PROJECT_DIR$/mscontr/MainGUI/ui_forms/ui.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mscontr/MainGUI/build-MainGUI-Desktop_Qt_5_12_5_clang_64bit-Debug/Debug/MainGUI.6a6acc72/.tmp/MainGUI" beforeDir="false" afterPath="$PROJECT_DIR$/mscontr/MainGUI/build-MainGUI-Desktop_Qt_5_12_5_clang_64bit-Debug/Debug/MainGUI.6a6acc72/.tmp/MainGUI" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mscontr/MainGUI/build-MainGUI-Desktop_Qt_5_12_5_clang_64bit-Debug/Debug/MainGUI.6a6acc72/MainGUI.app/Contents/MacOS/MainGUI" beforeDir="false" afterPath="$PROJECT_DIR$/mscontr/MainGUI/build-MainGUI-Desktop_Qt_5_12_5_clang_64bit-Debug/Debug/MainGUI.6a6acc72/MainGUI.app/Contents/MacOS/MainGUI" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mscontr/MainGUI/build-MainGUI-Desktop_Qt_5_12_5_clang_64bit-Debug/Debug/install-root/usr/local/Applications/MainGUI.app/Contents/MacOS/MainGUI" beforeDir="false" afterPath="$PROJECT_DIR$/mscontr/MainGUI/build-MainGUI-Desktop_Qt_5_12_5_clang_64bit-Debug/Debug/install-root/usr/local/Applications/MainGUI.app/Contents/MacOS/MainGUI" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mscontr/MainGUI/gr_field.py" beforeDir="false" afterPath="$PROJECT_DIR$/mscontr/MainGUI/gr_field.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mscontr/MainGUI/mcwidgets.py" beforeDir="false" afterPath="$PROJECT_DIR$/mscontr/MainGUI/mcwidgets.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mscontr/microwatcher/camera_interface.py" beforeDir="false" afterPath="$PROJECT_DIR$/mscontr/microwatcher/camera_interface.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mscontr/microwatcher/plasma_camera_emulator.py" beforeDir="false" afterPath="$PROJECT_DIR$/mscontr/microwatcher/plasma_camera_emulator.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mscontr/microwatcher/plasma_watcher.py" beforeDir="false" afterPath="$PROJECT_DIR$/mscontr/microwatcher/plasma_watcher.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/poetry.lock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_PlasmaWatcher.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_PlasmaWatcher.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/videos/drift_video.py" beforeDir="false" afterPath="$PROJECT_DIR$/videos/drift_video.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -22,7 +43,7 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="JupyterTrust" id="736faef9-ff6d-4135-b2e7-d8f1dcabffb2" />
+  <component name="JupyterTrust" id="88d6da73-a368-426b-9bfa-405429337a10" />
   <component name="ProjectId" id="1ds8qmBn1SFfhRorI0fxxHhYUNf" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
@@ -40,15 +61,15 @@
     <property name="node.js.path.for.package.tslint" value="project" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
-    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/tests" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.drift_video">
-    <configuration name="drift_video" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="Python.PlasmaWindow">
+    <configuration name="PlasmaWindow" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="MicroscopeController" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -56,12 +77,12 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/videos" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/mscontr/Demo_GUI" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/videos/drift_video.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/mscontr/Demo_GUI/PlasmaWindow.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -70,7 +91,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="exp8" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="qtplayer" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="MicroscopeController" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -78,12 +99,12 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/experiments" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/experiments/exp8.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tests/qtplayer.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -92,7 +113,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="plasma_video" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="show_and_record" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="MicroscopeController" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -100,12 +121,12 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/videos" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/videos/plasma_video.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tests/show_and_record.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -129,7 +150,7 @@
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="Unittests for test_PlasmaWatcher.TestPlasmaWatcher.test_calibrate_plasma_silent" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+    <configuration name="Unittests for test_PlasmaWatcher.TestPlasmaWatcher.test_move_jet_to" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <module name="MicroscopeController" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -140,17 +161,17 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;test_PlasmaWatcher.TestPlasmaWatcher.test_calibrate_plasma_silent&quot;" />
+      <option name="_new_target" value="&quot;test_PlasmaWatcher.TestPlasmaWatcher.test_move_jet_to&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.drift_video" />
-        <item itemvalue="Python tests.Unittests for test_PlasmaWatcher.TestPlasmaWatcher.test_calibrate_plasma_silent" />
+        <item itemvalue="Python.PlasmaWindow" />
+        <item itemvalue="Python.qtplayer" />
         <item itemvalue="Python tests.Unittests for test_PlasmaWatcher.TestPlasmaWatcher.test_calibrate_plasma" />
-        <item itemvalue="Python.exp8" />
-        <item itemvalue="Python.plasma_video" />
+        <item itemvalue="Python.show_and_record" />
+        <item itemvalue="Python tests.Unittests for test_PlasmaWatcher.TestPlasmaWatcher.test_move_jet_to" />
       </list>
     </recent_temporary>
   </component>
@@ -203,7 +224,38 @@
       <workItem from="1603761350793" duration="1111000" />
       <workItem from="1603762473894" duration="665000" />
       <workItem from="1603916453214" duration="571000" />
-      <workItem from="1603926162689" duration="1831000" />
+      <workItem from="1603926162689" duration="5856000" />
+      <workItem from="1604282859078" duration="1004000" />
+      <workItem from="1604703570361" duration="10770000" />
+      <workItem from="1605114037672" duration="320000" />
+      <workItem from="1605114580888" duration="363000" />
+      <workItem from="1605115821061" duration="795000" />
+      <workItem from="1605713429508" duration="666000" />
+      <workItem from="1605714214765" duration="791000" />
+      <workItem from="1605716114851" duration="907000" />
+      <workItem from="1605717287443" duration="1747000" />
+      <workItem from="1605731584227" duration="265000" />
+      <workItem from="1605734064097" duration="3529000" />
+      <workItem from="1605832361405" duration="642000" />
+      <workItem from="1606407449606" duration="12000" />
+      <workItem from="1606413976671" duration="217000" />
+      <workItem from="1606414481106" duration="598000" />
+      <workItem from="1606416757348" duration="585000" />
+      <workItem from="1613585580776" duration="1398000" />
+      <workItem from="1613588436477" duration="804000" />
+      <workItem from="1616529699353" duration="157000" />
+      <workItem from="1621033879271" duration="294000" />
+      <workItem from="1621039253955" duration="2285000" />
+      <workItem from="1621446286132" duration="878000" />
+      <workItem from="1622664663268" duration="6061000" />
+      <workItem from="1623520697104" duration="1840000" />
+      <workItem from="1626266761557" duration="2803000" />
+      <workItem from="1626276190051" duration="518000" />
+      <workItem from="1626826611293" duration="6576000" />
+      <workItem from="1626990522848" duration="2907000" />
+      <workItem from="1626997237239" duration="3871000" />
+      <workItem from="1627321668991" duration="27512000" />
+      <workItem from="1627396308823" duration="1628000" />
     </task>
     <task id="LOCAL-00001" summary="restructing with poetry">
       <created>1593203031464</created>
@@ -240,7 +292,14 @@
       <option name="project" value="LOCAL" />
       <updated>1602181457882</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="compensate_motor_error() und check_plasma_brightness()">
+      <created>1603928063007</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1603928063007</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -251,178 +310,18 @@
     <MESSAGE value="Plasma_Watcher Objekt erstellt, plasma und jet Kalibrierung, neue Koordinatensystem und anderes" />
     <MESSAGE value="Plasma_Watcher.move_plasma und move_jet testen und verfeinern" />
     <MESSAGE value="Plasma_Watcher.calibrate_plasma() verfeinern" />
-    <option name="LAST_COMMIT_MESSAGE" value="Plasma_Watcher.calibrate_plasma() verfeinern" />
-  </component>
-  <component name="WindowStateProjectService">
-    <state x="450" y="153" key="#Plugins" timestamp="1603761368170">
-      <screen x="0" y="23" width="1680" height="974" />
-    </state>
-    <state x="450" y="153" key="#Plugins/0.23.1680.974@0.23.1680.974" timestamp="1603761368170" />
-    <state x="62" y="229" width="1414" height="760" key="#com.intellij.execution.junit2.states.ComparisonFailureState$DiffDialog" timestamp="1600468162899">
-      <screen x="0" y="23" width="1680" height="966" />
-    </state>
-    <state x="62" y="229" width="1414" height="760" key="#com.intellij.execution.junit2.states.ComparisonFailureState$DiffDialog/0.23.1680.966@0.23.1680.966" timestamp="1600468162899" />
-    <state x="62" y="230" width="1414" height="760" key="#com.intellij.execution.junit2.states.ComparisonFailureState$DiffDialog/0.23.1680.967@0.23.1680.967" timestamp="1600385791357" />
-    <state x="549" y="312" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1596978004067">
-      <screen x="0" y="23" width="1680" height="966" />
-    </state>
-    <state x="549" y="312" key="#com.intellij.fileTypes.FileTypeChooser/0.23.1680.966@0.23.1680.966" timestamp="1596978004067" />
-    <state x="538" y="248" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog" timestamp="1603926081164">
-      <screen x="0" y="23" width="1680" height="975" />
-    </state>
-    <state x="538" y="248" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog/0.23.1680.974@0.23.1680.974" timestamp="1603761320488" />
-    <state x="538" y="248" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog/0.23.1680.975@0.23.1680.975" timestamp="1603926081164" />
-    <state x="0" y="23" width="1073" height="956" key="CommitChangelistDialog2" timestamp="1602181457588">
-      <screen x="0" y="23" width="1680" height="974" />
-    </state>
-    <state x="0" y="23" key="CommitChangelistDialog2/0.23.1680.973@0.23.1680.973" timestamp="1600953307915" />
-    <state x="0" y="23" width="1073" height="956" key="CommitChangelistDialog2/0.23.1680.974@0.23.1680.974" timestamp="1602181457588" />
-    <state width="1613" height="307" key="GridCell.Tab.0.bottom" timestamp="1602464427029">
-      <screen x="0" y="23" width="1680" height="966" />
-    </state>
-    <state width="1613" height="231" key="GridCell.Tab.0.bottom/0.23.1680.1027/1680.23.1920.1057@0.23.1680.1027" timestamp="1602024446996" />
-    <state width="1613" height="231" key="GridCell.Tab.0.bottom/0.23.1680.1027/1680.23.1920.995@0.23.1680.1027" timestamp="1602026664128" />
-    <state width="1613" height="231" key="GridCell.Tab.0.bottom/0.23.1680.1027/1680.23.1920.996@0.23.1680.1027" timestamp="1602026152301" />
-    <state width="1572" height="273" key="GridCell.Tab.0.bottom/0.23.1680.961@0.23.1680.961" timestamp="1595520017118" />
-    <state width="1572" height="250" key="GridCell.Tab.0.bottom/0.23.1680.963@0.23.1680.963" timestamp="1600168826244" />
-    <state width="1470" height="311" key="GridCell.Tab.0.bottom/0.23.1680.965@0.23.1680.965" timestamp="1601536368953" />
-    <state width="1572" height="250" key="GridCell.Tab.0.bottom/0.23.1680.966/1680.23.1920.1057@0.23.1680.966" timestamp="1599692273315" />
-    <state width="1613" height="307" key="GridCell.Tab.0.bottom/0.23.1680.966@0.23.1680.966" timestamp="1602464427029" />
-    <state width="1572" height="250" key="GridCell.Tab.0.bottom/0.23.1680.967/1680.23.1920.1057@0.23.1680.967" timestamp="1599686770578" />
-    <state width="1572" height="307" key="GridCell.Tab.0.bottom/0.23.1680.967@0.23.1680.967" timestamp="1600558507550" />
-    <state width="1572" height="307" key="GridCell.Tab.0.bottom/0.23.1680.972@0.23.1680.972" timestamp="1600385931811" />
-    <state width="1613" height="231" key="GridCell.Tab.0.bottom/0.23.1680.973@0.23.1680.973" timestamp="1602007936476" />
-    <state width="1613" height="231" key="GridCell.Tab.0.bottom/0.23.1680.974/1680.23.1920.1057@0.23.1680.974" timestamp="1602027675293" />
-    <state width="1613" height="213" key="GridCell.Tab.0.bottom/0.23.1680.974@0.23.1680.974" timestamp="1602181214864" />
-    <state width="1613" height="213" key="GridCell.Tab.0.bottom/0.23.1680.975@0.23.1680.975" timestamp="1602183359181" />
-    <state width="1470" height="234" key="GridCell.Tab.0.bottom/0.23.1680.976@0.23.1680.976" timestamp="1601401162404" />
-    <state width="1470" height="234" key="GridCell.Tab.0.bottom/0.23.1680.977@0.23.1680.977" timestamp="1601343221998" />
-    <state width="1613" height="307" key="GridCell.Tab.0.center" timestamp="1602464427028">
-      <screen x="0" y="23" width="1680" height="966" />
-    </state>
-    <state width="1613" height="231" key="GridCell.Tab.0.center/0.23.1680.1027/1680.23.1920.1057@0.23.1680.1027" timestamp="1602024446996" />
-    <state width="1613" height="231" key="GridCell.Tab.0.center/0.23.1680.1027/1680.23.1920.995@0.23.1680.1027" timestamp="1602026664127" />
-    <state width="1613" height="231" key="GridCell.Tab.0.center/0.23.1680.1027/1680.23.1920.996@0.23.1680.1027" timestamp="1602026152300" />
-    <state width="1572" height="273" key="GridCell.Tab.0.center/0.23.1680.961@0.23.1680.961" timestamp="1595520017117" />
-    <state width="1572" height="250" key="GridCell.Tab.0.center/0.23.1680.963@0.23.1680.963" timestamp="1600168826243" />
-    <state width="1470" height="311" key="GridCell.Tab.0.center/0.23.1680.965@0.23.1680.965" timestamp="1601536368952" />
-    <state width="1572" height="250" key="GridCell.Tab.0.center/0.23.1680.966/1680.23.1920.1057@0.23.1680.966" timestamp="1599692273314" />
-    <state width="1613" height="307" key="GridCell.Tab.0.center/0.23.1680.966@0.23.1680.966" timestamp="1602464427028" />
-    <state width="1572" height="250" key="GridCell.Tab.0.center/0.23.1680.967/1680.23.1920.1057@0.23.1680.967" timestamp="1599686770577" />
-    <state width="1572" height="307" key="GridCell.Tab.0.center/0.23.1680.967@0.23.1680.967" timestamp="1600558507549" />
-    <state width="1572" height="307" key="GridCell.Tab.0.center/0.23.1680.972@0.23.1680.972" timestamp="1600385931810" />
-    <state width="1613" height="231" key="GridCell.Tab.0.center/0.23.1680.973@0.23.1680.973" timestamp="1602007936475" />
-    <state width="1613" height="231" key="GridCell.Tab.0.center/0.23.1680.974/1680.23.1920.1057@0.23.1680.974" timestamp="1602027675292" />
-    <state width="1613" height="213" key="GridCell.Tab.0.center/0.23.1680.974@0.23.1680.974" timestamp="1602181214864" />
-    <state width="1613" height="213" key="GridCell.Tab.0.center/0.23.1680.975@0.23.1680.975" timestamp="1602183359180" />
-    <state width="1470" height="234" key="GridCell.Tab.0.center/0.23.1680.976@0.23.1680.976" timestamp="1601401162404" />
-    <state width="1470" height="234" key="GridCell.Tab.0.center/0.23.1680.977@0.23.1680.977" timestamp="1601343221998" />
-    <state width="1613" height="307" key="GridCell.Tab.0.left" timestamp="1602464427028">
-      <screen x="0" y="23" width="1680" height="966" />
-    </state>
-    <state width="1613" height="231" key="GridCell.Tab.0.left/0.23.1680.1027/1680.23.1920.1057@0.23.1680.1027" timestamp="1602024446995" />
-    <state width="1613" height="231" key="GridCell.Tab.0.left/0.23.1680.1027/1680.23.1920.995@0.23.1680.1027" timestamp="1602026664127" />
-    <state width="1613" height="231" key="GridCell.Tab.0.left/0.23.1680.1027/1680.23.1920.996@0.23.1680.1027" timestamp="1602026152300" />
-    <state width="1572" height="273" key="GridCell.Tab.0.left/0.23.1680.961@0.23.1680.961" timestamp="1595520017117" />
-    <state width="1572" height="250" key="GridCell.Tab.0.left/0.23.1680.963@0.23.1680.963" timestamp="1600168826242" />
-    <state width="1470" height="311" key="GridCell.Tab.0.left/0.23.1680.965@0.23.1680.965" timestamp="1601536368952" />
-    <state width="1572" height="250" key="GridCell.Tab.0.left/0.23.1680.966/1680.23.1920.1057@0.23.1680.966" timestamp="1599692273314" />
-    <state width="1613" height="307" key="GridCell.Tab.0.left/0.23.1680.966@0.23.1680.966" timestamp="1602464427028" />
-    <state width="1572" height="250" key="GridCell.Tab.0.left/0.23.1680.967/1680.23.1920.1057@0.23.1680.967" timestamp="1599686770577" />
-    <state width="1572" height="307" key="GridCell.Tab.0.left/0.23.1680.967@0.23.1680.967" timestamp="1600558507548" />
-    <state width="1572" height="307" key="GridCell.Tab.0.left/0.23.1680.972@0.23.1680.972" timestamp="1600385931809" />
-    <state width="1613" height="231" key="GridCell.Tab.0.left/0.23.1680.973@0.23.1680.973" timestamp="1602007936474" />
-    <state width="1613" height="231" key="GridCell.Tab.0.left/0.23.1680.974/1680.23.1920.1057@0.23.1680.974" timestamp="1602027675291" />
-    <state width="1613" height="213" key="GridCell.Tab.0.left/0.23.1680.974@0.23.1680.974" timestamp="1602181214863" />
-    <state width="1613" height="213" key="GridCell.Tab.0.left/0.23.1680.975@0.23.1680.975" timestamp="1602183359180" />
-    <state width="1470" height="234" key="GridCell.Tab.0.left/0.23.1680.976@0.23.1680.976" timestamp="1601401162403" />
-    <state width="1470" height="234" key="GridCell.Tab.0.left/0.23.1680.977@0.23.1680.977" timestamp="1601343221997" />
-    <state width="1613" height="307" key="GridCell.Tab.0.right" timestamp="1602464427029">
-      <screen x="0" y="23" width="1680" height="966" />
-    </state>
-    <state width="1613" height="231" key="GridCell.Tab.0.right/0.23.1680.1027/1680.23.1920.1057@0.23.1680.1027" timestamp="1602024446996" />
-    <state width="1613" height="231" key="GridCell.Tab.0.right/0.23.1680.1027/1680.23.1920.995@0.23.1680.1027" timestamp="1602026664128" />
-    <state width="1613" height="231" key="GridCell.Tab.0.right/0.23.1680.1027/1680.23.1920.996@0.23.1680.1027" timestamp="1602026152300" />
-    <state width="1572" height="273" key="GridCell.Tab.0.right/0.23.1680.961@0.23.1680.961" timestamp="1595520017117" />
-    <state width="1572" height="250" key="GridCell.Tab.0.right/0.23.1680.963@0.23.1680.963" timestamp="1600168826243" />
-    <state width="1470" height="311" key="GridCell.Tab.0.right/0.23.1680.965@0.23.1680.965" timestamp="1601536368953" />
-    <state width="1572" height="250" key="GridCell.Tab.0.right/0.23.1680.966/1680.23.1920.1057@0.23.1680.966" timestamp="1599692273315" />
-    <state width="1613" height="307" key="GridCell.Tab.0.right/0.23.1680.966@0.23.1680.966" timestamp="1602464427029" />
-    <state width="1572" height="250" key="GridCell.Tab.0.right/0.23.1680.967/1680.23.1920.1057@0.23.1680.967" timestamp="1599686770578" />
-    <state width="1572" height="307" key="GridCell.Tab.0.right/0.23.1680.967@0.23.1680.967" timestamp="1600558507549" />
-    <state width="1572" height="307" key="GridCell.Tab.0.right/0.23.1680.972@0.23.1680.972" timestamp="1600385931810" />
-    <state width="1613" height="231" key="GridCell.Tab.0.right/0.23.1680.973@0.23.1680.973" timestamp="1602007936475" />
-    <state width="1613" height="231" key="GridCell.Tab.0.right/0.23.1680.974/1680.23.1920.1057@0.23.1680.974" timestamp="1602027675293" />
-    <state width="1613" height="213" key="GridCell.Tab.0.right/0.23.1680.974@0.23.1680.974" timestamp="1602181214864" />
-    <state width="1613" height="213" key="GridCell.Tab.0.right/0.23.1680.975@0.23.1680.975" timestamp="1602183359181" />
-    <state width="1470" height="234" key="GridCell.Tab.0.right/0.23.1680.976@0.23.1680.976" timestamp="1601401162404" />
-    <state width="1470" height="234" key="GridCell.Tab.0.right/0.23.1680.977@0.23.1680.977" timestamp="1601343221998" />
-    <state width="1613" height="307" key="GridCell.Tab.1.bottom" timestamp="1602464427030">
-      <screen x="0" y="23" width="1680" height="966" />
-    </state>
-    <state width="1470" height="311" key="GridCell.Tab.1.bottom/0.23.1680.965@0.23.1680.965" timestamp="1601536368956" />
-    <state width="1613" height="307" key="GridCell.Tab.1.bottom/0.23.1680.966@0.23.1680.966" timestamp="1602464427030" />
-    <state width="1572" height="307" key="GridCell.Tab.1.bottom/0.23.1680.967@0.23.1680.967" timestamp="1600558507550" />
-    <state width="1572" height="307" key="GridCell.Tab.1.bottom/0.23.1680.972@0.23.1680.972" timestamp="1600385931708" />
-    <state width="1470" height="312" key="GridCell.Tab.1.bottom/0.23.1680.973@0.23.1680.973" timestamp="1600912470776" />
-    <state width="1613" height="307" key="GridCell.Tab.1.bottom/0.23.1680.974@0.23.1680.974" timestamp="1602030725939" />
-    <state width="1470" height="311" key="GridCell.Tab.1.bottom/0.23.1680.976@0.23.1680.976" timestamp="1601400548085" />
-    <state width="1470" height="311" key="GridCell.Tab.1.bottom/0.23.1680.977@0.23.1680.977" timestamp="1601338928656" />
-    <state width="1613" height="307" key="GridCell.Tab.1.center" timestamp="1602464427029">
-      <screen x="0" y="23" width="1680" height="966" />
-    </state>
-    <state width="1470" height="311" key="GridCell.Tab.1.center/0.23.1680.965@0.23.1680.965" timestamp="1601536368955" />
-    <state width="1613" height="307" key="GridCell.Tab.1.center/0.23.1680.966@0.23.1680.966" timestamp="1602464427029" />
-    <state width="1572" height="307" key="GridCell.Tab.1.center/0.23.1680.967@0.23.1680.967" timestamp="1600558507550" />
-    <state width="1572" height="307" key="GridCell.Tab.1.center/0.23.1680.972@0.23.1680.972" timestamp="1600385931707" />
-    <state width="1470" height="312" key="GridCell.Tab.1.center/0.23.1680.973@0.23.1680.973" timestamp="1600912470775" />
-    <state width="1613" height="307" key="GridCell.Tab.1.center/0.23.1680.974@0.23.1680.974" timestamp="1602030725939" />
-    <state width="1470" height="311" key="GridCell.Tab.1.center/0.23.1680.976@0.23.1680.976" timestamp="1601400548084" />
-    <state width="1470" height="311" key="GridCell.Tab.1.center/0.23.1680.977@0.23.1680.977" timestamp="1601338928656" />
-    <state width="1613" height="307" key="GridCell.Tab.1.left" timestamp="1602464427029">
-      <screen x="0" y="23" width="1680" height="966" />
-    </state>
-    <state width="1470" height="311" key="GridCell.Tab.1.left/0.23.1680.965@0.23.1680.965" timestamp="1601536368954" />
-    <state width="1613" height="307" key="GridCell.Tab.1.left/0.23.1680.966@0.23.1680.966" timestamp="1602464427029" />
-    <state width="1572" height="307" key="GridCell.Tab.1.left/0.23.1680.967@0.23.1680.967" timestamp="1600558507550" />
-    <state width="1572" height="307" key="GridCell.Tab.1.left/0.23.1680.972@0.23.1680.972" timestamp="1600385931707" />
-    <state width="1470" height="312" key="GridCell.Tab.1.left/0.23.1680.973@0.23.1680.973" timestamp="1600912470775" />
-    <state width="1613" height="307" key="GridCell.Tab.1.left/0.23.1680.974@0.23.1680.974" timestamp="1602030725939" />
-    <state width="1470" height="311" key="GridCell.Tab.1.left/0.23.1680.976@0.23.1680.976" timestamp="1601400548084" />
-    <state width="1470" height="311" key="GridCell.Tab.1.left/0.23.1680.977@0.23.1680.977" timestamp="1601338928656" />
-    <state width="1613" height="307" key="GridCell.Tab.1.right" timestamp="1602464427029">
-      <screen x="0" y="23" width="1680" height="966" />
-    </state>
-    <state width="1470" height="311" key="GridCell.Tab.1.right/0.23.1680.965@0.23.1680.965" timestamp="1601536368955" />
-    <state width="1613" height="307" key="GridCell.Tab.1.right/0.23.1680.966@0.23.1680.966" timestamp="1602464427029" />
-    <state width="1572" height="307" key="GridCell.Tab.1.right/0.23.1680.967@0.23.1680.967" timestamp="1600558507550" />
-    <state width="1572" height="307" key="GridCell.Tab.1.right/0.23.1680.972@0.23.1680.972" timestamp="1600385931707" />
-    <state width="1470" height="312" key="GridCell.Tab.1.right/0.23.1680.973@0.23.1680.973" timestamp="1600912470775" />
-    <state width="1613" height="307" key="GridCell.Tab.1.right/0.23.1680.974@0.23.1680.974" timestamp="1602030725939" />
-    <state width="1470" height="311" key="GridCell.Tab.1.right/0.23.1680.976@0.23.1680.976" timestamp="1601400548084" />
-    <state width="1470" height="311" key="GridCell.Tab.1.right/0.23.1680.977@0.23.1680.977" timestamp="1601338928656" />
-    <state x="348" y="143" key="SettingsEditor" timestamp="1603762460023">
-      <screen x="0" y="23" width="1680" height="974" />
-    </state>
-    <state x="348" y="129" key="SettingsEditor/0.0.1680.1050@0.0.1680.1050" timestamp="1600562916696" />
-    <state x="348" y="142" key="SettingsEditor/0.23.1680.965@0.23.1680.965" timestamp="1599165391249" />
-    <state x="348" y="142" key="SettingsEditor/0.23.1680.966@0.23.1680.966" timestamp="1597256437045" />
-    <state x="348" y="142" key="SettingsEditor/0.23.1680.967@0.23.1680.967" timestamp="1600558503273" />
-    <state x="309" y="179" key="SettingsEditor/0.23.1680.972@0.23.1680.972" timestamp="1597001099261" />
-    <state x="348" y="143" key="SettingsEditor/0.23.1680.973@0.23.1680.973" timestamp="1600952917112" />
-    <state x="348" y="143" key="SettingsEditor/0.23.1680.974@0.23.1680.974" timestamp="1603762460023" />
-    <state x="395" y="236" key="Vcs.Push.Dialog.v2" timestamp="1600959888619">
-      <screen x="0" y="23" width="1680" height="974" />
-    </state>
-    <state x="395" y="236" key="Vcs.Push.Dialog.v2/0.23.1680.973@0.23.1680.973" timestamp="1600953364723" />
-    <state x="395" y="236" key="Vcs.Push.Dialog.v2/0.23.1680.974@0.23.1680.974" timestamp="1600959888619" />
-    <state x="472" y="234" width="670" height="676" key="search.everywhere.popup" timestamp="1600467258972">
-      <screen x="0" y="23" width="1680" height="966" />
-    </state>
-    <state x="472" y="234" width="670" height="676" key="search.everywhere.popup/0.23.1680.966@0.23.1680.966" timestamp="1600467258972" />
+    <MESSAGE value="compensate_motor_error() und check_plasma_brightness()" />
+    <option name="LAST_COMMIT_MESSAGE" value="compensate_motor_error() und check_plasma_brightness()" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/mscontr/microwatcher/plasma_watcher.py</url>
+          <line>717</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
           <properties notifyOnTerminate="true" exception="BaseException">
@@ -444,28 +343,36 @@
     </watches-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/MicroscopeController$gr_field__2_.coverage" NAME="gr_field (2) Coverage Results" MODIFIED="1593440621176" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/mscontr/MainGUI" />
-    <SUITE FILE_PATH="coverage/MicroscopeController$drift_video.coverage" NAME="drift_video Coverage Results" MODIFIED="1602183359173" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/videos" />
-    <SUITE FILE_PATH="coverage/MicroscopeController$find_ray_exp.coverage" NAME="find_ray_exp Coverage Results" MODIFIED="1600386026296" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
-    <SUITE FILE_PATH="coverage/MicroscopeController$Unittests_for_test_PlasmaWatcher_TestExternalFunctions_test_paint_circle.coverage" NAME="Unittests for test_PlasmaWatcher.TestExternalFunctions.test_paint_circle Coverage Results" MODIFIED="1596976797157" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
-    <SUITE FILE_PATH="coverage/MicroscopeController$Unittests_for_test_PlasmaWatcher_TestPlasmaWatcher_test_calibrate_plasma_silent.coverage" NAME="Unittests for test_PlasmaWatcher.TestPlasmaWatcher.test_calibrate_plasma_silent Coverage Results" MODIFIED="1602182283439" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/MicroscopeController$exp8.coverage" NAME="exp8 Coverage Results" MODIFIED="1602031173021" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
-    <SUITE FILE_PATH="coverage/MicroscopeController$Unittests_for_test_PlasmaWatcher_TestExternalFunctions_test_find_ray.coverage" NAME="Unittests for test_PlasmaWatcher.TestExternalFunctions.test_find_ray Coverage Results" MODIFIED="1600386899062" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
-    <SUITE FILE_PATH="coverage/MicroscopeController$Unittests_for_test_PlasmaWatcher_TestExternalFunctions_test_paint_line.coverage" NAME="Unittests for test_PlasmaWatcher.TestExternalFunctions.test_paint_line Coverage Results" MODIFIED="1596976055374" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/MicroscopeController$opencv_exp.coverage" NAME="opencv_exp Coverage Results" MODIFIED="1593442852370" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
-    <SUITE FILE_PATH="coverage/MicroscopeController$Unittests_for_test_PlasmaWatcher_TestExternalFunctions_test_find_plasma.coverage" NAME="Unittests for test_PlasmaWatcher.TestExternalFunctions.test_find_plasma Coverage Results" MODIFIED="1600467978890" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/MicroscopeController$Unittests_for_test_PlasmaWatcher_TestPlasmaWatcher_test_move_jet_to.coverage" NAME="Unittests for test_PlasmaWatcher.TestPlasmaWatcher.test_move_jet_to Coverage Results" MODIFIED="1626991216789" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/MicroscopeController$Unittests_for_test_PlasmaWatcher_TestExternalFunctions_test_paint_circle.coverage" NAME="Unittests for test_PlasmaWatcher.TestExternalFunctions.test_paint_circle Coverage Results" MODIFIED="1596976797157" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/MicroscopeController$show_and_record.coverage" NAME="show_and_record Coverage Results" MODIFIED="1626997498319" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/MicroscopeController$drift_video.coverage" NAME="drift_video Coverage Results" MODIFIED="1605099683715" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/videos" />
+    <SUITE FILE_PATH="coverage/MicroscopeController$Unittests_for_test_PlasmaWatcher_TestPlasmaWatcher_test_calibrate_enl.coverage" NAME="Unittests for test_PlasmaWatcher.TestPlasmaWatcher.test_calibrate_enl Coverage Results" MODIFIED="1626991048344" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/MicroscopeController$find_ray_exp.coverage" NAME="find_ray_exp Coverage Results" MODIFIED="1600386026296" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
+    <SUITE FILE_PATH="coverage/MicroscopeController$Unittests_for_test_PlasmaWatcher_TestPlasmaWatcher_test_move_plasma_to.coverage" NAME="Unittests for test_PlasmaWatcher.TestPlasmaWatcher.test_move_plasma_to Coverage Results" MODIFIED="1600959258845" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/MicroscopeController$qtplayer.coverage" NAME="qtplayer Coverage Results" MODIFIED="1627001824578" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/MicroscopeController$plasma_watcher.coverage" NAME="plasma_watcher Coverage Results" MODIFIED="1599742673769" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/mscontr/microwatcher" />
+    <SUITE FILE_PATH="coverage/MicroscopeController$PlasmaWindow.coverage" NAME="PlasmaWindow Coverage Results" MODIFIED="1627355339706" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/mscontr/Demo_GUI" />
+    <SUITE FILE_PATH="coverage/pyproject_toml$arrowwidget.coverage" NAME="arrowwidget Coverage Results" MODIFIED="1613586294967" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/mscontr/ArrowWidget/ArrowsWidget" />
+    <SUITE FILE_PATH="coverage/MicroscopeController$Unittests_for_test_PlasmaWatcher_TestExternalFunctions_test_paint_line.coverage" NAME="Unittests for test_PlasmaWatcher.TestExternalFunctions.test_paint_line Coverage Results" MODIFIED="1596976055374" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/MicroscopeController$Unittests_in_test_PlasmaWatcher_py.coverage" NAME="Unittests in test_PlasmaWatcher.py Coverage Results" MODIFIED="1599741593494" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/MicroscopeController$Unittests_for_test_PlasmaWatcher_TestPlasmaWatcher_test_calibrate_plasma_silent.coverage" NAME="Unittests for test_PlasmaWatcher.TestPlasmaWatcher.test_calibrate_plasma_silent Coverage Results" MODIFIED="1626828445913" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/MicroscopeController$Unittests_for_test_PlasmaWatcher_TestPlasmaWatcher_test_calibrate_plasma.coverage" NAME="Unittests for test_PlasmaWatcher.TestPlasmaWatcher.test_calibrate_plasma Coverage Results" MODIFIED="1626998333955" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/MicroscopeController$Unittests_for_test_PlasmaWatcher_TestExternalFunctions_test_calibrate_enl.coverage" NAME="Unittests for test_PlasmaWatcher.TestExternalFunctions.test_calibrate_enl Coverage Results" MODIFIED="1600258845911" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/MicroscopeController$gr_field__2_.coverage" NAME="gr_field (2) Coverage Results" MODIFIED="1593440621176" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/mscontr/MainGUI" />
+    <SUITE FILE_PATH="coverage/MicroscopeController$UMCC2_Demo_GUI.coverage" NAME="UMCC2_Demo_GUI Coverage Results" MODIFIED="1622665141933" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/mscontr/Demo_GUI" />
+    <SUITE FILE_PATH="coverage/MicroscopeController$plasma_camera_emulator.coverage" NAME="plasma_camera_emulator Coverage Results" MODIFIED="1599169204246" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/mscontr/microwatcher" />
+    <SUITE FILE_PATH="coverage/MicroscopeController$gr_field.coverage" NAME="gr_field Coverage Results" MODIFIED="1621039282758" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/mscontr/MainGUI" />
     <SUITE FILE_PATH="coverage/MicroscopeController$plasma_video.coverage" NAME="plasma_video Coverage Results" MODIFIED="1600967673350" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/videos" />
     <SUITE FILE_PATH="coverage/MikroskopController$gr_field.coverage" NAME="gr_field Coverage Results" MODIFIED="1593439202388" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/mikroskopcontroller/MainGUI" />
-    <SUITE FILE_PATH="coverage/MicroscopeController$Unittests_for_test_PlasmaWatcher_TestPlasmaWatcher_test_move_jet_to.coverage" NAME="Unittests for test_PlasmaWatcher.TestPlasmaWatcher.test_move_jet_to Coverage Results" MODIFIED="1600953490635" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
-    <SUITE FILE_PATH="coverage/MicroscopeController$plasma_watcher.coverage" NAME="plasma_watcher Coverage Results" MODIFIED="1599742673769" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/mscontr/microwatcher" />
-    <SUITE FILE_PATH="coverage/MicroscopeController$Unittests_for_test_PlasmaWatcher_TestExternalFunctions_test_merge_close_lines.coverage" NAME="Unittests for test_PlasmaWatcher.TestExternalFunctions.test_merge_close_lines Coverage Results" MODIFIED="1600385654675" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
-    <SUITE FILE_PATH="coverage/MicroscopeController$Unittests_for_test_PlasmaWatcher_TestPlasmaWatcher_test_calibrate_enl.coverage" NAME="Unittests for test_PlasmaWatcher.TestPlasmaWatcher.test_calibrate_enl Coverage Results" MODIFIED="1600386742843" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
-    <SUITE FILE_PATH="coverage/MicroscopeController$Unittests_for_test_PlasmaWatcher_TestPlasmaWatcher_test_move_plasma_to.coverage" NAME="Unittests for test_PlasmaWatcher.TestPlasmaWatcher.test_move_plasma_to Coverage Results" MODIFIED="1600959258845" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
-    <SUITE FILE_PATH="coverage/MicroscopeController$plasma_camera_emulator.coverage" NAME="plasma_camera_emulator Coverage Results" MODIFIED="1599169204246" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/mscontr/microwatcher" />
+    <SUITE FILE_PATH="coverage/MicroscopeController$Unittests_for_test_PlasmaWatcher_TestExternalFunctions_test_find_ray.coverage" NAME="Unittests for test_PlasmaWatcher.TestExternalFunctions.test_find_ray Coverage Results" MODIFIED="1600386899062" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/pyproject_toml$gr_field.coverage" NAME="gr_field Coverage Results" MODIFIED="1613589006448" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/mscontr/MainGUI" />
     <SUITE FILE_PATH="coverage/MikroskopController$gr_field__1_.coverage" NAME="gr_field (1) Coverage Results" MODIFIED="1593439905734" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/mikroskopcontroller/MainGUI" />
+    <SUITE FILE_PATH="coverage/MicroscopeController$arrowwidget.coverage" NAME="arrowwidget Coverage Results" MODIFIED="1621033907982" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/mscontr/ArrowWidget/ArrowsWidget" />
     <SUITE FILE_PATH="coverage/MicroscopeController$exp7.coverage" NAME="exp7 Coverage Results" MODIFIED="1593452682249" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
-    <SUITE FILE_PATH="coverage/MicroscopeController$Unittests_for_test_PlasmaWatcher_TestPlasmaWatcher_test_calibrate_plasma.coverage" NAME="Unittests for test_PlasmaWatcher.TestPlasmaWatcher.test_calibrate_plasma Coverage Results" MODIFIED="1602182240591" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
-    <SUITE FILE_PATH="coverage/MicroscopeController$Unittests_in_test_PlasmaWatcher_py.coverage" NAME="Unittests in test_PlasmaWatcher.py Coverage Results" MODIFIED="1599741593494" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/MicroscopeController$Unittests_for_test_PlasmaWatcher_TestExternalFunctions_test_merge_close_lines.coverage" NAME="Unittests for test_PlasmaWatcher.TestExternalFunctions.test_merge_close_lines Coverage Results" MODIFIED="1600385654675" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/MicroscopeController$Unittests_for_test_PlasmaWatcher_TestExternalFunctions_test_find_plasma.coverage" NAME="Unittests for test_PlasmaWatcher.TestExternalFunctions.test_find_plasma Coverage Results" MODIFIED="1626990734577" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
   </component>
 </project>
