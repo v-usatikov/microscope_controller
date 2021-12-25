@@ -5,13 +5,15 @@ from math import pi, cos, sin, isclose
 from statistics import mean, pstdev
 from time import sleep
 from typing import List, Callable, Optional, Set, Tuple, Union
+
+from PyQt5.QtGui import QColor
 from lmfit import models
 # import matplotlib.pyplot as plt
 
 import numpy as np
 import cv2
 from motor_controller import Motor, Box, MotorsCluster
-from motor_controller.interface import MotorError
+from motor_controller.interface import MotorError, StopIndicator
 
 from mscontr.microwatcher.camera_interface import CameraInterf
 # import matplotlib
@@ -19,51 +21,239 @@ from mscontr.microwatcher.camera_interface import CameraInterf
 # from mscontr.microwatcher.plasma_camera_emulator import JetEmulator, CameraEmulator
 
 
-def find_ray(frame: np.ndarray, error_raise: bool = False) -> Optional[float]:
+def show(frame):
+    cv2.imshow('image', frame)
+    cv2.waitKey(0)
+
+
+def find_ray(frame: np.ndarray, error_raise: bool = False, crop: Tuple[int, int] = ()) -> Optional[float]:
+    """Bestimmt die Position des Stickstoffstrahls auf dem Frame."""
+    gray = deepcopy(frame)
+
+    low_brightness_bound = 40
+    disp_bound = 20
+
+    y2 = gray.shape[0]
+    gray = cv2.GaussianBlur(gray, (11, 11), 0)
+
+    if crop:
+        gray = gray[crop[0]:crop[1], :]
+
+    ym, zm = gray.shape
+
+    z_range = np.arange(zm)
+
+    z_values = np.zeros(gray.shape)
+
+    frame_max = np.copy(gray) * 0
+    frame_80 = np.copy(gray) * 0
+    medians = []
+    for i in range(ym):
+        frame_line = gray[i, :]
+        line_max = np.max(frame_line)
+
+        if line_max >= low_brightness_bound:
+            z_values[i, :] = z_range[:]
+            z_values[i, frame_line != line_max] = 0
+            medians.append(np.median(z_values[i, frame_line == line_max]))
+
+        # frame_max[i, frame_line == np.max(frame_line)] = frame_line[frame_line == np.max(frame_line)]
+        # frame_80[i, frame_line >= 0.8 * np.max(frame_line)] = frame_line[frame_line >= 0.8 * np.max(frame_line)]
+
+    z = np.median(z_values[z_values != 0])
+    medians = np.array(medians)
+
+    # prüfen, ob Jet-Strahl da ist.
+    if np.sum(z_values != 0) > 150:
+        if np.sum(np.abs(medians - z) < disp_bound) >= 0.7*ym:
+            return z
+
+    if error_raise:
+        cv2.imwrite('jet_errors/jet_error_None1.png', gray)
+        mask = z_values.copy()
+        mask[z_values > 0] = 254
+        cv2.imwrite('jet_errors/jet_error_None_mask1.png', mask)
+        raise NoJetError("Es wurde kein Jet-Strahl gefunden!")
+    else:
+        return None
+
+
+def find_ray_1(frame: np.ndarray, error_raise: bool = False, crop: Tuple[int, int] = ()) -> Optional[float]:
     """Bestimmt die Position des Stickstoffstrahls auf dem Frame."""
     frame0 = deepcopy(frame)
-    frame = ~frame
-    gray = frame
+
+    HG = 40
+
+    gray = cv2.GaussianBlur(frame0, (11, 11), 0)
+
+    if crop:
+        gray = gray[crop[0]:crop[1], :]
+
+    ym, zm = gray.shape
+
+    frame_max = np.copy(gray) * 0
+    for i in range(ym):
+        frame_line = gray[i, :]
+        frame_max[i, frame_line == np.max(frame_line)] = frame_line[frame_line == np.max(frame_line)]
+
+    frame_max[frame_max < HG] = 0
+    frame_max[frame_max != 0] = 255
+    edges = frame_max
+
+    rho = 2  # distance resolution in pixels of the Hough grid
+    theta = 0.6 * np.pi / 180  # angular resolution in radians of the Hough grid
+    threshold = 20  # minimum number of votes (intersections in Hough grid cell)
+    if crop:
+        min_line_length = 400  # minimum number of pixels making up a line
+        max_line_gap = 100  # maximum gap in pixels between connectable line segments
+    else:
+        min_line_length = 500
+        max_line_gap = 100
+
+    lines = cv2.HoughLinesP(edges, rho, theta, threshold, np.array([]),
+                            min_line_length, max_line_gap)
+
+    if lines is not None:
+        lines = lines[:, 0, :]
+        lines_befor_merge = deepcopy(lines)
+        # lines = merge_close_lines(lines)
+
+    if lines is None or lines == []:
+        if error_raise:
+            cv2.imwrite('jet_errors/jet_error_None.png', frame0)
+            cv2.imwrite('jet_errors/jet_error_None_mask.png', edges)
+            raise NoJetError("Es wurde kein Jet-Strahl gefunden!")
+        else:
+            return None
+    elif len(lines) > 1:
+        print(len(lines_befor_merge), lines_befor_merge)
+        print(len(lines),lines)
+
+        frame0 = cv2.cvtColor(frame0, cv2.COLOR_BGR2RGB)
+        line_image = np.copy(frame0) * 0  # creating a blank to draw lines on
+        colors = ((0,0,255), (0,128,255), (0,255,128), (255,255,0), (255,0,0))
+        for i, line in enumerate(lines):
+
+            x1, y1, x2, y2 = line
+            if crop:
+                y1 += crop[0]
+                y2 += crop[0]
+            cv2.line(line_image, (round(x1), round(y1)), (round(x2), round(y2)), colors[i], 1)
+        lines_edges = cv2.addWeighted(frame0, 0.8, line_image, 1, 0)
+
+        cv2.imwrite('jet_errors/jet_error.png', lines_edges)
+        cv2.imwrite('jet_errors/jet_error_mask.png',
+                    edges)
+
+        # cv2.imshow('image', lines_edges)
+        # cv2.waitKey(0)
+        # cv2.imshow('image', gray)
+        # cv2.waitKey(0)
+        # cv2.imshow('image', edges)
+        # cv2.waitKey(0)
+        raise RecognitionError(f"Kein Stickstoffstrahl erkannt. {len(lines)} Linien wurde erkannt.")
+
+    x = []
+    for line in lines:
+        x1, y1, x2, y2 = line
+        if abs(x1-x2) > 100:
+            raise RecognitionError(f"Kein Stickstoffstrahl gefunden. Die erkannte Linien sind nicht vertikal.")
+        x.append(x1)
+        x.append(x2)
+
+    # cv2.imshow('image', frame0)
+    # cv2.waitKey(0)
+    # # cv2.imshow('image', gray)
+    # # cv2.waitKey(0)
+    # cv2.imshow('image', edges)
+    # cv2.waitKey(0)
+    return mean(x)
+
+
+def find_ray0(frame: np.ndarray, error_raise: bool = False, crop: Tuple[int, int] = ()) -> Optional[float]:
+    """Bestimmt die Position des Stickstoffstrahls auf dem Frame."""
+    frame0 = deepcopy(frame)
+
+    # cv2.imshow('image', frame0)
+    # cv2.waitKey(0)
+
+    # frame = ~frame
+    gray = frame0
+
+    if crop:
+        gray = gray[crop[0]:crop[1], :]
+
+    # cv2.imshow('image', gray)
+    # cv2.waitKey(0)
+
     # kernel_size = 5
     # gray = cv2.GaussianBlur(gray,(kernel_size, kernel_size),0)
     low_threshold = 50
     high_threshold = 100
     edges = cv2.Canny(gray, low_threshold, high_threshold, apertureSize = 3)
 
-    rho = 1  # distance resolution in pixels of the Hough grid
-    theta = np.pi / 180  # angular resolution in radians of the Hough grid
+    # cv2.imshow('image', edges)
+    # cv2.waitKey(0)
+
+    rho = 2  # distance resolution in pixels of the Hough grid
+    theta = 0.6*np.pi / 180  # angular resolution in radians of the Hough grid
     threshold = 15  # minimum number of votes (intersections in Hough grid cell)
-    min_line_length = 500  # minimum number of pixels making up a line
-    max_line_gap = 100  # maximum gap in pixels between connectable line segments
+    if crop:
+        min_line_length = 400  # minimum number of pixels making up a line
+        max_line_gap = 100    # maximum gap in pixels between connectable line segments
+    else:
+        min_line_length = 400
+        max_line_gap = 100
 
     lines = cv2.HoughLinesP(edges, rho, theta, threshold, np.array([]),
-                        min_line_length, max_line_gap)[:, 0, :]
+                        min_line_length, max_line_gap)
 
-    lines = merge_close_lines(lines)
+
+    lines_befor_merge = deepcopy(lines)
+
+    if lines is not None:
+        lines = lines[:, 0, :]
+        lines = merge_close_lines(lines)
 
     if lines is None or lines == []:
         if error_raise:
+            cv2.imwrite('jet_errors/jet_error_None.png', frame0)
+            cv2.imwrite('jet_errors/jet_error_None_mask.png', edges)
             raise NoJetError("Es wurde kein Jet-Strahl gefunden!")
         else:
             return None
     elif len(lines) != 2:
-        print(lines)
-        cv2.imwrite('/Users/prouser/Dropbox/Proging/Python_Projects/MicroscopeController/experiments/jet_error.png', frame0)
-        cv2.imwrite('/Users/prouser/Dropbox/Proging/Python_Projects/MicroscopeController/experiments/jet_error_mask.png',
+        # print(len(lines_befor_merge), lines_befor_merge)
+        # print(len(lines),lines)
+
+        frame0 = cv2.cvtColor(frame0, cv2.COLOR_BGR2RGB)
+        line_image = np.copy(frame0) * 0  # creating a blank to draw lines on
+        colors = ((0,0,255), (0,128,255), (0,255,128), (255,255,0), (255,0,0))
+        for i, line in enumerate(lines):
+
+            x1, y1, x2, y2 = line
+            if crop:
+                y1 += crop[0]
+                y2 += crop[0]
+            cv2.line(line_image, (round(x1), round(y1)), (round(x2), round(y2)), colors[i], 1)
+        lines_edges = cv2.addWeighted(frame0, 0.8, line_image, 1, 0)
+
+        cv2.imwrite('jet_errors/jet_error.png', lines_edges)
+        cv2.imwrite('jet_errors/jet_error_mask.png',
                     edges)
 
-        cv2.imshow('image', frame0)
-        cv2.waitKey(0)
+        # cv2.imshow('image', lines_edges)
+        # cv2.waitKey(0)
         # cv2.imshow('image', gray)
         # cv2.waitKey(0)
-        cv2.imshow('image', edges)
-        cv2.waitKey(0)
+        # cv2.imshow('image', edges)
+        # cv2.waitKey(0)
         raise RecognitionError(f"Kein Stickstoffstrahl erkannt. {len(lines)} Linien wurde erkannt.")
 
     x = []
     for line in lines:
         x1, y1, x2, y2 = line
-        if abs(x1-x2) > 4:
+        if abs(x1-x2) > 100:
             raise RecognitionError(f"Kein Stickstoffstrahl gefunden. Die erkannte Linien sind nicht vertikal.")
         x.append(x1)
         x.append(x2)
@@ -145,11 +335,15 @@ def merge_close_lines(lines: np.ndarray) -> np.ndarray:
     return np.array(res_lines)
 
 
-def find_plasma(frame: np.ndarray, HG: int = 240, error_raise: bool = False) \
+def find_plasma(frame: np.ndarray, HG: int = 254, crop_top: int = 0,  error_raise: bool = False) \
         -> Union[Tuple[float, float, float], Tuple[None, None, None]]:
     """Bestimmt die Position der Plasmakugel auf dem Frame."""
 
-    gray = frame
+    frame0 = frame.copy()
+    gray = frame0
+
+    if crop_top:
+        gray = gray[crop_top:, :]
     # gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     # cv2.imshow('image', gray)
     # cv2.waitKey(0)
@@ -165,17 +359,133 @@ def find_plasma(frame: np.ndarray, HG: int = 240, error_raise: bool = False) \
 
     conts, h = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 
-    if len(conts) > 1:
-        raise RecognitionError("Mehrere Objekte gefunden!")
-    elif conts is None or conts == []:
+
+    # img = cv2.cvtColor(gray, cv2.COLOR_BGR2RGB)
+    # # cv2.drawContours(img, conts, -1, (255, 0, 0), 3)
+    # for cont in conts:
+    #     (x, y), r = cv2.minEnclosingCircle(cont)
+    #     cv2.circle(img, (round(x), round(y)), round(r), (0, 255, 0), 2)
+    # show(img)
+    # cv2.imwrite('plasma_det_old.png', img)
+
+
+    if conts is None or conts == []:
+        # print(None)
         if error_raise:
+            cv2.imwrite('PW_errors/no_plasma_error.png', frame)
+            cv2.imwrite('PW_errors/no_plasma_error_mask.png', thresh)
+            # show(frame)
+            # show(thresh)
             raise NoPlasmaError("Es wurde kein Plasmakugel gefunden!")
         else:
             return None, None, None
 
-    (x, y), r = cv2.minEnclosingCircle(conts[0])
+    conts_with_areas = []
+    for cont in conts:
+        conts_with_areas.append((cv2.contourArea(cont), cont))
 
+    if len(conts) > 1:
+        conts_with_areas.sort(key=lambda item: item[0], reverse=True)
+
+        if conts_with_areas[0][0] < 4*conts_with_areas[1][0]:
+            img = cv2.cvtColor(gray, cv2.COLOR_BGR2RGB)
+            cv2.drawContours(img, conts, -1, (255, 0, 0), 3)
+            for cont in conts:
+                (x, y), r = cv2.minEnclosingCircle(cont)
+                cv2.circle(img, (round(x), round(y)), round(r), (0, 255, 0), 2)
+            # show(img)
+
+            cv2.imwrite('plasma_errors/plasma_error.png', frame)
+            raise RecognitionError("Mehrere Objekte gefunden!")
+
+    # Position ausrechnen
+    x, y = np.sum(conts[0], axis=0)[0]/len(conts[0])
+    y += crop_top
+
+    # effektives Radius ausrechnen
+    area = cv2.contourArea(conts[0])
+    equi_diameter = np.sqrt(4 * area / np.pi)
+    r = equi_diameter/2
+
+    img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    cv2.circle(img, (round(x), round(y)), 0, (0, 0, 255), 3)
+    cv2.circle(img, (round(x), round(y)), round(r), (0, 255, 0), 2)
+    # show(img)
+    cv2.imwrite('plasma_det_new.png', img)
+
+    # print(x,y,r)
     return x, y, r
+
+
+def find_nozzle(frame: np.ndarray, HG: int = 30, crop: int = 300,  error_raise: bool = False) \
+        -> Union[Tuple[float, float], Tuple[None, None]]:
+    """Bestimmt die Position der Plasmakugel auf dem Frame."""
+
+    frame0 = frame.copy()
+    gray = frame0
+
+    if crop:
+        gray = gray[:crop, :]
+    # gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    # show(gray)
+
+    kernel_size = 5
+    gray = cv2.GaussianBlur(gray,(kernel_size, kernel_size),0)
+    # show(gray)
+
+    thresh = cv2.threshold(gray, HG, 255, cv2.THRESH_BINARY)[1]
+    # show(thresh)
+
+    thresh = cv2.erode(thresh, None, iterations=2)
+    # show(thresh)
+
+    thresh = cv2.dilate(thresh, None, iterations=9)
+    # show(thresh)
+
+    conts, h = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+
+    # img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    # cv2.drawContours(img, conts, -1, (255, 0, 0), 3)
+
+    if conts is None or conts == []:
+        # print(None)
+        if error_raise:
+            cv2.imwrite('PW_errors/no_nozzle_error.png', frame)
+            cv2.imwrite('PW_errors/no_nozzle_error_mask.png', thresh)
+            # show(frame)
+            # show(thresh)
+            raise NoNozzleError("Es wurde keine Düse gefunden!")
+        else:
+            return None, None
+
+    objects = []
+    for cont in conts:
+        x1, y1, dx, dy = cv2.boundingRect(cont)
+        x = x1 + dx/2
+        objects.append((x1, dx, y1, dy))
+        # print(x1, y1, dx, dy)
+        # cv2.rectangle(img, (round(x1), round(y1)), (round(x1+dx), round(y1+dy)), (0, 255, 0), 2)
+    # show(img)
+
+    if len(objects) > 1:
+        equi_diameter = lambda item: (item[1] + item[3])/2
+        objects.sort(key=equi_diameter, reverse=True)
+
+        if equi_diameter(objects[0]) < 4*equi_diameter(objects[1]):
+            img = cv2.cvtColor(gray, cv2.COLOR_BGR2RGB)
+            cv2.drawContours(img, conts, -1, (255, 0, 0), 3)
+            for obj in objects:
+                x1, dx, y1, dy = obj
+                cv2.rectangle(img, (round(x1), round(y1)), (round(x1+dx), round(y1+dy)), (0, 255, 0), 2)
+            # show(img)
+
+            cv2.imwrite('PW_errors/nozzle_error.png', frame)
+            raise RecognitionError("Mehrere Objekte gefunden!")
+
+    x1, dx, y1, dy = objects[0]
+    x = x1 + dx / 2
+    d = dx
+    return x, d
 
 
 def draw_circle(frame, x: float, y: float, r: float, center: bool = False) -> np.ndarray:
@@ -245,15 +555,15 @@ class CameraCoordinates:
     def cc_to_mc(self, x_: float, z_: float) -> (float, float):
         """Transformiert das Kamera Koordinatensystem ins Mikroskop Koordinatensystem."""
 
-        x = x_ * cos(self.psi) + z_ * sin(self.psi)
-        z = - x_ * sin(self.psi) + z_ * cos(self.psi)
+        x = x_ * cos(self.psi) - z_ * sin(self.psi)
+        z = x_ * sin(self.psi) + z_ * cos(self.psi)
         return x, z
 
     def mc_to_cc(self, x: float, z: float) -> (float, float):
         """Transformiert das Mikroskop Koordinatensystem ins Kamera Koordinatensystem."""
 
-        x_ = x * cos(-self.psi) + z * sin(-self.psi)
-        z_ = - x * sin(-self.psi) + z * cos(-self.psi)
+        x_ = x * cos(-self.psi) - z * sin(-self.psi)
+        z_ = x * sin(-self.psi) + z * cos(-self.psi)
         return x_, z_
 
     def move_jet_in_cc(self, shift_x: float, shift_z: float, wait: bool = False):
@@ -278,6 +588,7 @@ class PlasmaWatcher:
     def __init__(self, camera1: CameraInterf, camera2: CameraInterf,
                  jet_x: Motor, jet_z: Motor, laser_z: Motor, laser_y: Motor,
                  phi: float, psi: float,
+                 nozzle_d: float = 1000,
                  tol_pixel: float = 1):
         self.camera1 = camera1
         self.camera2 = camera2
@@ -298,6 +609,7 @@ class PlasmaWatcher:
         self._phi = pi*phi/180  #Winkel zwischen den Kameras
         self._psi = pi * psi / 180  # Winkel zwischen den Kamera1 und X-Achse
         self.tol_pixel = tol_pixel  # Akzeptable Abweichung der Messungen in pixel
+        self.nozzle_d = nozzle_d
 
         self.camera1_coord = CameraCoordinates(self._psi, jet_x, jet_z)
         self.camera2_coord = CameraCoordinates(self._phi + self._psi, jet_x, jet_z)
@@ -372,6 +684,20 @@ class PlasmaWatcher:
     def _new_frame2_event(self, frame: np.ndarray):
         self._frame2_is_new = True
 
+    def get_nozzle_z1(self, HG: int = 30, crop: int = 300, error_raise: bool = False) \
+            -> Union[Tuple[float, float], Tuple[None, None]]:
+        """Gibt die Position und den Diameter der Düse auf der ersten Kamera in Pixel zurück"""
+
+        frame1 = self.camera1.get_frame()
+        return find_nozzle(frame1, HG, crop, error_raise)
+
+    def get_nozzle_z2(self, HG: int = 30, crop: int = 300, error_raise: bool = False) \
+            -> Union[Tuple[float, float], Tuple[None, None]]:
+        """Gibt die Position und den Diameter der Düse auf der ersten Kamera in Pixel zurück"""
+
+        frame2 = self.camera2.get_frame()
+        return find_nozzle(frame2, HG, crop, error_raise)
+
     def _get_j_x1(self, error_raise: bool = False) -> float:
         """Gibt Jet-Position auf der ersten Kamera in Pixel zurück"""
 
@@ -380,7 +706,7 @@ class PlasmaWatcher:
         else:
             frame1 = self.camera1.get_frame()
             self._frame1_is_new = False
-            self._j_x1 = find_ray(frame1, error_raise)
+            self._j_x1 = find_ray(frame1, error_raise, crop=(300, 800))
         return self._j_x1
 
     def _get_j_x2(self, error_raise: bool = False) -> float:
@@ -391,7 +717,7 @@ class PlasmaWatcher:
         else:
             frame2 = self.camera2.get_frame()
             self._frame2_is_new = False
-            self._j_x2 = find_ray(frame2, error_raise)
+            self._j_x2 = find_ray(frame2, error_raise, crop=(300, 800))
         return self._j_x2
 
     def _find_plasma1(self, error_raise: bool = False) -> (float, float, float):
@@ -402,7 +728,7 @@ class PlasmaWatcher:
         else:
             frame1 = self.camera1.get_frame()
             self._frame1_is_new = False
-            self._pl_x1, self._pl_y1, self._pl_r1 = find_plasma(frame1, error_raise=error_raise)
+            self._pl_x1, self._pl_y1, self._pl_r1 = find_plasma(frame1, error_raise=error_raise, crop_top=300)
         return self._pl_x1, self._pl_y1, self._pl_r1
 
     def _find_plasma2(self, error_raise: bool = False) -> (float, float, float):
@@ -413,7 +739,7 @@ class PlasmaWatcher:
         else:
             frame2 = self.camera2.get_frame()
             self._frame2_is_new = False
-            self._pl_x2, self._pl_y2, self._pl_r2 = find_plasma(frame2, error_raise=error_raise)
+            self._pl_x2, self._pl_y2, self._pl_r2 = find_plasma(frame2, error_raise=error_raise, crop_top=300)
         return self._pl_x2, self._pl_y2, self._pl_r2
 
     def get_jet_position(self, error_raise: bool = False) -> Optional[Tuple[float, float]]:
@@ -458,6 +784,16 @@ class PlasmaWatcher:
 
         return x, y, z, r
 
+    def get_plasma_radius(self) -> Union[float, None]:
+        """Gibt den Radius der Plasma zurück, laut 1. Camera."""
+
+        x1, y1, r1 = self._find_plasma1(error_raise=False)
+        if r1 is None:
+            return None
+        else:
+            r1 *= self.g1
+            return r1
+
     def get_plasma_position(self, error_raise: bool = False) \
             -> Union[Tuple[float, float, float], Tuple[None, None, None]]:
         """Gibt die Plasma-Position in Raum (x, y, z) zurück."""
@@ -483,12 +819,14 @@ class PlasmaWatcher:
         else:
             return pos[1]
 
-    def move_jet(self, shift_x: float, shift_z: float, units: str = 'displ', wait: bool = False):
+    def move_jet(self, shift_x: float, shift_z: float, units: str = 'displ', wait: bool = False,
+                 stop_indicator: Optional[StopIndicator] = None):
         """Bewegt Jet-Strahl zu den angegebenen Verschiebungen."""
 
-        self.motors_cl.go({'JetX': shift_x, 'JetZ': shift_z}, units=units, wait=wait)
+        self.motors_cl.go({'JetX': shift_x, 'JetZ': shift_z}, units=units, wait=wait, stop_indicator=stop_indicator)
 
-    def move_jet_to(self, target_x: Optional[float], target_z: Optional[float], wait: bool = False):
+    def move_jet_to(self, target_x: Optional[float], target_z: Optional[float], wait: bool = False,
+                    stop_indicator: Optional[StopIndicator] = None):
         """Bewegt Jet-Strahl zur absoluten Position, die als target gegeben wird. Wenn als target None gegeben ist,
         wird diese Achse nicht bewegt."""
 
@@ -506,9 +844,43 @@ class PlasmaWatcher:
             shift_z = target_z - z
         else:
             shift_z = 0
-        self.move_jet(shift_x, shift_z, units='displ', wait=wait)
+        self.move_jet(shift_x, shift_z, units='displ', wait=wait, stop_indicator=stop_indicator)
 
-    def calibrate_enl(self, init_step: float = 1000, rel_err: float = 0.01, n_points: int = 10) -> str:
+    def centre_the_nozzle(self, tol: int = 3, stop_indicator: Optional[StopIndicator] = None,
+                          HG: int = 30, crop: int = 300):
+        """Zentriert die Düse auf beide Kameras."""
+
+        z_centre = round(self.camera1.get_resolution()[0]/2)
+
+        # die Vergröserungen der Kameras abschätzen
+        z1, d1 = self.get_nozzle_z1()
+        z2, d2 = self.get_nozzle_z2()
+
+        g1 = self.nozzle_d/d1
+        g2 = self.nozzle_d/d2
+
+        # zentrieren
+        while not stop_indicator.has_stop_requested():
+            z1 = self.get_nozzle_z1()[0]
+            z2 = self.get_nozzle_z2()[0]
+
+            if abs(z_centre - z1) < tol and abs(z_centre - z2) < tol:
+                logging.info('Die Zentrierung der Düse ist abgeschlossen.')
+                return
+
+            shift_z1 = g1*(z_centre - z1)*2/3
+            shift_x1, shift_z1 = self.camera1_coord.cc_to_mc(x_=0, z_=shift_z1)
+
+            shift_z2 = g2 * (z_centre - z2) * 2 / 3
+            shift_x2, shift_z2 = self.camera2_coord.cc_to_mc(x_=0, z_=shift_z2)
+
+            self.move_jet(shift_x1 + shift_x2, shift_z1 + shift_z2, units='displ', wait=True, stop_indicator=stop_indicator)
+
+
+
+
+    def calibrate_enl(self, init_step: float = 1000, rel_err: float = 0.01, n_points: int = 10,
+                      stop_indicator: Optional[StopIndicator] = None) -> str:
         """Führt eine Messung von den Vergröserungkoeffizienten g1 und g2 und speichert die Werte."""
 
         def measure_run(m_targets: np.ndarray, camera_coord: CameraCoordinates, get_jet_x: Callable) \
@@ -518,7 +890,10 @@ class PlasmaWatcher:
 
             for m_target in m_targets:
                 target_x, target_z = camera_coord.cc_to_mc(0, m_target)
-                self.move_jet_to(target_x, target_z, wait=True)
+                self.move_jet_to(target_x, target_z, wait=True, stop_indicator=stop_indicator)
+                if stop_indicator is not None:
+                    if stop_indicator.has_stop_requested():
+                        return
                 x_array_pixel.append(get_jet_x(error_raise=True))
 
                 jet_x_pos, jet_z_pos = self.jet_x.position('displ'), self.jet_z.position('displ')
@@ -528,27 +903,48 @@ class PlasmaWatcher:
             x_array_displ = np.array(x_array_displ)
             return x_array_pixel, x_array_displ
 
+        if stop_indicator is not None:
+            if stop_indicator.has_stop_requested():
+                return "stopped"
+
         # zum Mittelpunkt gehen
-        self.jet_x.go_to(500, units='norm', wait=True)
-        self.jet_z.go_to(500, units='norm', wait=True)
+        # self.jet_x.go_to(500, units='norm', wait=True)
+        # self.jet_z.go_to(500, units='norm', wait=True)
 
         # g1 und g2 grob abschätzen
         x1_0_pixel = self._get_j_x1(error_raise=True)
         x2_0_pixel = self._get_j_x2(error_raise=True)
         jet_z_0_pos = self.jet_z.position('displ')
 
-        while abs(x1_0_pixel - self._get_j_x1(error_raise=True)) < self.res_x/8:
-            self.jet_z.go(-init_step, units='displ', wait=True)
-        self.jet_z.go(self.jet_z.position('displ') - jet_z_0_pos, units='displ', wait=True)
+        while abs(x1_0_pixel - self._get_j_x1(error_raise=True)) < self.res_x/10:
+            self.jet_z.go(-init_step, units='displ', wait=True, stop_indicator=stop_indicator)
+
+            if stop_indicator is not None:
+                if stop_indicator.has_stop_requested():
+                    return "stopped"
+        self.jet_z.go(jet_z_0_pos - self.jet_z.position('displ'), units='displ', wait=True, stop_indicator=stop_indicator)
+
+        if stop_indicator is not None:
+            if stop_indicator.has_stop_requested():
+                return "stopped"
 
         delta_z_displ = self.jet_z.position('displ') - jet_z_0_pos
         self.g1 = self.camera1_coord.mc_to_cc(0, delta_z_displ)[1] / (self._get_j_x1(error_raise=True) - x1_0_pixel)
         self.g2 = self.camera2_coord.mc_to_cc(0, delta_z_displ)[1] / (self._get_j_x2(error_raise=True) - x2_0_pixel)
 
         # Messungen durchführen
-        m_targets = np.linspace(-3/8, 3/8, n_points) * self.res_x
+        m_targets = np.linspace(-1/10, 1/10, n_points) * self.res_x
         x1_array_pixel, x1_array_displ = measure_run(m_targets * self.g1, self.camera1_coord, self._get_j_x1)
+
+        if stop_indicator is not None:
+            if stop_indicator.has_stop_requested():
+                return "stopped"
+
         x2_array_pixel, x2_array_displ = measure_run(m_targets * self.g2, self.camera2_coord, self._get_j_x2)
+
+        if stop_indicator is not None:
+            if stop_indicator.has_stop_requested():
+                return "stopped"
 
         # Messungen auswerten
 
@@ -570,17 +966,24 @@ class PlasmaWatcher:
                  f'Kamera2: {koef2[1]} +- {err2[1]}\n'
         return report
 
-    def calibrate_plasma(self, ray_d: float = 70, s_range: float = 500, max_s_range: float = 10000,
-                         fine_step: float = 7, on_the_spot: bool = False, mess_per_point: int = 1,
+    def calibrate_plasma(self, ray_d: float = 70,
+                         s_range: float = 500,
+                         max_s_range: float = 10000,
+                         fine_step: float = 7,
+                         on_the_spot: bool = False,
+                         mess_per_point: int = 1,
                          time_per_point: float = 0,
-                         brightness_decr: float = 0.10, keep_position: bool = False):
-
+                         brightness_decr: float = 0.10,
+                         keep_position: bool = False,
+                         stop_indicator: Optional[StopIndicator] = None):
 
         def jet_z_move_with_check(value: float, mode: str = 'go'):
             if mode == 'go':
-                done, message = self.jet_z.go(value, units='displ', wait=True, check=True)
+                done, message = self.jet_z.go(value, units='displ', wait=True, check=True,
+                                              stop_indicator=stop_indicator)
             elif mode == 'go_to':
-                done, message = self.jet_z.go_to(value, units='displ', wait=True, check=True)
+                done, message = self.jet_z.go_to(value, units='displ', wait=True, check=True,
+                                                 stop_indicator=stop_indicator)
             else:
                 raise ValueError()
 
@@ -591,7 +994,11 @@ class PlasmaWatcher:
         def plasma_search(on_the_spot: bool):
             start0 = 0
             if not on_the_spot:
-                self.motors_cl.go_to({'JetX': 0, 'JetZ': 0, 'LaserZ': 0, 'LaserY': 0}, 'displ', wait=True)
+                self.motors_cl.go_to({'JetX': 0, 'JetZ': 0, 'LaserZ': 0, 'LaserY': 0}, 'displ', wait=True,
+                                     stop_indicator=stop_indicator)
+                if stop_indicator is not None:
+                    if stop_indicator.has_stop_requested():
+                        return
             else:
                 start0 = self.jet_z.position('displ')
 
@@ -599,13 +1006,16 @@ class PlasmaWatcher:
             i = 0
             stop_search = False
             while True:
-                start = i * s_range + start0
-                points = np.concatenate((np.arange(start, start + s_range, step),
-                                         np.flipud(np.arange(-start - s_range, -start, step))))
+                start = i * s_range
+                points = np.concatenate((np.arange(start + start0, start + s_range + start0, step),
+                                         np.flipud(np.arange(-start - s_range + start0, -start + start0, step))))
                 for point in points:
-                    self.jet_z.go_to(point, units='displ', wait=True)
+                    self.jet_z.go_to(point, units='displ', wait=True, stop_indicator=stop_indicator)
+                    if stop_indicator is not None:
+                        if stop_indicator.has_stop_requested():
+                            return
                     for _ in range(3):
-                        r = self.find_plasma()[3]
+                        r = self.get_plasma_radius()
                         if r is None:
                             break
                         sleep(time_per_point / mess_per_point)
@@ -625,7 +1035,7 @@ class PlasmaWatcher:
             position = self.jet_z.position('displ')
             pl_r_values = []
             for _ in range(repeats):
-                r = self.find_plasma()[3]
+                r = self.get_plasma_radius()
                 if r is not None:
                     pl_r_values.append(r)
 
@@ -650,6 +1060,9 @@ class PlasmaWatcher:
 
         # erstmal Plasma finden
         start_point = plasma_search(on_the_spot=on_the_spot)
+        if stop_indicator is not None:
+            if stop_indicator.has_stop_requested():
+                return
 
         # die Kurve messen
         step = fine_step
@@ -666,10 +1079,16 @@ class PlasmaWatcher:
             if r_mean is None:
                 if len(pl_r_arr) == 0:
                     start_point = plasma_search(on_the_spot=True)
+                    if stop_indicator is not None:
+                        if stop_indicator.has_stop_requested():
+                            return
                     continue
                 else:
                     for _ in range(2):
                         jet_z_move_with_check(direction * step)
+                        if stop_indicator is not None:
+                            if stop_indicator.has_stop_requested():
+                                return
                         position, r_mean, r_sigma = measure_point(repeats=mess_per_point)
                         if r_mean is not None:
                             break
@@ -935,12 +1354,12 @@ class PlasmaHolder(threading.Thread):
 
 
 def PlasmaWatcher_BoxInput(camera1: CameraInterf, camera2: CameraInterf,
-                           box: Box, phi: float, psi: float, tol_pixel: float = 1) -> PlasmaWatcher:
+                           box: Box, phi: float, psi: float, nozzle_d: float = 1000, tol_pixel: float = 1) -> PlasmaWatcher:
     jet_x = box.get_motor_by_name('JetX')
     jet_z = box.get_motor_by_name('JetZ')
     laser_z = box.get_motor_by_name('LaserZ')
     laser_y = box.get_motor_by_name('LaserY')
-    return PlasmaWatcher(camera1, camera2, jet_x, jet_z, laser_z, laser_y, phi, psi, tol_pixel)
+    return PlasmaWatcher(camera1, camera2, jet_x, jet_z, laser_z, laser_y, phi, psi, nozzle_d, tol_pixel)
 
 
 class RecognitionError(Exception):
@@ -952,6 +1371,10 @@ class NoJetError(Exception):
 
 
 class NoPlasmaError(Exception):
+    """Fehler, wenn ein Plasmakugel benötigt, ist aber kein gufunden."""
+
+
+class NoNozzleError(Exception):
     """Fehler, wenn ein Plasmakugel benötigt, ist aber kein gufunden."""
 
 

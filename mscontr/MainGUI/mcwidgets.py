@@ -3,13 +3,13 @@ from typing import Tuple, Callable, List, Optional
 
 from PyQt5 import QtGui, QtCore, QtWidgets
 from PyQt5.QtWidgets import QFileDialog, QMessageBox, QMainWindow, QApplication, QScrollBar, QStatusBar, QGraphicsView, \
-    QSizePolicy, QGroupBox
+    QSizePolicy, QGroupBox, QStyle, QStyleFactory
 from PyQt5.QtWidgets import QFrame, QWidget, QLabel
 from PyQt5.QtGui import QPainter, QPen, QPixmap, QColor
 from PyQt5.QtCore import Qt, QThread, pyqtSignal, QPoint
 from math import sqrt
 from PIL import Image
-from graphic_ext import GraphicField, GraphicObjekt
+from graphic_ext import GraphicField, GraphicObject
 from motor_controller import Motor
 
 
@@ -64,7 +64,7 @@ class SampleNavigator(GraphicField):
                 photo.mouseDoubleClickEvent(a0)
 
 
-class FoV(GraphicObjekt):
+class FoV(GraphicObject):
 
     def __init__(self, s_navig: SampleNavigator, x: float = 0, y: float = 0):
         super().__init__(s_navig, x, y)
@@ -238,7 +238,11 @@ class MotorWidget(QGroupBox):
 
     def __init__(self, parent: Optional[QWidget]):
         super().__init__(parent)
+        # self.setStyle()
         self.setupUi(self)
+
+        # print('1', self.styleSheet())
+        # self.setStyle('windowsvista')
 
         self.position = 0
         self.position_NE = 0
@@ -384,14 +388,14 @@ class MotorWidget(QGroupBox):
 
         group_box.setEnabled(False)
         group_box.setGeometry(QtCore.QRect(20, 90, 400, 121))
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(group_box.sizePolicy().hasHeightForWidth())
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        # sizePolicy.setHorizontalStretch(0)
+        # sizePolicy.setVerticalStretch(0)
+        # sizePolicy.setHeightForWidth(group_box.sizePolicy().hasHeightForWidth())
         group_box.setSizePolicy(sizePolicy)
-        group_box.setMinimumSize(QtCore.QSize(0, 121))
+        # group_box.setMinimumSize(QtCore.QSize(0, 121))
         font = QtGui.QFont()
-        font.setPointSize(13)
+        font.setPointSize(100)
         group_box.setFont(font)
         group_box.setObjectName("MotorBox")
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(group_box)
@@ -490,7 +494,7 @@ class MotorWidget(QGroupBox):
 
 
         _translate = QtCore.QCoreApplication.translate
-        group_box.setWindowTitle(_translate("Form", "Form"))
+        # group_box.setWindowTitle(_translate("Form", "Form"))
         group_box.setTitle(_translate("Form", "Motor 1"))
         self.label_6.setText(_translate("Form", "Aktuelle Position:"))
         self.Units_label.setText(_translate("Form", "NE"))
@@ -520,3 +524,5 @@ class VideoWidget(QLabel):
         grey = QPixmap(self.width(), self.height())
         grey.fill(QColor('darkGray'))
         self.setPixmap(grey)
+
+

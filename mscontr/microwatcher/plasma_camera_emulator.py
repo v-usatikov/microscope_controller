@@ -10,7 +10,7 @@ from mscontr.microwatcher.camera_interface import CameraInterf
 from motor_controller import Motor, Box
 from motor_controller.Phytron_MCC2 import MCC2BoxEmulator
 import mscontr.microwatcher as microwatcher
-from mscontr.microwatcher.plasma_watcher import CameraCoordinates
+from mscontr.microwatcher.plasma_watcher import CameraCoordinates, show
 
 DATA_FOLDER = microwatcher.__file__[:-11]+"data/"
 
@@ -31,8 +31,47 @@ def paint_circle(frame: np.ndarray, x: float, y: float, radius: float) -> None:
 
             frame[j, :] = line
 
+def paint_line(frame: np.ndarray, line_x: float, d: float, transp=0.8) -> None:
+    range_ = np.arange(2048)
+    range_ = range_[np.abs(range_ - line_x - 2048 / 2) < d/2]
+    # print(range_)
+    line_frame = 254*np.ones(frame.shape)
+    for i in range_:
+        line_frame[:, i] = line_frame[:, i]*(1-transp)*np.sin(np.arccos((i - line_x - 2048 / 2)*2/d))
 
-def paint_line(frame: np.ndarray, line_x: float, d: float, transp=0.4) -> None:
+    mask = np.array(frame)
+    frame[:,:] = frame[:,:] + line_frame[:,:]
+    mask[:, :] = mask[:, :] + line_frame[:, :]
+
+    frame[mask > 254] = 254
+
+
+def paint_nozzle(frame: np.ndarray, nozzle: np.ndarray, nozzle_x: float) -> None:
+
+    nozzle = nozzle.copy()
+    ym, xm = nozzle.shape
+    # show(frame)
+    # show(nozzle)
+
+    if nozzle_x < - xm/2 - 200 or nozzle_x > xm/2 + 200:
+        return
+
+    big_nozzle_frame = np.ones((300, xm*3))
+
+    shift = round(nozzle_x)
+
+    big_nozzle_frame[0:300, xm+shift:2*xm+shift] = nozzle[0:300, :]
+    # show(big_nozzle_frame)
+
+    nozzle[:300, :] = big_nozzle_frame[:, xm:2*xm]
+    # show(nozzle)
+
+    mask = nozzle != 1
+    frame[mask] = nozzle[mask]
+    # show(frame)
+
+
+def paint_line_white(frame: np.ndarray, line_x: float, d: float, transp=0.4) -> None:
     range_ = np.arange(2048)
     range_ = range_[np.abs(range_ - line_x - 2048 / 2) < d/2]
     # print(range_)
@@ -104,6 +143,8 @@ class JetEmulator:
         self.dark_exposure = 10000
 
         self._bg = cv2.imread(DATA_FOLDER+'hintg.bmp', 0)
+        self._bg[:,:] = 0.1*self._bg[:,:]
+        self._nozzle = cv2.imread(DATA_FOLDER + 'nozzle.bmp', 0)
 
         self.laser_on = False
 
@@ -158,11 +199,15 @@ class JetEmulator:
 
         frame = deepcopy(self._bg)
 
-        k = self.exposure / self.normal_exposure
-        frame[:,:] = frame[:,:] * k
-        frame[frame > 255] = 255
+        paint_line(frame, line_x=pl_z, d=self.jet_d / g, transp=0.6)
+        paint_nozzle(frame, self._nozzle, nozzle_x=pl_z)
 
-        paint_line(frame, line_x=pl_z, d=self.jet_d/g, transp=0.4)
+        k = self.exposure / self.normal_exposure
+        mask = np.array(frame)*k
+        frame[:,:] = frame[:,:] * k
+        frame[mask > 254] = 254
+        frame[frame < 1] = 1
+
 
         if self.laser_on:
             intens = intens_from_dist(dist=abs(self.j_z()-self.l_z()-self.laser_jet_shift), d=self.jet_d)

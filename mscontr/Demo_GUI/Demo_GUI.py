@@ -423,6 +423,8 @@ class ExampleApp(QMainWindow):
     def connect_MCC2(self):
 
         input_file = 'input/MCC2_Motoren_config.csv'
+        input_file = 'input/Jet_box_config.csv'
+
         emulator_input_file = 'input/MCC2_Emulator_config.csv'
         self._connect_controller('MCC2', input_file, emulator_input_file)
 

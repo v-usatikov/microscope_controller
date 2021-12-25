@@ -1,5 +1,6 @@
 import time
 from copy import deepcopy
+from math import pi
 from unittest import TestCase
 import numpy as np
 import cv2
@@ -7,9 +8,10 @@ import cv2
 # from MicroWatcher.PlasmaWatcher import find_ray
 # from MicroWatcher.camera_emulator import make_ray_photo
 
-from mscontr.microwatcher.plasma_camera_emulator import paint_circle, paint_line, JetEmulator, CameraEmulator
+from mscontr.microwatcher.plasma_camera_emulator import paint_circle, paint_line, JetEmulator, CameraEmulator, \
+    paint_nozzle
 from mscontr.microwatcher.plasma_watcher import find_ray, find_plasma, draw_circle, PlasmaWatcher, \
-    PlasmaWatcher_BoxInput, NoPlasmaError, merge_close_lines
+    PlasmaWatcher_BoxInput, NoPlasmaError, merge_close_lines, CameraCoordinates, show, find_nozzle
 
 
 def prepare_jet_watcher_to_test(phi = 90, psi = 45, g1 = 10, g2 = 10, shift = 43, laser_on = True, jet_cal = True,
@@ -52,11 +54,26 @@ class TestExternalFunctions(TestCase):
 
     def test_find_ray(self):
         bg0 = cv2.imread('test_data/hintg.bmp', 0)
-        points = np.linspace(-1000, 1000, 1)
+        bg0[:, :] = bg0[:, :] * 0.1
+        points = np.linspace(-1000, 1000, 10)
         for x in points:
             bg = deepcopy(bg0)
+            # show(bg)
             paint_line(bg, x, 7)
+            # show(bg)
             self.assertAlmostEqual(find_ray(bg)-2048/2, x, delta=0.6)
+
+    def test_find_nozzle(self):
+        bg0 = cv2.imread('test_data/hintg.bmp', 0)
+        nozzle = cv2.imread('test_data/nozzle.bmp', 0)
+        bg0[:, :] = bg0[:, :] * 0.1
+        points = np.linspace(-800, 800, 10)
+        for x in points:
+            bg = deepcopy(bg0)
+            # show(bg)
+            paint_nozzle(bg, nozzle, x)
+            # show(bg)
+            self.assertAlmostEqual(find_nozzle(bg)[0]-2048/2, x, delta=3)
 
     def test_find_plasma(self):
         bg0 = cv2.imread('test_data/hintg.bmp', 0)
@@ -75,7 +92,7 @@ class TestExternalFunctions(TestCase):
                 bg2 = deepcopy(bg)
                 paint_circle(bg2, x, z, 7)
 
-                x_, z_, r = find_plasma(bg2)
+                x_, z_, r = find_plasma(bg2, error_raise=True)
 
                 self.assertAlmostEqual(x_-2048/2, x, delta=1)
                 self.assertAlmostEqual(-z_ + 1088 / 2, z, delta=1)
@@ -99,6 +116,21 @@ class TestExternalFunctions(TestCase):
         # self.assertEqual(res.tolist(), merge_close_lines(lines).tolist())
         np.testing.assert_almost_equal(merge_close_lines(lines), res)
 
+class TestCameraCoordinates(TestCase):
+
+    def test_1(self):
+
+        camera1_coord = CameraCoordinates(0, None, None)
+        camera2_coord = CameraCoordinates(pi/2, None, None)
+
+        x, z = camera1_coord.cc_to_mc(0, 1)
+        self.assertAlmostEqual(0, x)
+        self.assertAlmostEqual(1, z)
+
+        x2, z2 = camera2_coord.mc_to_cc(x, z)
+        self.assertAlmostEqual(1, x2)
+        self.assertAlmostEqual(0, z2)
+
 
 class TestPlasmaWatcher(TestCase):
 
@@ -115,8 +147,8 @@ class TestPlasmaWatcher(TestCase):
 
         report = plasma_watcher.calibrate_enl(init_step=jet_emulator.g1 * 100, n_points=10)
         print(report)
-        self.assertAlmostEqual(jet_emulator.g1, plasma_watcher.g1, delta=0.001)
-        self.assertAlmostEqual(jet_emulator.g2, plasma_watcher.g2, delta=0.001)
+        self.assertAlmostEqual(jet_emulator.g1, plasma_watcher.g1, delta=0.005)
+        self.assertAlmostEqual(jet_emulator.g2, plasma_watcher.g2, delta=0.005)
 
     def test_move_jet_to(self):
         plasma_watcher, jet_emulator, camera1, camera2 = prepare_jet_watcher_to_test(laser_on=False)

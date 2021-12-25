@@ -165,7 +165,7 @@ class RoundLabel(QLabel):
 class ExampleApp(QMainWindow):
     def __init__(self, parent=None):
         super(ExampleApp, self).__init__(parent)
-        loadUi('MainGUI/mainwindow.ui', self)
+        loadUi('ui_forms/mainwindow.ui', self)
 
         self.GoButton.clicked.connect(self.go_to)
         self.FotoButton.clicked.connect(self.make_photo)
