@@ -1,16 +1,22 @@
 import logging
-from typing import Tuple, Callable, List, Optional
+from typing import Tuple, Callable, List, Optional, Union, Dict
 
-from PyQt5 import QtGui, QtCore, QtWidgets
-from PyQt5.QtWidgets import QFileDialog, QMessageBox, QMainWindow, QApplication, QScrollBar, QStatusBar, QGraphicsView, \
+import numpy as np
+from PyQt6 import QtGui, QtCore, QtWidgets
+from PyQt6.QtWidgets import QFileDialog, QMessageBox, QMainWindow, QApplication, QScrollBar, QStatusBar, QGraphicsView, \
     QSizePolicy, QGroupBox, QStyle, QStyleFactory
-from PyQt5.QtWidgets import QFrame, QWidget, QLabel
-from PyQt5.QtGui import QPainter, QPen, QPixmap, QColor
-from PyQt5.QtCore import Qt, QThread, pyqtSignal, QPoint
+from PyQt6.QtWidgets import QFrame, QWidget, QLabel
+from PyQt6.QtGui import QPainter, QPen, QPixmap, QColor, QFont
+from PyQt6.QtCore import Qt, QThread, pyqtSignal, QPoint
 from math import sqrt
 from PIL import Image
-from graphic_ext import GraphicField, GraphicObject
+from graphic_ext import GraphicField, GraphicObject, GraphicZone, QPainter_ext
+from graphic_ext.gr_field import Axes, Axis, RoundAxis
 from motor_controller import Motor
+
+
+point_n = Tuple[float, float]
+point_p = Tuple[int, int]
 
 
 class SampleNavigator(GraphicField):
@@ -67,7 +73,7 @@ class SampleNavigator(GraphicField):
 class FoV(GraphicObject):
 
     def __init__(self, s_navig: SampleNavigator, x: float = 0, y: float = 0):
-        super().__init__(s_navig, x, y)
+        super().__init__(s_navig, x, y, True)
 
         self.s_navig = s_navig
 
@@ -87,12 +93,12 @@ class FoV(GraphicObject):
         super().paintEvent(a0)
         qp = QPainter()
         qp.begin(self)
-        qp.setRenderHint(QPainter.Antialiasing)
+        qp.setRenderHint(QPainter.RenderHint.Antialiasing)
         self.paint(qp)
         qp.end()
 
     def paint(self, qp):
-        pen = QPen(Qt.black, 1, Qt.SolidLine)
+        pen = QPen(Qt.GlobalColor.black, 1, Qt.BrushStyle.SolidLine)
         qp.setPen(pen)
         qp.setBrush(Qt.NoBrush)
         qp.drawEllipse(QPoint(round(self.width() / 2), round(self.height() / 2)), self.d_pixel() / 2, self.d_pixel() / 2)
@@ -526,3 +532,195 @@ class VideoWidget(QLabel):
         self.setPixmap(grey)
 
 
+class MicroscopeScheme(GraphicField):
+
+    def __init__(self, parent: QWidget | None = None):
+
+        super().__init__(parent)
+        self.arrow_length = 61
+        self.names_rel_font_size = 0.62  # Font-size relativ zu arrow_length
+        self.axes_rel_font_size = 0.5  # Font-size relativ zu arrow_length
+        self.arrow_parameters = {'arrow_head_rel_width': 0.3,
+                                 'round_arrow_head_rel_width': 0.35,
+                                 'round_arrow_head_rotation': 15}
+
+        self.round_axis_parameters = {'rel_width': 0.65}
+        self.axis_parameters = {'notation_shift': (0.55, 0.55)}
+
+        self.pen_width = 1
+        self.pen_width_activated = 2
+        self.color_base = QColor('darkblue')
+        self.color_activated = QColor('Orange')
+
+    def names_font_size(self) -> int:
+
+        return round(self.names_rel_font_size * self.norm_to_pixel_rel(self.arrow_length))
+
+
+class MicroscopeZone(GraphicZone):
+
+    def __init__(self, micr_scheme: MicroscopeScheme,
+                 name: str,
+                 name_pos: point_n,
+                 axes_pos: point_n,
+                 pointer_line: Tuple[point_n, point_n],
+                 axes_to_enable: Dict[str, bool] | None = None,
+                 mask_file: str | None = None):
+        super().__init__(micr_scheme, mask_file=mask_file)
+
+        if axes_to_enable is None:
+            axes_to_enable = {}
+
+        self.micr_scheme = micr_scheme
+        self.name = name
+        self.name_pos = name_pos
+        self.pointer_line = pointer_line
+
+        self.axes = Axes_Generator(self.micr_scheme, axes_pos,
+                                   self.micr_scheme.arrow_length,
+                                   self.micr_scheme.axes_rel_font_size,
+                                   **axes_to_enable,
+                                   pen_width=self.micr_scheme.pen_width,
+                                   color_base=self.micr_scheme.color_base,
+                                   color_activated=self.micr_scheme.color_activated,
+                                   pen_width_activated=self.micr_scheme.pen_width_activated,
+                                   plus_minus=False,
+                                   arrow_parameters=self.micr_scheme.arrow_parameters,
+                                   axis_parameters=self.micr_scheme.axis_parameters,
+                                   round_axis_parameters=self.micr_scheme.round_axis_parameters)
+
+        self.mouse_enter.connect(self.mouse_enter_event)
+        self.mouse_leave.connect(self.mouse_leave_event)
+
+    def set_activated(self, activated: bool):
+        self.activated = activated
+        self.axes.set_activated(activated)
+
+    def mouse_enter_event(self):
+        self.set_activated(True)
+
+    def mouse_leave_event(self):
+        self.set_activated(False)
+
+    def paint(self, painter: QPainter_ext):
+
+        # set pen and font
+        font = painter.font()
+        if self.activated:
+            pen = QPen(self.micr_scheme.color_activated, self.micr_scheme.pen_width_activated, Qt.PenStyle.SolidLine)
+            painter.setPen(pen)
+            font.setBold(True)
+        else:
+            pen = QPen(self.micr_scheme.color_base, self.micr_scheme.pen_width, Qt.PenStyle.SolidLine)
+            painter.setPen(pen)
+            font.setBold(False)
+
+        # Name schreiben
+        # font = QFont('Arial', self.micr_scheme.names_font_size())
+        font.setPointSize(self.micr_scheme.names_font_size())
+        font.setLetterSpacing(QFont.SpacingType.PercentageSpacing, 103)
+        painter.setFont(font)
+
+        pos = self.micr_scheme.norm_to_pixel_coord_int(*self.name_pos)
+        painter.drawText_centered(pos, self.name)
+
+        # Pointerlinie zeichnen
+        start = self.micr_scheme.norm_to_pixel_coord_int(*self.pointer_line[0])
+        end = self.micr_scheme.norm_to_pixel_coord_int(*self.pointer_line[1])
+        painter.drawLine(*start, *end)
+
+
+def Axes_Generator(gr_field: GraphicField,
+                   pos: point_n,
+                   arrow_length: float,
+                   font_size_rel: float = 0.15,
+                   pen_width: int = 1,
+                   color_base: QColor = Qt.GlobalColor.black,
+                   pen_width_activated: int = 2,
+                   color_activated: QColor = Qt.GlobalColor.red,
+                   x: bool = False,
+                   rx: bool = False,
+                   y: bool = False,
+                   ry: bool = False,
+                   z: bool = False,
+                   rz: bool = False,
+                   plus_minus: bool = False,
+                   arrow_parameters: dict | None = None,
+                   axis_parameters: dict | None = None,
+                   round_axis_parameters: dict | None = None) -> Axes:
+
+    def add_axis(name: str, rotation: bool, definition: tuple[int, int, int], axes: Axes):
+
+        new_axes = []
+        if not plus_minus:
+            new_axis = Axis(axes, name, definition, axis_parameters)
+            new_axes.append(new_axis)
+            if rotation:
+                new_axes.append(RoundAxis(new_axis, parameters=round_axis_parameters))
+        else:
+            k = 1.2
+            r_axis_param_adj = round_axis_parameters.copy()
+            if 'axis_notation_shift' not in r_axis_param_adj.keys():
+                r_axis_param_adj['axis_notation_shift'] = RoundAxis.axis_notation_shift
+            if 'notation_shift' not in r_axis_param_adj.keys():
+                r_axis_param_adj['notation_shift'] = RoundAxis.notation_shift
+            r_axis_param_adj['axis_notation_shift'] = tuple(k * np.array(r_axis_param_adj['axis_notation_shift']))
+            r_axis_param_adj['notation_shift'] = tuple(k * np.array(r_axis_param_adj['notation_shift']))
+
+            definition = np.array(definition)
+            plus_axis = Axis(axes, '+' + name, tuple(definition), axis_parameters)
+            notation_shift = tuple(k * np.array(plus_axis.notation_shift))
+            plus_axis.notation_shift = notation_shift
+            minus_axis = Axis(axes, '-' + name, tuple(-definition), axis_parameters)
+            minus_axis.notation_shift = notation_shift
+            new_axes += [plus_axis, minus_axis]
+            if rotation:
+                new_axes.append(RoundAxis(plus_axis, '+R' + name, r_axis_param_adj))
+                new_axes.append(RoundAxis(minus_axis, '-R' + name, r_axis_param_adj))
+        axes.axes += new_axes
+
+    if round_axis_parameters is None:
+        round_axis_parameters = {}
+    if axis_parameters is None:
+        axis_parameters = {}
+
+    axes = Axes(gr_field, *pos, arrow_length, font_size_rel,
+                pen_width=pen_width,
+                pen_color=color_base,
+                pen_width_activated=pen_width_activated,
+                pen_color_activated=color_activated,
+                arrow_parameters=arrow_parameters,
+                axis_parameters=axis_parameters,
+                round_axis_parameters=round_axis_parameters)
+    if x:
+        add_axis('x', rx, (-1, 0, 0), axes)
+    if y:
+        add_axis('y', ry, (0, 0, 1), axes)
+    if z:
+        add_axis('z', rz, (0, 1, 0), axes)
+
+    return axes
+
+
+
+
+# class AxesPainter:
+#
+#     def __init__(self, gr_field: GraphicField,
+#                  origin_point: Tuple,
+#                  arrow_length: float,
+#                  def_color: Union[QColor, int] = Qt.black,
+#                  select_color: Union[QColor, int] = Qt.darkYellow,
+#                  lines_width: int = 2,
+#
+#
+#
+#         self.def_color =
+
+# class Axis:
+#
+#     name: str
+#     end_point: Tuple[]
+#
+#     def __init__(self, ):
+#         self.

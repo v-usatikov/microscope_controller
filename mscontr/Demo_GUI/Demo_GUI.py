@@ -5,16 +5,16 @@ import threading
 import time
 from typing import List, Set, Dict
 
-from PyQt5 import QtGui, QtCore
-from PyQt5.QtWidgets import QFileDialog, QMessageBox, QMainWindow, QApplication, QScrollBar, QStatusBar
-from PyQt5.QtGui import QPainter, QPen
-from PyQt5.QtCore import Qt, QThread, pyqtSignal, QSize
+from PyQt6 import QtGui, QtCore
+from PyQt6.QtWidgets import QFileDialog, QMessageBox, QMainWindow, QApplication, QScrollBar, QStatusBar
+from PyQt6.QtGui import QPainter, QPen
+from PyQt6.QtCore import Qt, QThread, pyqtSignal, QSize
 # from pyqt_led import Led
 import sys
 # import pylab
 import serial, serial.tools.list_ports
 # import pyqtgraph
-from PyQt5.uic import loadUi
+from PyQt6.uic import loadUi
 
 from motor_controller import MotorsCluster, Motor, BoxesCluster
 from motor_controller.SmarAct_MCS import MCSBoxSerial
@@ -31,7 +31,7 @@ if __name__ == '__main__':
 
 class AktPositionSlider(QScrollBar):
     def __init__(self, parent=None):
-        super(AktPositionSlider, self).__init__(Qt.Horizontal, parent)
+        super(AktPositionSlider, self).__init__(Qt.Orientation.Horizontal, parent)
         self.low_x = 0
         self.up_x = 100
         self.setInvertedAppearance(True)
@@ -41,12 +41,12 @@ class AktPositionSlider(QScrollBar):
         # super().paintEvent(e)
         qp = QPainter()
         qp.begin(self)
-        qp.setRenderHint(QPainter.Antialiasing)
+        qp.setRenderHint(QPainter.RenderHint.Antialiasing)
         self.drawLines(qp)
         qp.end()
 
     def drawLines(self, qp):
-        pen = QPen(Qt.gray, 2, Qt.SolidLine)
+        pen = QPen(Qt.GlobalColor.gray, 2, Qt.PenStyle.SolidLine)
 
         # Parametern
         d_icon = 8
@@ -54,7 +54,7 @@ class AktPositionSlider(QScrollBar):
         rund_k = 1
         h_hint = 7
         height = self.height()
-        hcenter = height / 2
+        hcenter = round(height / 2)
         width = self.width()
         v_range = width - 2 * d_icon
         x_icon = d_icon + self.value() * v_range / 1000
@@ -62,24 +62,24 @@ class AktPositionSlider(QScrollBar):
 
         # Hintergrund malen
         pen.setWidth(1)
-        pen.setColor(Qt.white)
+        pen.setColor(Qt.GlobalColor.white)
         qp.setPen(pen)
-        qp.setBrush(Qt.white)
-        qp.drawRect(0, hcenter - h_hint, width, 2 * h_hint)
+        qp.setBrush(Qt.GlobalColor.white)
+        qp.drawRect(0, round(hcenter - h_hint), width, 2 * h_hint)
 
         # Icon malen
         pen.setWidth(0)
-        pen.setColor(Qt.gray)
+        pen.setColor(Qt.GlobalColor.gray)
         qp.setPen(pen)
-        qp.setBrush(Qt.gray)
-        qp.drawRoundedRect(x_icon - d_icon, hcenter - h_icon, 2 * d_icon, 2 * h_icon, rund_k * h_icon, rund_k * h_icon)
+        qp.setBrush(Qt.GlobalColor.gray)
+        qp.drawRoundedRect(round(x_icon - d_icon), round(hcenter - h_icon), 2 * d_icon, 2 * h_icon, rund_k * h_icon, rund_k * h_icon)
         # print(x_icon+d_icon, width)
 
         # Soft Limits malen
         pen.setWidth(2)
         qp.setPen(pen)
-        U_pixel_x = d_icon + self.low_x * v_range / 1000
-        O_pixel_x = d_icon + self.up_x * v_range / 1000
+        U_pixel_x = round(d_icon + self.low_x * v_range / 1000)
+        O_pixel_x = round(d_icon + self.up_x * v_range / 1000)
         try:
             qp.drawLine(U_pixel_x, hcenter - h_hint, U_pixel_x, hcenter + h_hint)
             qp.drawLine(O_pixel_x, hcenter - h_hint, O_pixel_x, hcenter + h_hint)
@@ -394,7 +394,7 @@ class ExampleApp(QMainWindow):
 
     def set_HSlider(self, Val):
         if self.motor.is_calibratable():
-            self.horizontalSlider1.setValue(Val)
+            self.horizontalSlider1.setValue(round(Val))
 
     def Plus1(self):
         self.motor.go(float(self.SchrittEdit1.text()), self.units)
@@ -609,13 +609,13 @@ class ExampleApp(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    app.setStyle('macintosh')
+    app.setStyle('macos')
     form = ExampleApp()
     form.show()
     # form.update() #start with something
 
     try:
-        app.exec_()
+        app.exec()
     finally:
         if form.connected:
             form.stop()

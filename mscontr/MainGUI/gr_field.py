@@ -3,17 +3,17 @@ import logging
 import time
 from typing import List, Set
 
-from PyQt5 import QtGui, QtCore
-from PyQt5.QtWidgets import QFileDialog, QMessageBox, QMainWindow, QApplication, QScrollBar, QStatusBar, QGraphicsView, \
+from PyQt6 import QtGui, QtCore
+from PyQt6.QtWidgets import QFileDialog, QMessageBox, QMainWindow, QApplication, QScrollBar, QStatusBar, QGraphicsView, \
     QSizePolicy
-from PyQt5.QtWidgets import QFrame, QWidget, QLabel
-from PyQt5.QtGui import QPainter, QPen
-from PyQt5.QtCore import Qt, QThread, pyqtSignal, QPoint, QSize
+from PyQt6.QtWidgets import QFrame, QWidget, QLabel
+from PyQt6.QtGui import QPainter, QPen
+from PyQt6.QtCore import Qt, QThread, pyqtSignal, QPoint, QSize
 import sys
 # import pylab
 import serial, serial.tools.list_ports
 # import pyqtgraph
-from PyQt5.uic import loadUi
+from PyQt6.uic import loadUi
 from motor_controller.interface import SerialConnector
 
 from mscontr.MainGUI.mcwidgets import SampleNavigator
@@ -25,7 +25,7 @@ if __name__ == '__main__':
     logscolor.init_config()
 
 
-class MyGraphField(QFrame):
+class MyGraphField(QLabel):
     pos_signal = pyqtSignal()
     pos_to_signal = pyqtSignal()
 
@@ -165,7 +165,7 @@ class RoundLabel(QLabel):
 class ExampleApp(QMainWindow):
     def __init__(self, parent=None):
         super(ExampleApp, self).__init__(parent)
-        loadUi('ui_forms/mainwindow.ui', self)
+        loadUi('ui_forms/sample_navigation.ui', self)
 
         self.GoButton.clicked.connect(self.go_to)
         self.FotoButton.clicked.connect(self.make_photo)

@@ -5,20 +5,20 @@ description = ""
 authors = ["Vladimir Usatikov <vladimir@usatikov.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
-PyQt5 = "^5.15.0"
+python = "3.10.*"
+PyQt6 = "^6"
 logscolor = {git = "https://github.com/v-usatikov/logscolor.git"}
 graphic-ext = {git = "https://github.com/v-usatikov/graphic_ext.git"}
-motor-controller = {git = "https://github.com/v-usatikov/motor_controller.git", develop = true}
-numpy = "^1.19.0"
-opencv-python = "^4.2.0"
-pymba = "^0.3.7"
-lmfit = "^1.0.1"
-matplotlib = "^3.4.2"
+motor-controller = {git = "https://github.com/v-usatikov/motor_controller.git"}#, develop = true}
+numpy = "^1"
+opencv-python = "^4"
+pymba = "^0"
+lmfit = "^1"
+matplotlib = "^3"
 vimbapython = {git = "https://github.com/alliedvision/VimbaPython.git"}
 
 [tool.poetry.dev-dependencies]
-pytest = "^4.6"
+pytest = "*"
 
 [build-system]
 requires = ["poetry>=0.12"]

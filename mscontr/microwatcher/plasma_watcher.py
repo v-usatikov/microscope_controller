@@ -6,7 +6,7 @@ from statistics import mean, pstdev
 from time import sleep
 from typing import List, Callable, Optional, Set, Tuple, Union
 
-from PyQt5.QtGui import QColor
+from PyQt6.QtGui import QColor
 from lmfit import models
 # import matplotlib.pyplot as plt
 
