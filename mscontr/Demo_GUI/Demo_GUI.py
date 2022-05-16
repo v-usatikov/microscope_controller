@@ -45,7 +45,7 @@ class AktPositionSlider(QScrollBar):
         self.drawLines(qp)
         qp.end()
 
-    def drawLines(self, qp):
+    def drawLines(self, qp: QPainter):
         pen = QPen(Qt.GlobalColor.gray, 2, Qt.PenStyle.SolidLine)
 
         # Parametern

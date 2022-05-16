@@ -1,19 +1,23 @@
 import logging
+import traceback
+from abc import ABC
 from typing import Tuple, Callable, List, Optional, Union, Dict
 
 import numpy as np
+import serial, serial.tools.list_ports
 from PyQt6 import QtGui, QtCore, QtWidgets
 from PyQt6.QtWidgets import QFileDialog, QMessageBox, QMainWindow, QApplication, QScrollBar, QStatusBar, QGraphicsView, \
-    QSizePolicy, QGroupBox, QStyle, QStyleFactory
+    QSizePolicy, QGroupBox, QStyle, QStyleFactory, QComboBox, QHBoxLayout
 from PyQt6.QtWidgets import QFrame, QWidget, QLabel
-from PyQt6.QtGui import QPainter, QPen, QPixmap, QColor, QFont
+from PyQt6.QtGui import QPainter, QPen, QPixmap, QColor, QFont, QWindow
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QPoint
 from math import sqrt
 from PIL import Image
+from PyQt6.uic import loadUi
 from graphic_ext import GraphicField, GraphicObject, GraphicZone, QPainter_ext
 from graphic_ext.gr_field import Axes, Axis, RoundAxis
 from motor_controller import Motor
-
+import motor_controller as mc
 
 point_n = Tuple[float, float]
 point_p = Tuple[int, int]
@@ -100,7 +104,7 @@ class FoV(GraphicObject):
     def paint(self, qp):
         pen = QPen(Qt.GlobalColor.black, 1, Qt.BrushStyle.SolidLine)
         qp.setPen(pen)
-        qp.setBrush(Qt.NoBrush)
+        qp.setBrush(Qt.BrushStyle.NoBrush)
         qp.drawEllipse(QPoint(round(self.width() / 2), round(self.height() / 2)), self.d_pixel() / 2, self.d_pixel() / 2)
 
     def hello(self):
@@ -110,9 +114,9 @@ class FoV(GraphicObject):
 class FoVto(FoV):
 
     def paint(self, qp):
-        pen = QPen(Qt.gray, 1, Qt.DashLine)
+        pen = QPen(Qt.GlobalColor.gray, 1, Qt.PenStyle.DashLine)
         qp.setPen(pen)
-        qp.setBrush(Qt.NoBrush)
+        qp.setBrush(Qt.BrushStyle.NoBrush)
         qp.drawEllipse(QPoint(round(self.width()/2), round(self.height()/2)), self.d_pixel()/2, self.d_pixel()/2)
 
     def hello(self):
@@ -151,7 +155,7 @@ class SamplePhoto(FoV):
 
 class AktPositionSlider(QScrollBar):
     def __init__(self, parent=None):
-        super(AktPositionSlider, self).__init__(Qt.Horizontal, parent)
+        super(AktPositionSlider, self).__init__(Qt.Orientation.Horizontal, parent)
         self.low_x = 0
         self.up_x = 100
         self.setInvertedAppearance(True)
@@ -160,12 +164,12 @@ class AktPositionSlider(QScrollBar):
         # super().paintEvent(e)
         qp = QPainter()
         qp.begin(self)
-        qp.setRenderHint(QPainter.Antialiasing)
+        qp.setRenderHint(QPainter.RenderHint.Antialiasing)
         self.drawLines(qp)
         qp.end()
 
     def drawLines(self, qp):
-        pen = QPen(Qt.gray, 2, Qt.SolidLine)
+        pen = QPen(Qt.GlobalColor.gray, 2, Qt.PenStyle.SolidLine)
 
         # Parametern
         d_icon = 8
@@ -173,32 +177,32 @@ class AktPositionSlider(QScrollBar):
         rund_k = 1
         h_hint = 7
         height = self.height()
-        hcenter = height / 2
+        hcenter = round(height / 2)
         width = self.width()
         v_range = width - 2 * d_icon
-        x_icon = d_icon + self.value() * v_range / 1000
+        x_icon = round(d_icon + self.value() * v_range / 1000)
         # x_icon = d_icon + self.U_x * v_range / 1000
 
         # Hintergrund malen
         pen.setWidth(1)
-        pen.setColor(Qt.white)
+        pen.setColor(Qt.GlobalColor.white)
         qp.setPen(pen)
-        qp.setBrush(Qt.white)
+        qp.setBrush(Qt.GlobalColor.white)
         qp.drawRect(0, hcenter - h_hint, width, 2 * h_hint)
 
         # Icon malen
         pen.setWidth(0)
-        pen.setColor(Qt.gray)
+        pen.setColor(Qt.GlobalColor.gray)
         qp.setPen(pen)
-        qp.setBrush(Qt.gray)
+        qp.setBrush(Qt.GlobalColor.gray)
         qp.drawRoundedRect(x_icon - d_icon, hcenter - h_icon, 2 * d_icon, 2 * h_icon, rund_k * h_icon, rund_k * h_icon)
         # print(x_icon+d_icon, width)
 
         # Soft Limits malen
         pen.setWidth(2)
         qp.setPen(pen)
-        U_pixel_x = d_icon + self.low_x * v_range / 1000
-        O_pixel_x = d_icon + self.up_x * v_range / 1000
+        U_pixel_x = round(d_icon + self.low_x * v_range / 1000)
+        O_pixel_x = round(d_icon + self.up_x * v_range / 1000)
         try:
             qp.drawLine(U_pixel_x, hcenter - h_hint, U_pixel_x, hcenter + h_hint)
             qp.drawLine(O_pixel_x, hcenter - h_hint, O_pixel_x, hcenter + h_hint)
@@ -242,11 +246,15 @@ class AktPositionSlider(QScrollBar):
 
 class MotorWidget(QGroupBox):
 
-    def __init__(self, parent: Optional[QWidget]):
+    def __init__(self, parent: Optional[QWidget], name: Optional[str] = None):
         super().__init__(parent)
         # self.setStyle()
         self.setupUi(self)
 
+        if name is not None:
+            self.setTitle(name)
+        else:
+            self.setTitle('')
         # print('1', self.styleSheet())
         # self.setStyle('windowsvista')
 
@@ -273,7 +281,7 @@ class MotorWidget(QGroupBox):
             self.APSlider.setValue(0)
         else:
             self.APSlider.setEnabled(True)
-            self.APSlider.setValue(self.position_NE)
+            self.APSlider.setValue(round(self.position_NE))
 
         self.Units_label.setText(self.motor.config['display_units'])
         self.setTitle(self.motor.name)
@@ -394,14 +402,14 @@ class MotorWidget(QGroupBox):
 
         group_box.setEnabled(False)
         group_box.setGeometry(QtCore.QRect(20, 90, 400, 121))
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        sizePolicy = QtWidgets.QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         # sizePolicy.setHorizontalStretch(0)
         # sizePolicy.setVerticalStretch(0)
         # sizePolicy.setHeightForWidth(group_box.sizePolicy().hasHeightForWidth())
         group_box.setSizePolicy(sizePolicy)
         # group_box.setMinimumSize(QtCore.QSize(0, 121))
         font = QtGui.QFont()
-        font.setPointSize(100)
+        # font.setPointSize(100)
         group_box.setFont(font)
         group_box.setObjectName("MotorBox")
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(group_box)
@@ -416,7 +424,7 @@ class MotorWidget(QGroupBox):
         self.APSlider.setProperty("value", 300)
         self.APSlider.setSliderPosition(300)
         self.APSlider.setTracking(True)
-        self.APSlider.setOrientation(Qt.Horizontal)
+        self.APSlider.setOrientation(Qt.Orientation.Horizontal)
         self.APSlider.setInvertedAppearance(True)
         self.APSlider.setInvertedControls(False)
         self.APSlider.setObjectName("APSlider")
@@ -435,7 +443,7 @@ class MotorWidget(QGroupBox):
         self.Units_label = QtWidgets.QLabel(group_box)
         self.Units_label.setObjectName("Units_label")
         self.horizontalLayout_3.addWidget(self.Units_label)
-        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem = QtWidgets.QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
         self.horizontalLayout_3.addItem(spacerItem)
         self.minusBtn = QtWidgets.QPushButton(group_box)
         self.minusBtn.setObjectName("minusBtn")
@@ -448,7 +456,7 @@ class MotorWidget(QGroupBox):
         self.plusBtn = QtWidgets.QPushButton(group_box)
         self.plusBtn.setObjectName("plusBtn")
         self.horizontalLayout_3.addWidget(self.plusBtn)
-        spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem1 = QtWidgets.QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
         self.horizontalLayout_3.addItem(spacerItem1)
         self.label_7 = QtWidgets.QLabel(group_box)
         self.label_7.setMinimumSize(QtCore.QSize(0, 0))
@@ -464,18 +472,18 @@ class MotorWidget(QGroupBox):
         self.horizontalLayout_4.setObjectName("horizontalLayout_4")
         self.NullBtn = QtWidgets.QPushButton(group_box)
         self.NullBtn.setMaximumSize(QtCore.QSize(120, 16777215))
-        self.NullBtn.setLayoutDirection(Qt.LeftToRight)
+        self.NullBtn.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
         self.NullBtn.setObjectName("NullBtn")
         self.horizontalLayout_4.addWidget(self.NullBtn)
-        spacerItem2 = QtWidgets.QSpacerItem(30, 28, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem2 = QtWidgets.QSpacerItem(30, 28, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
         self.horizontalLayout_4.addItem(spacerItem2)
         self.StopButton = QtWidgets.QPushButton(group_box)
-        self.StopButton.setMinimumSize(QtCore.QSize(120, 0))
+        self.StopButton.setMinimumSize(QtCore.QSize(100, 0))
         self.StopButton.setObjectName("StopButton")
         self.horizontalLayout_4.addWidget(self.StopButton)
         self.line_2 = QtWidgets.QFrame(group_box)
-        self.line_2.setFrameShape(QtWidgets.QFrame.VLine)
-        self.line_2.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.line_2.setFrameShape(QtWidgets.QFrame.Shape.VLine)
+        self.line_2.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
         self.line_2.setObjectName("line_2")
         self.horizontalLayout_4.addWidget(self.line_2)
         self.label_8 = QtWidgets.QLabel(group_box)
@@ -493,7 +501,7 @@ class MotorWidget(QGroupBox):
         self.SL_O_Edit = QtWidgets.QLineEdit(group_box)
         self.SL_O_Edit.setObjectName("SL_O_Edit")
         self.horizontalLayout_4.addWidget(self.SL_O_Edit)
-        spacerItem3 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem3 = QtWidgets.QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
         self.horizontalLayout_4.addItem(spacerItem3)
         self.verticalLayout_2.addLayout(self.horizontalLayout_4)
 
@@ -522,7 +530,7 @@ class VideoWidget(QLabel):
     def __init__(self, parent: Optional[QWidget]):
         super(VideoWidget, self).__init__(parent)
 
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        sizePolicy = QtWidgets.QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.setSizePolicy(sizePolicy)
 
 
@@ -702,7 +710,357 @@ def Axes_Generator(gr_field: GraphicField,
     return axes
 
 
+class MotorWindow(QWindow):
 
+    def __init__(self, parent: QWindow, ):
+        super().__init__(parent)
+
+
+class ConnectionWindow(QWidget):
+
+    controller_connected = pyqtSignal(Dict[str, Motor])
+    controller_disconnected = pyqtSignal(Tuple[str])
+
+    PortBox_MCC2_box: QComboBox
+    PortBox_MCC2_jet: QComboBox
+    PortBox_MCS: QComboBox
+
+    def __init__(self):
+        super().__init__()
+
+        self.setObjectName("Connection Window")
+        self.resize(636, 295)
+        self.verticalLayout = QtWidgets.QVBoxLayout(self)
+
+        self.conn_widgets: List[ConnectionWidget] = []
+
+        self.mcc2_cw = MCC2_SerialConnectionWidget(self, "Phytron Box (MCC2)", 'input/MCC2_Motoren_config.csv')
+        self.add_connection_widget(self.mcc2_cw)
+
+        self.mcc2_jet_cw = MCC2_SerialConnectionWidget(self, "Phytron Jet  (MCC2)", 'input/Jet_box_config.csv')
+        self.add_connection_widget(self.mcc2_jet_cw)
+
+        self.mcs_cw = MCS_SerialConnectionWidget(self, "SmarAct (MCS)", 'input/MCS_Motoren_config.csv')
+        self.add_connection_widget(self.mcs_cw)
+
+        self.mcs2_cw = MCS2_EthernetConnectionWidget(self, "SmarAct (MCS2)", 'input/MCS2_Motoren_config.csv')
+        self.add_connection_widget(self.mcs2_cw)
+
+        self.line = QtWidgets.QFrame(self)
+        self.line.setFrameShape(QtWidgets.QFrame.Shape.HLine)
+        self.line.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
+        self.line.setObjectName("line")
+        self.verticalLayout.addWidget(self.line)
+
+        self.horizontalLayout = QtWidgets.QHBoxLayout()
+        self.horizontalLayout.setObjectName("horizontalLayout")
+        spacerItem4 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Policy.Expanding,
+                                            QtWidgets.QSizePolicy.Policy.Minimum)
+        self.horizontalLayout.addItem(spacerItem4)
+        self.conn_all_btn = QtWidgets.QPushButton(self)
+        self.horizontalLayout.addWidget(self.conn_all_btn)
+        self.disconn_all_btn = QtWidgets.QPushButton(self)
+        self.horizontalLayout.addWidget(self.disconn_all_btn)
+        self.verticalLayout.addLayout(self.horizontalLayout)
+
+        self.conn_all_btn.clicked.connect(self.connect_all)
+        self.disconn_all_btn.clicked.connect(self.disconnect_all)
+
+        self.boxes_cluster = mc.BoxesCluster()
+
+    def add_connection_widget(self, connection_widget):
+        """Fügt das angegebene connection_widget hinzu."""
+
+        self.conn_widgets.append(connection_widget)
+        self.verticalLayout.addLayout(connection_widget)
+
+    def connect_all(self):
+        """Verbindet alle Kontroller."""
+
+        for conn_widget in self.conn_widgets:
+            if conn_widget.box is None:
+                conn_widget.connection_btn_click()
+
+    def disconnect_all(self):
+        """Trennt alle verbundene Kontroller."""
+
+        for conn_widget in self.conn_widgets:
+            if conn_widget.box is not None:
+                conn_widget.connection_btn_click()
+
+
+class ConnectionWidget(QHBoxLayout):
+
+    VerbButton: QtWidgets.QPushButton
+
+    def __init__(self, conn_wind: ConnectionWindow, name: str, input_file: str):
+        super().__init__(parent=conn_wind)
+
+        self.conn_wind = conn_wind
+        self.name = name
+        self.input_file = input_file
+
+        self.box: mc.Box | None = None
+
+    def is_connected(self) -> bool:
+        """Gibt zuruck, ob den Kontroller verbunden wurde."""
+
+        return self.box is None
+
+    def connection_data(self) -> str:
+        """Bekommt das Verbindung-Data aus der Felder des Widgets und gibt das zurück."""
+
+        raise NotImplementedError
+
+    def fill_widget_with_saved_connection_data(self, connection_data: str):
+        """Füllt die Felder des Widgets mit angegebene Verbindung-Data"""
+
+        pass
+
+    def save_last_connection_data(self):
+        """Speichert Data uber die letzte Verbindung in der Datei."""
+
+        with open('data/' + self.name + '_last_conn_data.txt', 'w') as f:
+            f.write(self.connection_data())
+
+    def read_last_connection_data(self):
+        """Liest Data uber die letzte Verbindung aus der Datei."""
+
+        try:
+            with open('data/' + self.name + '_last_conn_data.txt', 'r') as f:
+                self.fill_widget_with_saved_connection_data(f.read())
+        except FileNotFoundError:
+            pass
+
+    def get_communicator(self, connector: mc.Connector) -> mc.ContrCommunicator:
+
+        raise NotImplementedError
+
+    def is_emulation(self):
+
+        return False
+
+    def connect_box(self) -> mc.Box:
+
+        self.disconnect_box()
+
+        if self.is_emulation():
+            emulator = mc.Phytron_MCC2.BoxEmulator(n_bus=5, n_axes=3, realtime=True)
+            self.box = mc.Box(emulator, input_file=self.input_file)
+        else:
+            communicator = self.get_communicator(self.get_connector())
+            self.box = mc.Box(communicator, self.input_file)
+
+        self.conn_wind.boxes_cluster.add_box(self.box, self.name)
+        self.conn_wind.controller_connected.emit(self.box.motors_cluster.motors)
+
+        self.save_last_connection_data()
+        return self.box
+
+    def disconnect_box(self):
+
+        if self.box is not None:
+            self.conn_wind.controller_disconnected.emit(tuple(self.box.motors_cluster.motors.keys()))
+            self.conn_wind.boxes_cluster.remove_box(self.box)
+            self.box.close()
+            self.box = None
+
+    def connection_btn_click(self):
+
+        if self.VerbButton.text() == 'verbinden':
+            try:
+                self.connect_box()
+            except Exception as err:
+                logging.exception(err)
+                QMessageBox.warning(self.conn_wind, "Verbindung fehlgeschlagen!",
+                                    traceback.format_exc())
+            else:
+                self.VerbButton.setText("trennen")
+                QMessageBox.information(self.conn_wind, "Verbindung abgeschlossen!",
+                                        self.box.report)
+        else:
+            self.disconnect_box()
+            self.VerbButton.setText("verbinden")
+
+
+class SerialConnectionWidget(ConnectionWidget):
+
+    def __int__(self, conn_wind: ConnectionWindow, name: str, input_file: str):
+        super().__init__(conn_wind, name, input_file)
+
+        self.name_label = QLabel(self.conn_wind)
+        self.name_label.setText(self.name)
+        self.addWidget(self.name_label)
+
+        self._line = QFrame(self)
+        self._line.setFrameShape(QtWidgets.QFrame.Shape.VLine)
+        self._line.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
+        self.addWidget(self._line)
+
+        self.port_label = QLabel(self.conn_wind)
+        self.port_label.setText("Port:")
+        self.addWidget(self.port_label)
+
+        self.PortBox = QtWidgets.QComboBox(self.conn_wind)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.PortBox.sizePolicy().hasHeightForWidth())
+        self.PortBox.setSizePolicy(sizePolicy)
+        self.PortBox.setMinimumSize(QtCore.QSize(125, 0))
+        self.PortBox.setCurrentText("")
+        self.addWidget(self.PortBox)
+
+        self.refrBtn = QtWidgets.QPushButton(self.conn_wind)
+        self.refrBtn.setText("⟳")
+        self.addWidget(self.refrBtn)
+
+        spacerItem = QtWidgets.QSpacerItem(10, 20, QtWidgets.QSizePolicy.Policy.MinimumExpanding,
+                                           QtWidgets.QSizePolicy.Policy.Minimum)
+        self.addItem(spacerItem)
+
+        self.VerbButton = QtWidgets.QPushButton(self.conn_wind)
+        self.VerbButton.setText('verbinden')
+        self.addWidget(self.VerbButton)
+
+        self.refrBtn.clicked.connect(self.read_ports)
+        self.VerbButton.clicked.connect(self.connection_btn_click)
+
+        self.read_ports()
+        self.read_last_connection_data()
+
+    def connection_data(self) -> str:
+        """Bekommt das Verbindung-Data aus der Felder des Widgets und gibt das zurück."""
+
+        return self.PortBox.currentText()
+
+    def fill_widget_with_saved_connection_data(self, connection_data: str):
+        """Füllt die Felder des Widgets mit angegebene Verbindung-Data"""
+
+        index = self.PortBox.findText(connection_data, flags=Qt.MatchFlag.MatchExactly)
+        if index == -1:
+            pass
+        else:
+            self.PortBox.setCurrentIndex(index)
+
+    def read_ports(self):
+
+        self.PortBox.clear()
+        comlist = serial.tools.list_ports.comports()
+
+        for element in comlist:
+            self.PortBox.addItem(element.device)
+        self.PortBox.addItem('Emulator')
+
+    def is_emulation(self):
+
+        if self.PortBox.currentText() == 'Emulator':
+            return True
+        else:
+            return False
+
+    def get_communicator(self, connector: mc.Connector) -> mc.ContrCommunicator:
+
+        raise NotImplementedError
+
+
+class MCC2_SerialConnectionWidget(SerialConnectionWidget):
+
+    def get_communicator(self, connector: mc.Connector) -> mc.ContrCommunicator:
+
+        connector = mc.Phytron_MCC2.MCC2SerialConnector(port=self.PortBox.currentText())
+        return mc.Phytron_MCC2.MCC2Communicator(connector)
+
+
+class MCS_SerialConnectionWidget(SerialConnectionWidget):
+
+    def get_communicator(self, connector: mc.Connector) -> mc.ContrCommunicator:
+        connector = mc.SmarAct_MCS.MCS_SerialConnector(port=self.PortBox.currentText())
+        return mc.SmarAct_MCS.MCSCommunicator(connector)
+
+
+class EthernetConnectionWidget(ConnectionWidget):
+
+    def __int__(self, conn_wind: ConnectionWindow, name: str, input_file: str):
+        super().__init__(conn_wind, name, input_file)
+
+        self.name_label = QtWidgets.QLabel(self.conn_wind)
+        self.addWidget(self.name_label)
+
+        self._line = QtWidgets.QFrame(self.conn_wind)
+        self._line.setFrameShape(QtWidgets.QFrame.Shape.VLine)
+        self._line.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
+        self.addWidget(self._line)
+
+        self.ip_label = QtWidgets.QLabel(self.conn_wind)
+        self.ip_label.setText("ip:")
+        self.addWidget(self.ip_label)
+
+        self.ipLine = QtWidgets.QLineEdit(self.conn_wind)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.ipLine.sizePolicy().hasHeightForWidth())
+        self.ipLine.setSizePolicy(sizePolicy)
+        self.addWidget(self.ipLine)
+
+        self.port_label = QtWidgets.QLabel(self.conn_wind)
+        self.port_label.setText("Port:")
+        self.addWidget(self.port_label)
+
+        self.PortLine = QtWidgets.QLineEdit(self.conn_wind)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.MinimumExpanding,
+                                           QtWidgets.QSizePolicy.Policy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.PortLine.sizePolicy().hasHeightForWidth())
+        self.PortLine.setSizePolicy(sizePolicy)
+        self.addWidget(self.PortLine)
+
+        spacerItem3 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Policy.Expanding,
+                                            QtWidgets.QSizePolicy.Policy.Minimum)
+        self.addItem(spacerItem3)
+
+        self.VerbButton = QtWidgets.QPushButton(self.conn_wind)
+        self.addWidget(self.VerbButton)
+
+        self.VerbButton.clicked.connect(self.connection_btn_click)
+
+        self.read_last_connection_data()
+
+    def connection_data(self) -> str:
+        """Bekommt das Verbindung-Data aus der Felder des Widgets und gibt das zurück."""
+
+        return self.ipLine.text() + ";" + self.PortLine.text()
+
+    def fill_widget_with_saved_connection_data(self, connection_data: str):
+        """Füllt die Felder des Widgets mit angegebene Verbindung-Data"""
+
+        data = connection_data.split(';')
+        if len(data) != 2:
+            logging.error('Connection data is damaged.')
+        else:
+            ip, port = data
+            self.ipLine.setText(ip)
+            self.PortLine.setText(port)
+
+    def is_emulation(self):
+
+        if self.ipLine.text() == 'E':
+            return True
+        else:
+            return False
+
+    def get_communicator(self, connector: mc.Connector) -> mc.ContrCommunicator:
+
+        raise NotImplementedError
+
+
+class MCS2_EthernetConnectionWidget(EthernetConnectionWidget):
+
+    def get_communicator(self, connector: mc.Connector) -> mc.ContrCommunicator:
+        connector = mc.SmarAct_MCS2.MCS2_EthernetConnector(self.ipLine.text(), self.PortLine.text())
+        return mc.SmarAct_MCS2.MCS2Communicator(connector)
 
 # class AxesPainter:
 #

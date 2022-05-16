@@ -3,12 +3,11 @@ import threading
 
 import cv2
 import serial.tools.list_ports
-from PyQt5 import QtGui
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QCheckBox, QLineEdit, QFileDialog, QComboBox, \
+from PyQt6 import QtGui
+from PyQt6.QtGui import QPixmap
+from PyQt6.QtWidgets import QMainWindow, QApplication, QWidget, QCheckBox, QLineEdit, QFileDialog, QComboBox, \
     QStyleFactory, QPushButton
-from PyQt5.uic import loadUi
+from PyQt6.uic import loadUi
 from motor_controller.Phytron_MCC2 import MCC2BoxSerial
 from motor_controller.interface import StandardStopIndicator
 
@@ -192,7 +191,7 @@ class PlasmaMotorWindow(QWidget):
 
         h, w, ch = rgb_image.shape
         bytes_per_line = ch * w
-        convert_to_Qt_format = QtGui.QImage(rgb_image.data, w, h, bytes_per_line, QtGui.QImage.Format_RGB888)
+        convert_to_Qt_format = QtGui.QImage(rgb_image.data, w, h, bytes_per_line, QtGui.QImage.Format.Format_RGB888)
         return QPixmap.fromImage(convert_to_Qt_format)
 
     def calibr_plasma(self):
@@ -296,7 +295,7 @@ if __name__ == "__main__":
     # form.update() #start with something
 
     try:
-        app.exec_()
+        app.exec()
     finally:
         if form.connected:
             form.box.stop()

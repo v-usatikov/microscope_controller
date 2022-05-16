@@ -1,8 +1,10 @@
 import sys
 
+from PyQt6.QtGui import QWindow
 from PyQt6.QtWidgets import QMainWindow, QApplication
 from PyQt6.uic import loadUi
 
+from mscontr.MainGUI.arrows import Window
 from mscontr.MainGUI.mcwidgets import MicroscopeScheme, MicroscopeZone
 
 
@@ -27,9 +29,18 @@ class MainWindow(QMainWindow):
         self.micr_scheme.zones.append(self.ml_zone)
         self.micr_scheme.setMouseTracking(True)
 
+        self.window = Window()
+        self.window.hide()
 
+        self.ml_zone.double_clicked.connect(self.open_window)
 
         # self.GoButton.clicked.connect(self.go_to)
+
+    def open_window(self):
+
+        self.window.show()
+        self.window.raise_()
+
 
 
 if __name__ == "__main__":

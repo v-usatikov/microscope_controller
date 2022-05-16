@@ -16,6 +16,7 @@ pymba = "^0"
 lmfit = "^1"
 matplotlib = "^3"
 vimbapython = {git = "https://github.com/alliedvision/VimbaPython.git"}
+pyserial = "^3.5"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
