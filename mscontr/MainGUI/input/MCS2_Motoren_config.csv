@@ -1,0 +1,3 @@
+Motor Name;Bus;Achse;Mit Initiatoren(0 oder 1);Mit Encoder(0 oder 1);Einheiten;Umrechnungsfaktor;Positioner Type;Velocity;Acceleration
+CStoppX;1;0;1;1;pm;1;300;;
+CStoppY;1;1;1;1;pm;1;300;;

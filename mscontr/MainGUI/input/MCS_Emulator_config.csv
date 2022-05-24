@@ -1,0 +1,4 @@
+Motor Name;Bus;Achse;Mit Initiatoren(0 oder 1);Mit Encoder(0 oder 1);Einheiten;Umrechnungsfaktor;Lauffrequenz;Stoppstrom;Laufstrom;Booststrom;Initiatortyp
+MCS_1;0;1;0;1;;;4000;1;2;2;
+MCS_2;0;2;0;1;;;4000;1;2;2;
+MCS_3;0;3;0;1;;;4000;1;2;2;

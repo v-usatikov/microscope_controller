@@ -1,13 +1,13 @@
 import logging
 import traceback
 from abc import ABC
-from typing import Tuple, Callable, List, Optional, Union, Dict
+from typing import Tuple, Callable, List, Optional, Union, Dict, Collection
 
 import numpy as np
 import serial, serial.tools.list_ports
 from PyQt6 import QtGui, QtCore, QtWidgets
 from PyQt6.QtWidgets import QFileDialog, QMessageBox, QMainWindow, QApplication, QScrollBar, QStatusBar, QGraphicsView, \
-    QSizePolicy, QGroupBox, QStyle, QStyleFactory, QComboBox, QHBoxLayout
+    QSizePolicy, QGroupBox, QStyle, QStyleFactory, QComboBox, QHBoxLayout, QGridLayout
 from PyQt6.QtWidgets import QFrame, QWidget, QLabel
 from PyQt6.QtGui import QPainter, QPen, QPixmap, QColor, QFont, QWindow
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QPoint
@@ -246,6 +246,8 @@ class AktPositionSlider(QScrollBar):
 
 class MotorWidget(QGroupBox):
 
+    motor: Motor | None
+
     def __init__(self, parent: Optional[QWidget], name: Optional[str] = None):
         super().__init__(parent)
         # self.setStyle()
@@ -260,8 +262,7 @@ class MotorWidget(QGroupBox):
 
         self.position = 0
         self.position_NE = 0
-        self.is_closed = False
-        self.refresh_position = True
+        self.is_sleeping = True
 
         self.GeheZuEdit.returnPressed.connect(self.go_to)
         self.SL_U_Edit.textEdited.connect(self.set_soft_limits)
@@ -271,7 +272,9 @@ class MotorWidget(QGroupBox):
         self.plusBtn.clicked.connect(self.plus_step)
         self.NullBtn.clicked.connect(self.set_zero)
 
-    def init(self, motor: Motor):
+        self.setEnabled(False)
+
+    def init(self, motor: Motor, awake: bool = True):
 
         self.motor = motor
         self.init_soft_limits()
@@ -285,7 +288,14 @@ class MotorWidget(QGroupBox):
 
         self.Units_label.setText(self.motor.config['display_units'])
         self.setTitle(self.motor.name)
-        self.setEnabled(True)
+
+        if awake:
+            self.awake()
+
+    def discard(self):
+
+        self.setEnabled(False)
+        self.motor = None
 
     def go_to(self):
         self.motor.go_to(float(self.GeheZuEdit.text()), 'displ')
@@ -299,14 +309,25 @@ class MotorWidget(QGroupBox):
     def stop(self):
         self.motor.stop()
 
+    def sleep(self):
+
+        self.setEnabled(False)
+        self.is_sleeping = True
+
+    def awake(self):
+
+        if self.motor is not None:
+            self.setEnabled(True)
+            self.is_sleeping = False
+
     def read_position(self, single_shot=False):
-        if self.refresh_position:
+        if not self.is_sleeping and self.motor is not None:
             self.position = self.motor.position('displ')
             self.position_NE = self.motor.transform_units(self.position, 'displ', 'norm')
             self.AktPosEdit.setText(str(round(self.position, 4)))
             if self.motor.is_calibratable():
                 self.APSlider.setValue(int(self.position_NE))
-        if not single_shot and not self.is_closed:
+        if not single_shot and self.motor is not None:
             QtCore.QTimer.singleShot(200, self.read_position)
 
     def set_zero(self):
@@ -320,12 +341,10 @@ class MotorWidget(QGroupBox):
         O_Grenze = Motor.soft_limits[1]
 
         if U_Grenze is not None:
-            if self.EinheitenBox1.checkState():
-                U_Grenze = Motor.transform_units(U_Grenze, 'norm', to='displ')
+            U_Grenze = Motor.transform_units(U_Grenze, 'norm', to='displ')
             self.SL_U_Edit.setText(str(round(U_Grenze, 4)))
         if O_Grenze is not None:
-            if self.EinheitenBox1.checkState():
-                O_Grenze = Motor.transform_units(O_Grenze, 'norm', to='displ')
+            O_Grenze = Motor.transform_units(O_Grenze, 'norm', to='displ')
             self.SL_O_Edit.setText(str(round(O_Grenze, 4)))
 
     def set_soft_limits(self):
@@ -380,14 +399,12 @@ class MotorWidget(QGroupBox):
         # print('Init', motor.Name, lower_bound, upper_bound)
 
         if lower_bound is not None:
-            if self.EinheitenBox1.checkState():
-                lower_bound = motor.transform_units(lower_bound, 'norm', to='displ')
+            lower_bound = motor.transform_units(lower_bound, 'norm', to='displ')
             self.SL_U_Edit.setText(str(round(lower_bound, 4)))
         else:
             self.SL_U_Edit.setText('')
         if upper_bound is not None:
-            if self.EinheitenBox1.checkState():
-                upper_bound = motor.transform_units(upper_bound, 'norm', to='displ')
+            upper_bound = motor.transform_units(upper_bound, 'norm', to='displ')
             self.SL_O_Edit.setText(str(round(upper_bound, 4)))
         else:
             self.SL_O_Edit.setText('')
@@ -710,27 +727,18 @@ def Axes_Generator(gr_field: GraphicField,
     return axes
 
 
-class MotorWindow(QWindow):
-
-    def __init__(self, parent: QWindow, ):
-        super().__init__(parent)
-
-
 class ConnectionWindow(QWidget):
 
-    controller_connected = pyqtSignal(Dict[str, Motor])
-    controller_disconnected = pyqtSignal(Tuple[str])
-
-    PortBox_MCC2_box: QComboBox
-    PortBox_MCC2_jet: QComboBox
-    PortBox_MCS: QComboBox
+    controller_connected = pyqtSignal([dict])
+    controller_disconnected = pyqtSignal([tuple])
 
     def __init__(self):
         super().__init__()
 
         self.setObjectName("Connection Window")
         self.resize(636, 295)
-        self.verticalLayout = QtWidgets.QVBoxLayout(self)
+        self.verticalLayout = QtWidgets.QVBoxLayout()
+        self.setLayout(self.verticalLayout)
 
         self.conn_widgets: List[ConnectionWidget] = []
 
@@ -758,8 +766,10 @@ class ConnectionWindow(QWidget):
                                             QtWidgets.QSizePolicy.Policy.Minimum)
         self.horizontalLayout.addItem(spacerItem4)
         self.conn_all_btn = QtWidgets.QPushButton(self)
+        self.conn_all_btn.setText('alle verbinden')
         self.horizontalLayout.addWidget(self.conn_all_btn)
         self.disconn_all_btn = QtWidgets.QPushButton(self)
+        self.disconn_all_btn.setText('alle trennen')
         self.horizontalLayout.addWidget(self.disconn_all_btn)
         self.verticalLayout.addLayout(self.horizontalLayout)
 
@@ -788,13 +798,20 @@ class ConnectionWindow(QWidget):
             if conn_widget.box is not None:
                 conn_widget.connection_btn_click()
 
+    def open(self):
+
+        self.show()
+        self.raise_()
+
+
 
 class ConnectionWidget(QHBoxLayout):
 
     VerbButton: QtWidgets.QPushButton
 
     def __init__(self, conn_wind: ConnectionWindow, name: str, input_file: str):
-        super().__init__(parent=conn_wind)
+        # super().__init__(conn_wind)
+        super().__init__()
 
         self.conn_wind = conn_wind
         self.name = name
@@ -832,7 +849,7 @@ class ConnectionWidget(QHBoxLayout):
         except FileNotFoundError:
             pass
 
-    def get_communicator(self, connector: mc.Connector) -> mc.ContrCommunicator:
+    def get_communicator(self) -> mc.ContrCommunicator:
 
         raise NotImplementedError
 
@@ -848,7 +865,7 @@ class ConnectionWidget(QHBoxLayout):
             emulator = mc.Phytron_MCC2.BoxEmulator(n_bus=5, n_axes=3, realtime=True)
             self.box = mc.Box(emulator, input_file=self.input_file)
         else:
-            communicator = self.get_communicator(self.get_connector())
+            communicator = self.get_communicator()
             self.box = mc.Box(communicator, self.input_file)
 
         self.conn_wind.boxes_cluster.add_box(self.box, self.name)
@@ -885,14 +902,14 @@ class ConnectionWidget(QHBoxLayout):
 
 class SerialConnectionWidget(ConnectionWidget):
 
-    def __int__(self, conn_wind: ConnectionWindow, name: str, input_file: str):
+    def __init__(self, conn_wind: ConnectionWindow, name: str, input_file: str):
         super().__init__(conn_wind, name, input_file)
 
         self.name_label = QLabel(self.conn_wind)
         self.name_label.setText(self.name)
         self.addWidget(self.name_label)
 
-        self._line = QFrame(self)
+        self._line = QFrame(self.conn_wind)
         self._line.setFrameShape(QtWidgets.QFrame.Shape.VLine)
         self._line.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
         self.addWidget(self._line)
@@ -952,6 +969,8 @@ class SerialConnectionWidget(ConnectionWidget):
             self.PortBox.addItem(element.device)
         self.PortBox.addItem('Emulator')
 
+        self.read_last_connection_data()
+
     def is_emulation(self):
 
         if self.PortBox.currentText() == 'Emulator':
@@ -959,14 +978,17 @@ class SerialConnectionWidget(ConnectionWidget):
         else:
             return False
 
-    def get_communicator(self, connector: mc.Connector) -> mc.ContrCommunicator:
+    def get_communicator(self) -> mc.ContrCommunicator:
 
         raise NotImplementedError
 
 
 class MCC2_SerialConnectionWidget(SerialConnectionWidget):
 
-    def get_communicator(self, connector: mc.Connector) -> mc.ContrCommunicator:
+    def __init__(self, conn_wind: ConnectionWindow, name: str, input_file: str):
+        super().__init__(conn_wind, name, input_file)
+
+    def get_communicator(self) -> mc.ContrCommunicator:
 
         connector = mc.Phytron_MCC2.MCC2SerialConnector(port=self.PortBox.currentText())
         return mc.Phytron_MCC2.MCC2Communicator(connector)
@@ -974,17 +996,21 @@ class MCC2_SerialConnectionWidget(SerialConnectionWidget):
 
 class MCS_SerialConnectionWidget(SerialConnectionWidget):
 
-    def get_communicator(self, connector: mc.Connector) -> mc.ContrCommunicator:
+    def __init__(self, conn_wind: ConnectionWindow, name: str, input_file: str):
+        super().__init__(conn_wind, name, input_file)
+
+    def get_communicator(self) -> mc.ContrCommunicator:
         connector = mc.SmarAct_MCS.MCS_SerialConnector(port=self.PortBox.currentText())
         return mc.SmarAct_MCS.MCSCommunicator(connector)
 
 
 class EthernetConnectionWidget(ConnectionWidget):
 
-    def __int__(self, conn_wind: ConnectionWindow, name: str, input_file: str):
+    def __init__(self, conn_wind: ConnectionWindow, name: str, input_file: str):
         super().__init__(conn_wind, name, input_file)
 
         self.name_label = QtWidgets.QLabel(self.conn_wind)
+        self.name_label.setText(self.name)
         self.addWidget(self.name_label)
 
         self._line = QtWidgets.QFrame(self.conn_wind)
@@ -1002,6 +1028,7 @@ class EthernetConnectionWidget(ConnectionWidget):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.ipLine.sizePolicy().hasHeightForWidth())
         self.ipLine.setSizePolicy(sizePolicy)
+        self.ipLine.setText("192.168.1.200")
         self.addWidget(self.ipLine)
 
         self.port_label = QtWidgets.QLabel(self.conn_wind)
@@ -1015,6 +1042,7 @@ class EthernetConnectionWidget(ConnectionWidget):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.PortLine.sizePolicy().hasHeightForWidth())
         self.PortLine.setSizePolicy(sizePolicy)
+        self.PortLine.setText("55551")
         self.addWidget(self.PortLine)
 
         spacerItem3 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Policy.Expanding,
@@ -1022,6 +1050,7 @@ class EthernetConnectionWidget(ConnectionWidget):
         self.addItem(spacerItem3)
 
         self.VerbButton = QtWidgets.QPushButton(self.conn_wind)
+        self.VerbButton.setText('verbinden')
         self.addWidget(self.VerbButton)
 
         self.VerbButton.clicked.connect(self.connection_btn_click)
@@ -1051,16 +1080,98 @@ class EthernetConnectionWidget(ConnectionWidget):
         else:
             return False
 
-    def get_communicator(self, connector: mc.Connector) -> mc.ContrCommunicator:
+    def get_communicator(self) -> mc.ContrCommunicator:
 
         raise NotImplementedError
 
 
 class MCS2_EthernetConnectionWidget(EthernetConnectionWidget):
 
-    def get_communicator(self, connector: mc.Connector) -> mc.ContrCommunicator:
+    def __init__(self, conn_wind: ConnectionWindow, name: str, input_file: str):
+        super().__init__(conn_wind, name, input_file)
+
+    def get_communicator(self) -> mc.ContrCommunicator:
         connector = mc.SmarAct_MCS2.MCS2_EthernetConnector(self.ipLine.text(), self.PortLine.text())
         return mc.SmarAct_MCS2.MCS2Communicator(connector)
+
+
+def motors_wdgs_place_generator():
+
+    yield 1, 0
+    yield 2, 0
+    yield 1, 1
+    yield 2, 1
+    for i in range(3, 10):
+        for j in range(2):
+            yield i, j
+
+
+class MotorWindow(QWidget):
+
+    def __init__(self, conn_window: ConnectionWindow, motors_names: Collection[str]):
+        super().__init__()
+
+        self.conn_window = conn_window
+
+        self.resize(300, 300)
+        self.grid = QGridLayout(self)
+        self.setLayout(self.grid)
+
+        self.motor_scheme = GraphicField(self, 1000, 200)
+        self.motor_scheme.set_background_from_file('img/ML.png')
+        self.motor_scheme.show()
+
+        if len(motors_names) > 2:
+            column_span = 2
+        else:
+            column_span = 1
+        self.grid.addWidget(self.motor_scheme, 0, 0, 1, column_span)
+
+        self.motors_widgets: Dict[str, MotorWidget] = {}
+
+        for name, place in zip(motors_names, motors_wdgs_place_generator()):
+            motor_widget = MotorWidget(self, name)
+            self.motors_widgets[name] = motor_widget
+            print(name, place)
+            self.grid.addWidget(motor_widget, *place)
+
+            if name in self.conn_window.boxes_cluster.names():
+                motor = self.conn_window.boxes_cluster.get_motor(name)
+                motor_widget.init(motor, awake=False)
+
+        self.conn_window.controller_connected.connect(self.controller_connected_event)
+        self.conn_window.controller_disconnected.connect(self.controller_disconnected_event)
+
+    def open(self):
+
+        self.show()
+        self.raise_()
+
+    def controller_connected_event(self, motors_dict: Dict[str, Motor]):
+
+        for name, m_widg in self.motors_widgets.items():
+            if name in motors_dict.keys():
+                m_widg.init(motors_dict[name], awake=self.isVisible())
+
+    def controller_disconnected_event(self, motors_names: Tuple[str]):
+
+        for name, m_widg in self.motors_widgets.items():
+            if name in motors_names:
+                m_widg.discard()
+
+    def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
+
+        for m_widg in self.motors_widgets.values():
+            m_widg.sleep()
+        super(MotorWindow, self).closeEvent(a0)
+
+    def showEvent(self, a0: QtGui.QShowEvent) -> None:
+
+        super(MotorWindow, self).showEvent(a0)
+        for m_widg in self.motors_widgets.values():
+            m_widg.awake()
+            
+
 
 # class AxesPainter:
 #
