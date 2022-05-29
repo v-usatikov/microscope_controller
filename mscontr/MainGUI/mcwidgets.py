@@ -246,7 +246,7 @@ class AktPositionSlider(QScrollBar):
 
 class MotorWidget(QGroupBox):
 
-    motor: Motor | None
+    motor: Motor | None = None
 
     def __init__(self, parent: Optional[QWidget], name: Optional[str] = None):
         super().__init__(parent)
@@ -263,6 +263,9 @@ class MotorWidget(QGroupBox):
         self.position = 0
         self.position_NE = 0
         self.is_sleeping = True
+
+        self.axis_p: Axis | None = None
+        self.axis_m: Axis | None = None
 
         self.GeheZuEdit.returnPressed.connect(self.go_to)
         self.SL_U_Edit.textEdited.connect(self.set_soft_limits)
@@ -322,11 +325,29 @@ class MotorWidget(QGroupBox):
 
     def read_position(self, single_shot=False):
         if not self.is_sleeping and self.motor is not None:
+            position0 = self.position
             self.position = self.motor.position('displ')
             self.position_NE = self.motor.transform_units(self.position, 'displ', 'norm')
             self.AktPosEdit.setText(str(round(self.position, 4)))
             if self.motor.is_calibratable():
                 self.APSlider.setValue(int(self.position_NE))
+
+            if self.axis_p is not None and self.axis_m is not None:
+                shift = self.position - position0
+                tol = self.motor.communicator.tolerance
+                if shift > tol and not self.axis_p.activated:
+                    self.axis_p.activated = True
+                    self.axis_m.activated = False
+                    self.axis_p.axes_obj.update()
+                elif shift < -tol and not self.axis_m.activated:
+                    self.axis_p.activated = False
+                    self.axis_m.activated = True
+                    self.axis_p.axes_obj.update()
+                elif self.axis_m.activated or self.axis_p.activated:
+                    self.axis_p.activated = False
+                    self.axis_m.activated = False
+                    self.axis_p.axes_obj.update()
+
         if not single_shot and self.motor is not None:
             QtCore.QTimer.singleShot(200, self.read_position)
 
@@ -419,15 +440,15 @@ class MotorWidget(QGroupBox):
 
         group_box.setEnabled(False)
         group_box.setGeometry(QtCore.QRect(20, 90, 400, 121))
-        sizePolicy = QtWidgets.QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        sizePolicy = QtWidgets.QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
         # sizePolicy.setHorizontalStretch(0)
         # sizePolicy.setVerticalStretch(0)
         # sizePolicy.setHeightForWidth(group_box.sizePolicy().hasHeightForWidth())
         group_box.setSizePolicy(sizePolicy)
         # group_box.setMinimumSize(QtCore.QSize(0, 121))
-        font = QtGui.QFont()
+        # font = QtGui.QFont()
         # font.setPointSize(100)
-        group_box.setFont(font)
+        # group_box.setFont(font)
         group_box.setObjectName("MotorBox")
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(group_box)
         self.verticalLayout_2.setContentsMargins(10, 5, 10, 5)
@@ -702,7 +723,8 @@ def Axes_Generator(gr_field: GraphicField,
             if rotation:
                 new_axes.append(RoundAxis(plus_axis, '+R' + name, r_axis_param_adj))
                 new_axes.append(RoundAxis(minus_axis, '-R' + name, r_axis_param_adj))
-        axes.axes += new_axes
+        for axis in new_axes:
+            axes.axes[axis.name] = axis
 
     if round_axis_parameters is None:
         round_axis_parameters = {}
@@ -1113,38 +1135,43 @@ class MotorWindow(QWidget):
 
         self.conn_window = conn_window
 
-        self.resize(300, 300)
+        # self.resize(300, 300)
         self.grid = QGridLayout(self)
+        self.grid.setVerticalSpacing(10)
         self.setLayout(self.grid)
-
-        self.motor_scheme = GraphicField(self, 1000, 200)
-        self.motor_scheme.set_background_from_file('img/ML.png')
-        self.motor_scheme.show()
-
-        if len(motors_names) > 2:
-            column_span = 2
-        else:
-            column_span = 1
-        self.grid.addWidget(self.motor_scheme, 0, 0, 1, column_span)
 
         self.motors_widgets: Dict[str, MotorWidget] = {}
 
         for name, place in zip(motors_names, motors_wdgs_place_generator()):
             motor_widget = MotorWidget(self, name)
             self.motors_widgets[name] = motor_widget
-            print(name, place)
             self.grid.addWidget(motor_widget, *place)
 
             if name in self.conn_window.boxes_cluster.names():
                 motor = self.conn_window.boxes_cluster.get_motor(name)
                 motor_widget.init(motor, awake=False)
 
+        self.motor_scheme = MicroscopZoneChema(self)
+        if len(motors_names) > 2:
+            column_span = 2
+        else:
+            column_span = 1
+        self.grid.addWidget(self.motor_scheme, 0, 0, 1, column_span)
+
         self.conn_window.controller_connected.connect(self.controller_connected_event)
         self.conn_window.controller_disconnected.connect(self.controller_disconnected_event)
 
     def open(self):
 
-        self.show()
+        if self.isHidden():
+            self.show()
+
+            x_range, y_range = self.motor_scheme.x_range, self.motor_scheme.y_range
+            left, top, right, bottom = self.grid.getContentsMargins()
+            min_w = self.width() - left - right
+            self.motor_scheme.setMinimumWidth(min_w)
+            self.motor_scheme.setMinimumHeight(round(y_range / x_range * min_w))
+
         self.raise_()
 
     def controller_connected_event(self, motors_dict: Dict[str, Motor]):
@@ -1170,8 +1197,64 @@ class MotorWindow(QWidget):
         super(MotorWindow, self).showEvent(a0)
         for m_widg in self.motors_widgets.values():
             m_widg.awake()
-            
 
+
+class MicroscopZoneChema(GraphicField):
+
+    def __init__(self, motor_wind: MotorWindow, img: str | None = None):
+        super().__init__(motor_wind, 1000, 300)
+
+        self.motor_wind = motor_wind
+
+        if img is not None:
+            self.set_background_from_file(img)
+
+        self.__closed = True
+
+        axes_to_enable: Dict[str, bool] = {}
+        axes_mwidgs_dict: Dict[str, MotorWidget] = {}
+        for name, motor_widg in self.motor_wind.motors_widgets.items():
+            for axis_name in ['X', 'Y', 'Z']:
+                axis_name_rot = 'R' + axis_name
+                if name[-2:] == axis_name_rot:
+                    axes_to_enable[axis_name_rot.lower()] = True
+                    axes_to_enable[axis_name.lower()] = True
+                    axes_mwidgs_dict['R' + axis_name.lower()] = motor_widg
+                elif name[-1] == axis_name:
+                    axes_to_enable[axis_name.lower()] = True
+                    axes_mwidgs_dict[axis_name.lower()] = motor_widg
+
+        width = self.y_range
+        self.axes = Axes_Generator(self, (width/2, width/2), width/4, 0.2, **axes_to_enable,
+                                   plus_minus=True,
+                                   color_activated=QColor("orange"))
+        # self.axes = Axes_Generator(self,
+        #                            (width/2, width/2),
+        #                            width/4,
+        #                            0.2,
+        #                            **axes_to_enable,
+        #                            pen_width=self.micr_scheme.pen_width,
+        #                            color_base=self.micr_scheme.color_base,
+        #                            color_activated=self.micr_scheme.color_activated,
+        #                            pen_width_activated=self.micr_scheme.pen_width_activated,
+        #                            plus_minus=False,
+        #                            arrow_parameters=self.micr_scheme.arrow_parameters,
+        #                            axis_parameters=self.micr_scheme.axis_parameters,
+        #                            round_axis_parameters=self.micr_scheme.round_axis_parameters)
+
+        for axis_name, m_widg in axes_mwidgs_dict.items():
+            m_widg.axis_p = self.axes.axes['+' + axis_name]
+            m_widg.axis_m = self.axes.axes['-' + axis_name]
+
+    def showEvent(self, a0: QtGui.QShowEvent) -> None:
+
+        super(MicroscopZoneChema, self).showEvent(a0)
+        self.__closed = False
+
+    def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
+
+        super(MicroscopZoneChema, self).closeEvent(a0)
+        self.__closed = True
 
 # class AxesPainter:
 #
