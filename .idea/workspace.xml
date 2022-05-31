@@ -6,6 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="af26340a-193a-4aa8-bbc7-a5c0e335b84c" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mscontr/Demo_GUI/input/MCC2_Motoren_config.csv" beforeDir="false" afterPath="$PROJECT_DIR$/mscontr/Demo_GUI/input/MCC2_Motoren_config.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mscontr/MainGUI/main_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/mscontr/MainGUI/main_gui.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mscontr/MainGUI/mcwidgets.py" beforeDir="false" afterPath="$PROJECT_DIR$/mscontr/MainGUI/mcwidgets.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -59,7 +61,7 @@
     </key>
   </component>
   <component name="RunManager" selected="Python.main_gui">
-    <configuration name="Demo_GUI" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="PlasmaWindow" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="MicroscopeController" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -72,7 +74,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/mscontr/Demo_GUI/Demo_GUI.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/mscontr/Demo_GUI/PlasmaWindow.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -172,10 +174,10 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.main_gui" />
+        <item itemvalue="Python.PlasmaWindow" />
         <item itemvalue="Python.arrows" />
         <item itemvalue="Python.conn_widg_test" />
         <item itemvalue="Python.connection_window" />
-        <item itemvalue="Python.Demo_GUI" />
       </list>
     </recent_temporary>
   </component>
@@ -316,7 +318,7 @@
       <workItem from="1652718326257" duration="8140000" />
       <workItem from="1652788823029" duration="41000" />
       <workItem from="1652788914670" duration="10727000" />
-      <workItem from="1653409529444" duration="22069000" />
+      <workItem from="1653409529444" duration="44915000" />
     </task>
     <task id="LOCAL-00001" summary="restructing with poetry">
       <created>1593203031464</created>
@@ -395,7 +397,14 @@
       <option name="project" value="LOCAL" />
       <updated>1653415133259</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="MicroscopZoneChema">
+      <created>1653839889710</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1653839889710</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -413,7 +422,8 @@
     <MESSAGE value="MicroscopeZone fertig" />
     <MESSAGE value="ConnectionWindow" />
     <MESSAGE value="ConnectionWindow, MotorWindow" />
-    <option name="LAST_COMMIT_MESSAGE" value="ConnectionWindow, MotorWindow" />
+    <MESSAGE value="MicroscopZoneChema" />
+    <option name="LAST_COMMIT_MESSAGE" value="MicroscopZoneChema" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -520,7 +530,7 @@
     <SUITE FILE_PATH="coverage/MicroscopeController$find_ray_on_error_frame.coverage" NAME="find_ray_on_error_frame Coverage Results" MODIFIED="1628993038868" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments/jet_errors" />
     <SUITE FILE_PATH="coverage/pyproject_toml$arrowwidget.coverage" NAME="arrowwidget Coverage Results" MODIFIED="1613586294967" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/mscontr/ArrowWidget/ArrowsWidget" />
     <SUITE FILE_PATH="coverage/MicroscopeController$plasma_watcher.coverage" NAME="plasma_watcher Coverage Results" MODIFIED="1629042358361" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/mscontr/microwatcher" />
-    <SUITE FILE_PATH="coverage/MicroscopeController$PlasmaWindow.coverage" NAME="PlasmaWindow Coverage Results" MODIFIED="1645425033497" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/mscontr/Demo_GUI" />
+    <SUITE FILE_PATH="coverage/MicroscopeController$PlasmaWindow.coverage" NAME="PlasmaWindow Coverage Results" MODIFIED="1653905163912" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/mscontr/Demo_GUI" />
     <SUITE FILE_PATH="coverage/MicroscopeController$Unittests_for_test_PlasmaWatcher_TestExternalFunctions_test_find_nozzle.coverage" NAME="Unittests for test_PlasmaWatcher.TestExternalFunctions.test_find_nozzle Coverage Results" MODIFIED="1630355693131" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/MicroscopeController$exp10.coverage" NAME="exp10 Coverage Results" MODIFIED="1644359695147" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
     <SUITE FILE_PATH="coverage/MicroscopeController$Unittests_for_test_PlasmaWatcher_TestExternalFunctions_test_find_plasma.coverage" NAME="Unittests for test_PlasmaWatcher.TestExternalFunctions.test_find_plasma Coverage Results" MODIFIED="1629045334849" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
@@ -542,7 +552,7 @@
     <SUITE FILE_PATH="coverage/MicroscopeController$exp9.coverage" NAME="exp9 Coverage Results" MODIFIED="1635796880257" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
     <SUITE FILE_PATH="coverage/MicroscopeController$Demo_GUI.coverage" NAME="Demo_GUI Coverage Results" MODIFIED="1648668482065" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/mscontr/Demo_GUI" />
     <SUITE FILE_PATH="coverage/MicroscopeController$find_plasma_exp2.coverage" NAME="find_plasma_exp2 Coverage Results" MODIFIED="1629045106690" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
-    <SUITE FILE_PATH="coverage/MicroscopeController$main_gui.coverage" NAME="main_gui Coverage Results" MODIFIED="1653839535263" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/mscontr/MainGUI" />
+    <SUITE FILE_PATH="coverage/MicroscopeController$main_gui.coverage" NAME="main_gui Coverage Results" MODIFIED="1654014188380" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/mscontr/MainGUI" />
     <SUITE FILE_PATH="coverage/MicroscopeController$qtplayer.coverage" NAME="qtplayer Coverage Results" MODIFIED="1627001824578" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/MicroscopeController$Unittests_for_test_PlasmaWatcher_TestPlasmaWatcher_test_move_plasma_to.coverage" NAME="Unittests for test_PlasmaWatcher.TestPlasmaWatcher.test_move_plasma_to Coverage Results" MODIFIED="1600959258845" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/MicroscopeController$Unittests_for_test_PlasmaWatcher_TestCameraCoordinates_test_1.coverage" NAME="Unittests for test_PlasmaWatcher.TestCameraCoordinates.test_1 Coverage Results" MODIFIED="1627413710070" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />

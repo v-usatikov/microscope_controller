@@ -1,13 +1,16 @@
 import logging
+import threading
 import traceback
 from abc import ABC
-from typing import Tuple, Callable, List, Optional, Union, Dict, Collection
+from typing import Tuple, Callable, List, Optional, Union, Dict, Collection, Set
 
+import cv2
 import numpy as np
 import serial, serial.tools.list_ports
 from PyQt6 import QtGui, QtCore, QtWidgets
 from PyQt6.QtWidgets import QFileDialog, QMessageBox, QMainWindow, QApplication, QScrollBar, QStatusBar, QGraphicsView, \
-    QSizePolicy, QGroupBox, QStyle, QStyleFactory, QComboBox, QHBoxLayout, QGridLayout
+    QSizePolicy, QGroupBox, QStyle, QStyleFactory, QComboBox, QHBoxLayout, QGridLayout, QCheckBox, QLineEdit, \
+    QPushButton, QVBoxLayout
 from PyQt6.QtWidgets import QFrame, QWidget, QLabel
 from PyQt6.QtGui import QPainter, QPen, QPixmap, QColor, QFont, QWindow
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QPoint
@@ -18,6 +21,11 @@ from graphic_ext import GraphicField, GraphicObject, GraphicZone, QPainter_ext
 from graphic_ext.gr_field import Axes, Axis, RoundAxis
 from motor_controller import Motor
 import motor_controller as mc
+from motor_controller.Phytron_MCC2 import MCC2BoxSerial
+from motor_controller.interface import StandardStopIndicator, StopIndicator, WaitReporter
+
+from mscontr.microwatcher.plasma_watcher import PlasmaWatcher
+from tests.test_PlasmaWatcher import prepare_jet_watcher_to_test
 
 point_n = Tuple[float, float]
 point_p = Tuple[int, int]
@@ -260,6 +268,7 @@ class MotorWidget(QGroupBox):
         # print('1', self.styleSheet())
         # self.setStyle('windowsvista')
 
+        self.__first_position_read = True
         self.position = 0
         self.position_NE = 0
         self.is_sleeping = True
@@ -281,6 +290,7 @@ class MotorWidget(QGroupBox):
 
         self.motor = motor
         self.init_soft_limits()
+        self.__first_position_read = True
         self.read_position()
         if not self.motor.is_calibratable():
             self.APSlider.setEnabled(False)
@@ -327,6 +337,9 @@ class MotorWidget(QGroupBox):
         if not self.is_sleeping and self.motor is not None:
             position0 = self.position
             self.position = self.motor.position('displ')
+            if self.__first_position_read:
+                position0 = self.position
+                self.__first_position_read = False
             self.position_NE = self.motor.transform_units(self.position, 'displ', 'norm')
             self.AktPosEdit.setText(str(round(self.position, 4)))
             if self.motor.is_calibratable():
@@ -334,15 +347,18 @@ class MotorWidget(QGroupBox):
 
             if self.axis_p is not None and self.axis_m is not None:
                 shift = self.position - position0
+                shift = self.motor.transform_units(shift, 'displ', 'contr', rel=True)
                 tol = self.motor.communicator.tolerance
-                if shift > tol and not self.axis_p.activated:
-                    self.axis_p.activated = True
-                    self.axis_m.activated = False
-                    self.axis_p.axes_obj.update()
-                elif shift < -tol and not self.axis_m.activated:
-                    self.axis_p.activated = False
-                    self.axis_m.activated = True
-                    self.axis_p.axes_obj.update()
+                if shift > tol:
+                    if not self.axis_p.activated:
+                        self.axis_p.activated = True
+                        self.axis_m.activated = False
+                        self.axis_p.axes_obj.update()
+                elif shift < -tol:
+                    if not self.axis_m.activated:
+                        self.axis_p.activated = False
+                        self.axis_m.activated = True
+                        self.axis_p.axes_obj.update()
                 elif self.axis_m.activated or self.axis_p.activated:
                     self.axis_p.activated = False
                     self.axis_m.activated = False
@@ -757,7 +773,7 @@ class ConnectionWindow(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.setObjectName("Connection Window")
+        self.setWindowTitle("Verbindung")
         self.resize(636, 295)
         self.verticalLayout = QtWidgets.QVBoxLayout()
         self.setLayout(self.verticalLayout)
@@ -825,6 +841,10 @@ class ConnectionWindow(QWidget):
         self.show()
         self.raise_()
 
+    # def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
+    #
+    #     super(ConnectionWindow, self).closeEvent(a0)
+    #     print("conn wind closed")
 
 
 class ConnectionWidget(QHBoxLayout):
@@ -1117,6 +1137,247 @@ class MCS2_EthernetConnectionWidget(EthernetConnectionWidget):
         return mc.SmarAct_MCS2.MCS2Communicator(connector)
 
 
+
+def calibr_wdgs_place_generator():
+
+    for i in range(10):
+        for j in range(3):
+            yield i, j
+
+
+class CalibrationWindow(QWidget):
+
+    calibration_started = pyqtSignal([tuple])
+    motor_is_ready = pyqtSignal(str)
+
+    def __init__(self, conn_wind: ConnectionWindow, motors_zones: Dict[str, Collection[str]]):
+        super().__init__()
+
+        self.setWindowTitle('Kalibrierung')
+
+        self.conn_wind = conn_wind
+        self.calibr_widgets: List[CalibrationWidget] = []
+
+        self.grid = QGridLayout(self)
+        self.grid.setVerticalSpacing(10)
+        self.setLayout(self.grid)
+
+        last_row = 0
+        for (zone_name, motors_names), place in zip(motors_zones.items(), calibr_wdgs_place_generator()):
+            calibr_widget = CalibrationWidget(self, motors_names, zone_name)
+            self.calibr_widgets.append(calibr_widget)
+            self.grid.addWidget(calibr_widget, *place)
+            last_row = place[0]
+
+        self.horizontalLayout = QtWidgets.QHBoxLayout()
+        self.all_parallel_check = QCheckBox("alle parallel", self)
+        self.horizontalLayout.addWidget(self.all_parallel_check)
+        spacerItem4 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Policy.Expanding,
+                                            QtWidgets.QSizePolicy.Policy.Minimum)
+        self.horizontalLayout.addItem(spacerItem4)
+        self.all_callibr_btn = QtWidgets.QPushButton(self)
+        self.all_callibr_btn.setText('alle kalibrieren')
+        self.horizontalLayout.addWidget(self.all_callibr_btn)
+        self.all_stopp_btn = QtWidgets.QPushButton(self)
+        self.all_stopp_btn.setText('alle stoppen')
+        self.horizontalLayout.addWidget(self.all_stopp_btn)
+        if len(motors_zones) > 3:
+            column_span = 3
+        else:
+            column_span = len(motors_zones)
+        self.grid.addItem(self.horizontalLayout, last_row + 1, 0, 1, column_span)
+
+        self.all_callibr_btn.clicked.connect(self.calibrate_all)
+        self.all_stopp_btn.clicked.connect(self.stop_all)
+        self.all_parallel_check.stateChanged.connect(self.select_all_parallel_event)
+
+    def open(self):
+
+        self.show()
+        self.raise_()
+
+    def calibrate_all(self):
+
+        for calibr_widgt in self.calibr_widgets:
+            if calibr_widgt.callibr_btn.text() == 'kalibrieren':
+                calibr_widgt.callibr_btn.click()
+
+    def stop_all(self):
+        for calibr_widgt in self.calibr_widgets:
+            if calibr_widgt.callibr_btn.text() == 'Stop':
+                calibr_widgt.callibr_btn.click()
+
+    def select_all_parallel_event(self):
+
+        for calibr_widget in self.calibr_widgets:
+            calibr_widget.parallel_calibr_check.setChecked(self.all_parallel_check.isChecked())
+
+
+class CalibrationWidget(QGroupBox):
+
+    def __init__(self, calibr_wind: CalibrationWindow, motors_names: Collection[str], name: str | None = None):
+        super().__init__(calibr_wind)
+
+        if name is None:
+            self.setTitle("")
+        else:
+            self.setTitle(name)
+
+        self.calibr_wind = calibr_wind
+
+        self.cal_thread = CalibrationThread(self.calibr_wind)
+        self.cal_thread.calibration_complete.connect(self.calibration_complete)
+        self.cal_thread.calibration_status_changed.connect(self.refresh_cal_state)
+
+        self.v_layout = QVBoxLayout(self)
+        self.setLayout(self.v_layout)
+
+        self.parallel_calibr_check = QCheckBox("parallel kalibrieren", self)
+        self.parallel_calibr_check.setChecked(True)
+        self.v_layout.addWidget(self.parallel_calibr_check)
+
+        self.line = QtWidgets.QFrame(self)
+        self.line.setFrameShape(QtWidgets.QFrame.Shape.HLine)
+        self.line.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
+        self.line.setObjectName("line")
+        self.v_layout.addWidget(self.line)
+
+        self.select_all_check = QCheckBox("", self)
+        self.v_layout.addWidget(self.select_all_check)
+
+        self.motors_check_boxes: Dict[str, QCheckBox] = {}
+
+        for name in motors_names:
+            check_box = QCheckBox(name, self)
+            check_box.setEnabled(False)
+            self.v_layout.addWidget(check_box)
+            self.motors_check_boxes[name] = check_box
+
+        self.horizontalLayout = QtWidgets.QHBoxLayout()
+        spacerItem4 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Policy.Expanding,
+                                            QtWidgets.QSizePolicy.Policy.Minimum)
+        self.horizontalLayout.addItem(spacerItem4)
+        self.callibr_btn = QtWidgets.QPushButton(self)
+        self.callibr_btn.setText('kalibrieren')
+        self.horizontalLayout.addWidget(self.callibr_btn)
+        self.v_layout.addItem(self.horizontalLayout)
+
+        self.calibr_wind.conn_wind.controller_connected.connect(self.controller_connected_event)
+        self.calibr_wind.conn_wind.controller_disconnected.connect(self.controller_disconnected_event)
+        self.select_all_check.stateChanged.connect(self.select_all_check_event)
+        self.callibr_btn.clicked.connect(self.calibrate)
+
+    def controller_connected_event(self, motors_dict: Dict[str, Motor]):
+
+        for name, m_check_b in self.motors_check_boxes.items():
+            if name in motors_dict.keys():
+                if motors_dict[name].is_calibratable():
+                    m_check_b.setEnabled(True)
+                    m_check_b.setChecked(True)
+
+    def controller_disconnected_event(self, motors_names: Tuple[str]):
+
+        for name, m_check_b in self.motors_check_boxes.items():
+            if name in motors_names:
+                m_check_b.setEnabled(False)
+                m_check_b.setChecked(False)
+
+    def select_all_check_event(self):
+
+        for check_box in self.motors_check_boxes.values():
+            if check_box.isEnabled():
+                check_box.setChecked(self.select_all_check.isChecked())
+
+    def calibration_complete(self):
+
+        self.callibr_btn.setText("kalibrieren")
+
+    def calibrate(self):
+
+        if self.callibr_btn.text() == "kalibrieren":
+            self.callibr_btn.setText("Stop")
+
+            motors_names_to_calibration = []
+            for check_box in self.motors_check_boxes.values():
+                if check_box.isChecked() and check_box.isEnabled():
+                    motors_names_to_calibration.append(check_box.text())
+
+            self.cal_thread.start(motors_names_to_calibration, self.parallel_calibr_check.isChecked())
+
+        else:
+            self.cal_thread.stop = True
+
+    def refresh_cal_state(self):
+
+        for check_box in self.motors_check_boxes.values():
+            if check_box.text() in self.cal_thread.motors_in_calibration:
+                check_box.setStyleSheet("color: orange;")
+            else:
+                check_box.setStyleSheet("color:;")
+
+
+class CalibrationThread(QThread):
+    """Thread für Kalibrierung der Motoren"""
+
+    calibration_status_changed = pyqtSignal()
+    calibration_complete = pyqtSignal()
+    stop = False
+
+    def __init__(self, calibr_wind: CalibrationWindow):
+
+        super().__init__()
+        self.calibr_wind = calibr_wind
+        self.motors_names_to_calibration = []
+        self.motors_in_calibration = []
+        self.parallel = False
+
+    def start(self, motors_names_to_calibration: Collection[str], parallel: bool):
+        self.motors_names_to_calibration = list(motors_names_to_calibration)
+        self.parallel = parallel
+        self.stop = False
+        super().start()
+
+    def run(self):
+        calibration_reporter = GuiCalibrationReporter(self)
+        stop_indicator = GuiStopIndicator(self)
+
+        self.calibr_wind.conn_wind.boxes_cluster.calibrate_motors(names_to_calibration=self.motors_names_to_calibration,
+                                                                  stop_indicator=stop_indicator,
+                                                                  reporter=calibration_reporter,
+                                                                  parallel=self.parallel)
+
+        self.calibration_complete.emit()
+
+
+class GuiCalibrationReporter(WaitReporter):
+    """Durch dieses Objekt kann man während eine Kalibrierung die Liste der im Moment laufenden Motoren bekommen.
+            Es wird als argument für PBox.calibrate_motors() verwendet."""
+
+    def __init__(self, cal_thread: CalibrationThread):
+        self.cal_thread = cal_thread
+
+    def set_wait_list(self, wait_list: Set[str]):
+        self.cal_thread.calibr_wind.calibration_started.emit(tuple(wait_list))
+        self.cal_thread.motors_in_calibration = list(wait_list)
+        self.cal_thread.calibration_status_changed.emit()
+
+    def motor_is_done(self, motor_name: str):
+        self.cal_thread.calibr_wind.motor_is_ready.emit(motor_name)
+        self.cal_thread.motors_in_calibration.remove(motor_name)
+        self.cal_thread.calibration_status_changed.emit()
+
+
+class GuiStopIndicator(StopIndicator):
+    """Durch dieses Objekt kann man Kalibrierung abbrechen.
+    Es wird als argument für PBox.calibrate_motors() verwendet."""
+
+    def __init__(self, kal_thread: CalibrationThread):
+        self.kal_thread = kal_thread
+
+    def has_stop_requested(self) -> bool:
+        return self.kal_thread.stop
+
+
 def motors_wdgs_place_generator():
 
     yield 1, 0
@@ -1130,17 +1391,85 @@ def motors_wdgs_place_generator():
 
 class MotorWindow(QWidget):
 
-    def __init__(self, conn_window: ConnectionWindow, motors_names: Collection[str]):
+    def __init__(self, conn_window: ConnectionWindow, calibr_window: CalibrationWindow | None = None,
+                 name: str | None = None):
         super().__init__()
 
         self.conn_window = conn_window
+        self.calibr_window = calibr_window
+
+        if name is not None:
+            self.setWindowTitle(name)
+        else:
+            self.setWindowTitle("MotorWindow")
+
+        self.motors_widgets: Dict[str, MotorWidget] = {}
+
+        self.conn_window.controller_connected.connect(self.controller_connected_event)
+        self.conn_window.controller_disconnected.connect(self.controller_disconnected_event)
+
+        if calibr_window is not None:
+            self.calibr_window.calibration_started.connect(self.calibration_started_event)
+            self.calibr_window.motor_is_ready.connect(self.calibration_complete_event)
+
+    def open(self):
+
+        if self.isHidden():
+            self.show()
+        self.raise_()
+
+    def controller_connected_event(self, motors_dict: Dict[str, Motor]):
+
+        for name, m_widg in self.motors_widgets.items():
+            if name in motors_dict.keys():
+                m_widg.init(motors_dict[name], awake=self.isVisible())
+
+    def controller_disconnected_event(self, motors_names: Tuple[str]):
+
+        for name, m_widg in self.motors_widgets.items():
+            if name in motors_names:
+                m_widg.discard()
+
+    def calibration_started_event(self, motors_names: Collection[str]):
+
+        for name, m_widg in self.motors_widgets.items():
+            if name in motors_names:
+                m_widg.sleep()
+                m_widg.setTitle(name + ' (Kalibrierung)')
+
+    def calibration_complete_event(self, motor_name: str):
+
+        for name, m_widg in self.motors_widgets.items():
+            if name == motor_name:
+                m_widg.awake()
+                m_widg.setTitle(name)
+
+    def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
+
+        for m_widg in self.motors_widgets.values():
+            m_widg.sleep()
+        super(MotorWindow, self).closeEvent(a0)
+
+    def showEvent(self, a0: QtGui.QShowEvent) -> None:
+
+        super(MotorWindow, self).showEvent(a0)
+        for m_widg in self.motors_widgets.values():
+            m_widg.awake()
+
+
+class StandardMotorWindow(MotorWindow):
+
+    def __init__(self, conn_window: ConnectionWindow,
+                 motors_names: Collection[str],
+                 calibr_window: CalibrationWindow | None = None,
+                 name: str | None = None):
+
+        super().__init__(conn_window, calibr_window, name)
 
         # self.resize(300, 300)
         self.grid = QGridLayout(self)
         self.grid.setVerticalSpacing(10)
         self.setLayout(self.grid)
-
-        self.motors_widgets: Dict[str, MotorWidget] = {}
 
         for name, place in zip(motors_names, motors_wdgs_place_generator()):
             motor_widget = MotorWidget(self, name)
@@ -1158,9 +1487,6 @@ class MotorWindow(QWidget):
             column_span = 1
         self.grid.addWidget(self.motor_scheme, 0, 0, 1, column_span)
 
-        self.conn_window.controller_connected.connect(self.controller_connected_event)
-        self.conn_window.controller_disconnected.connect(self.controller_disconnected_event)
-
     def open(self):
 
         if self.isHidden():
@@ -1173,30 +1499,6 @@ class MotorWindow(QWidget):
             self.motor_scheme.setMinimumHeight(round(y_range / x_range * min_w))
 
         self.raise_()
-
-    def controller_connected_event(self, motors_dict: Dict[str, Motor]):
-
-        for name, m_widg in self.motors_widgets.items():
-            if name in motors_dict.keys():
-                m_widg.init(motors_dict[name], awake=self.isVisible())
-
-    def controller_disconnected_event(self, motors_names: Tuple[str]):
-
-        for name, m_widg in self.motors_widgets.items():
-            if name in motors_names:
-                m_widg.discard()
-
-    def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
-
-        for m_widg in self.motors_widgets.values():
-            m_widg.sleep()
-        super(MotorWindow, self).closeEvent(a0)
-
-    def showEvent(self, a0: QtGui.QShowEvent) -> None:
-
-        super(MotorWindow, self).showEvent(a0)
-        for m_widg in self.motors_widgets.values():
-            m_widg.awake()
 
 
 class MicroscopZoneChema(GraphicField):
@@ -1256,23 +1558,273 @@ class MicroscopZoneChema(GraphicField):
         super(MicroscopZoneChema, self).closeEvent(a0)
         self.__closed = True
 
-# class AxesPainter:
-#
-#     def __init__(self, gr_field: GraphicField,
-#                  origin_point: Tuple,
-#                  arrow_length: float,
-#                  def_color: Union[QColor, int] = Qt.black,
-#                  select_color: Union[QColor, int] = Qt.darkYellow,
-#                  lines_width: int = 2,
-#
-#
-#
-#         self.def_color =
 
-# class Axis:
-#
-#     name: str
-#     end_point: Tuple[]
-#
-#     def __init__(self, ):
-#         self.
+MODE = "emulator"
+# MODE = "real"
+
+
+class PlasmaMotorWindow(MotorWindow):
+
+    VideoField: VideoWidget
+    checkBox_laser: QCheckBox
+    gainEdit: QLineEdit
+    JetXBox: MotorWidget
+    comboBox_camera: QComboBox
+    CalPlasmaBtn: QPushButton
+
+    def __init__(self, conn_window: ConnectionWindow,
+                 calibr_window: CalibrationWindow | None = None,
+                 name: str | None = None):
+
+        super().__init__(conn_window, calibr_window, name)
+
+        loadUi('GUI_form/PlasmaMotorWindow.ui', self)
+
+        self.connected = False
+        self.is_recording = False
+        self.stop_indicator = StandardStopIndicator()
+
+        self.CalPlasmaBtn.clicked.connect(self.calibr_plasma)
+        self.CalEnlBtn.clicked.connect(self.calibr_enl)
+        self.centreBtn.clicked.connect(self.centre_nozzle)
+        self.recordBtn.clicked.connect(self.record)
+        self.calJXBtn.clicked.connect(self.calibrate_JetX)
+        self.calJZBtn.clicked.connect(self.calibrate_JetZ)
+        self.plusBtn.clicked.connect(self.plus_step)
+        self.minusBtn.clicked.connect(self.minus_step)
+        self.StopButton.clicked.connect(self.stop)
+        self.checkBox_laser.stateChanged.connect(self.laser_status_changed)
+        self.gainEdit.editingFinished.connect(self.set_gain)
+        self.exposeEdit.editingFinished.connect(self.set_exposure)
+        self.comboBox_camera.currentTextChanged.connect(self.change_camera)
+
+        self.exposeEdit.setValidator(QtGui.QIntValidator())
+        self.gainEdit.setValidator(QtGui.QIntValidator())
+
+        self._dark_exposure = 10000
+        self._normal_exposure = 40000
+
+        self._dark_gain = 10
+        self._normal_gain = 10
+
+        if MODE == "emulator":
+            self.plasma_watcher, self.jet_emulator, self.camera1, self.camera2 = prepare_jet_watcher_to_test(pl_cal=False,
+                                                                                                             shift=1500)
+            self.jet_emulator.realtime(True)
+
+
+            # self.test1()
+        elif MODE == "real":
+            from mscontr.microwatcher.vimba_camera import Camera, get_cameras_list
+
+            plasma_watcher, self.jet_emulator, camera1, camera2 = prepare_jet_watcher_to_test(
+                pl_cal=False,
+                shift=1500)
+
+            print(get_cameras_list())
+            self.camera1 = Camera('DEV_000F314E840B', bandwidth=60000000)
+            self.camera2 = Camera('DEV_000F314E840A', bandwidth=60000000)
+
+
+            print(serial.tools.list_ports.comports())
+            port = "COM5"
+            input_file = 'input/Jet_box_config.csv'
+            self.box = MCC2BoxSerial(port, input_file=input_file, baudrate=115200)
+
+            try:
+                self.box.motors_cluster.read_saved_session_data("data/saved_session_data_Jet.txt")
+            except FileNotFoundError:
+                pass
+
+            self.connected = True
+
+            phi = 80
+            psi = 50
+
+            jet_x = self.box.get_motor_by_name('JetX')
+            jet_z = self.box.get_motor_by_name('JetZ')
+            laser_z = plasma_watcher.laser_z
+            laser_y = plasma_watcher.laser_y
+            self.plasma_watcher = PlasmaWatcher(self.camera1, self.camera2, jet_x, jet_z, laser_z, laser_y, phi, psi)
+
+        self.JetXBox.init(self.plasma_watcher.jet_x)
+        self.JetZBox.init(self.plasma_watcher.jet_z)
+
+        self.camera = self.camera1
+        self.change_camera()
+
+    def calibrate_JetX(self):
+        def in_thread():
+            self.plasma_watcher.jet_x.calibrate()
+            self.plasma_watcher.jet_x.go_to(500, 'norm')
+
+        threading.Thread(target=in_thread).start()
+
+    def calibrate_JetZ(self):
+        def in_thread():
+            self.plasma_watcher.jet_z.calibrate()
+            self.plasma_watcher.jet_z.go_to(500, 'norm')
+
+        threading.Thread(target=in_thread).start()
+
+    def change_camera(self):
+
+        self.camera.stop_stream()
+        self.camera.disconnect_from_stream(self.show_frame)
+        if self.comboBox_camera.currentText() == "camera 1":
+            self.camera = self.camera1
+        elif self.comboBox_camera.currentText() == "camera 2":
+            self.camera = self.camera2
+
+        self.camera.connect_to_stream(self.show_frame)
+        self.camera.start_stream()
+
+    def record(self):
+        if not self.is_recording:
+            address = QFileDialog.getSaveFileName(self, 'Save video', '', "AVI Movie File (*.avi)")[0]
+            if address == '':
+                return
+            self.camera.start_video_record(address, start_stream=True)
+            self.recordBtn.setText("stop recording")
+            self.is_recording = True
+        else:
+            self.camera.stop_video_record()
+            self.recordBtn.setText("record video")
+            self.is_recording = False
+
+
+    def laser_status_changed(self):
+        if self.checkBox_laser.isChecked():
+            self._normal_gain = int(self.gainEdit.text())
+            self._normal_exposure = int(self.exposeEdit.text())
+
+            self.gainEdit.setText(str(self._dark_gain))
+            self.exposeEdit.setText(str(self._dark_exposure))
+        else:
+            self._dark_gain = int(self.gainEdit.text())
+            self._dark_exposure = int(self.exposeEdit.text())
+
+            self.gainEdit.setText(str(self._normal_gain))
+            self.exposeEdit.setText(str(self._normal_exposure))
+        self.set_gain()
+        self.set_exposure()
+
+    def set_gain(self):
+        self.camera.set_gain(int(self.gainEdit.text()))
+
+    def set_exposure(self):
+        self.camera.set_exposure(int(self.exposeEdit.text()))
+
+    def show_frame(self, frame):
+        qt_img = self.convert_cv_qt(frame)
+        self.VideoField.setPixmap(qt_img)
+
+    def convert_cv_qt(self, cv_img):
+        """Convert from an opencv image to QPixmap"""
+        rgb_image = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
+
+        if self.checkBox_cmark.isChecked():
+            center = round(rgb_image.shape[1]/2)
+            rgb_image = cv2.line(rgb_image, (center, 0), (center, rgb_image.shape[0]), (0, 255, 0), 2)
+
+        if self.VideoField.width() >= self.VideoField.height()*2048/1088:
+            height = int(self.VideoField.height())
+            width = int(height*2048/1088)
+        else:
+            width = self.VideoField.width()
+            height = int(width*1088/2048)
+
+        dim = (width, height)
+        rgb_image = cv2.resize(rgb_image, dim, interpolation=cv2.INTER_AREA)
+
+        h, w, ch = rgb_image.shape
+        bytes_per_line = ch * w
+        convert_to_Qt_format = QtGui.QImage(rgb_image.data, w, h, bytes_per_line, QtGui.QImage.Format.Format_RGB888)
+        return QPixmap.fromImage(convert_to_Qt_format)
+
+    def calibr_plasma(self):
+
+        def in_thread():
+
+            self.plasma_watcher.calibrate_plasma(mess_per_point=mess_per_point, on_the_spot=True,
+                                                 stop_indicator=self.stop_indicator)
+            self.CalPlasmaBtn.setText("calibr plasma")
+
+        if self.CalPlasmaBtn.text() == "calibr plasma":
+
+            mess_per_point = 5
+            self.jet_emulator.flicker_sigma = 0.1
+            self.stop_indicator.restore()
+
+            self.checkBox_laser.setChecked(True)
+            self.camera1.start_stream()
+            self.camera2.start_stream()
+
+            threading.Thread(target=in_thread).start()
+            self.CalPlasmaBtn.setText("stop")
+        elif self.CalPlasmaBtn.text() == "stop":
+            self.stop_indicator.stop()
+            self.CalPlasmaBtn.setText("calibr plasma")
+
+    def centre_nozzle(self):
+
+        def in_thread():
+
+            self.plasma_watcher.centre_the_nozzle(stop_indicator=self.stop_indicator)
+            self.centreBtn.setText("zentrieren")
+
+        if self.centreBtn.text() == "zentrieren":
+            self.stop_indicator.restore()
+            self.checkBox_laser.setChecked(False)
+            threading.Thread(target=in_thread).start()
+            self.centreBtn.setText("stop")
+        elif self.centreBtn.text() == "stop":
+            self.stop_indicator.stop()
+            self.centreBtn.setText("zentrieren")
+
+    def calibr_enl(self):
+
+        def in_thread():
+
+            report = self.plasma_watcher.calibrate_enl(init_step=100, rel_err=0.01, n_points=10,
+                                                       stop_indicator=self.stop_indicator)
+            print(report)
+            self.CalEnlBtn.setText("calibr enl")
+
+        if self.CalEnlBtn.text() == "calibr enl":
+            self.stop_indicator.restore()
+            self.checkBox_laser.setChecked(False)
+            threading.Thread(target=in_thread).start()
+            self.CalEnlBtn.setText("stop")
+        elif self.CalEnlBtn.text() == "stop":
+            self.stop_indicator.stop()
+            self.CalEnlBtn.setText("calibr enl")
+
+    def move_in_cam_coord(self, shift: float):
+
+        if self.comboBox_camera.currentText() == "camera 1":
+            camera_coord = self.plasma_watcher.camera1_coord
+        elif self.comboBox_camera.currentText() == "camera 2":
+            camera_coord = self.plasma_watcher.camera2_coord
+        else:
+            raise ValueError("Unbekante Kamerabezeichnung!")
+
+        shift_x, shift_z = camera_coord.cc_to_mc(x_=0, z_=shift)
+
+        self.plasma_watcher.move_jet(shift_x, shift_z, units='displ')
+
+    def plus_step(self):
+        self.move_in_cam_coord(float(self.SchrittEdit.text()))
+
+    def minus_step(self):
+        self.move_in_cam_coord(-float(self.SchrittEdit.text()))
+
+    def stop(self):
+        self.plasma_watcher.jet_x.stop()
+        self.plasma_watcher.jet_z.stop()
+
+    def closeEvent(self, a0: QtGui.QCloseEvent):
+        self.camera1.stop_stream()
+        self.camera2.stop_stream()
+        return super().closeEvent(a0)
+
