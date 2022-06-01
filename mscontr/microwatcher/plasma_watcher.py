@@ -586,23 +586,30 @@ class CameraCoordinates:
 class PlasmaWatcher:
 
     def __init__(self, camera1: CameraInterf, camera2: CameraInterf,
-                 jet_x: Motor, jet_z: Motor, laser_z: Motor, laser_y: Motor,
+                 jet_x: Motor, jet_z: Motor,
                  phi: float, psi: float,
+                 laser_z: Motor | None = None,
+                 laser_y: Motor | None = None,
                  nozzle_d: float = 1000,
                  tol_pixel: float = 1):
         self.camera1 = camera1
         self.camera2 = camera2
 
-        jet_z.name = 'JetZ'
-        jet_x.name = 'JetX'
-        laser_z.name = 'LaserZ'
-        laser_y.name = 'LaserY'
+        # jet_z.name = 'JetZ'
+        # jet_x.name = 'JetX'
+        # laser_z.name = 'LaserZ'
+        # laser_y.name = 'LaserY'
 
         self.jet_z = jet_z
         self.jet_x = jet_x
         self.laser_z = laser_z
         self.laser_y = laser_y
-        self.motors_cl = MotorsCluster([jet_z, jet_x, laser_z, laser_y])
+        motors = [jet_z, jet_x]
+        if laser_z is not None:
+            motors.append(laser_z)
+        if laser_y is not None:
+            motors.append(laser_y)
+        self.motors_cl = MotorsCluster(motors)
 
         self.g1 = 1  #Vergröserung der ersten Kamera
         self.g2 = 1  #Vergröserung der zweiten Kamera

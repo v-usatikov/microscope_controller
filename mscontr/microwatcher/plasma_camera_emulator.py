@@ -102,11 +102,11 @@ def flicker(mu: float, sigma: float):
 
 
 class JetEmulator:
-    def __init__(self, jet_x: Motor = None, jet_z: Motor = None, laser_z: Motor = None, laser_y: Motor = None,
+    def __init__(self, def_init: bool = True, jet_x: Motor = None, jet_z: Motor = None, laser_z: Motor = None, laser_y: Motor = None,
                  phi: float = 90, psi: float = 45, g1: float = 10, g2: float = 10,
                  jet_d: float = 70, laser_d: float = 70, laser_jet_shift: float = 0, flicker_sigma: float = 0):
 
-        if None in [jet_x, jet_z, laser_z, laser_y]:
+        if def_init:
             self.box_emulator = MCC2BoxEmulator(n_bus=2, n_axes=2, realtime=False)
             self.box = Box(self.box_emulator, input_file=DATA_FOLDER+'test_motor_input.csv')
             self.box.motors_cluster.calibrate_motors()
@@ -120,11 +120,16 @@ class JetEmulator:
             self.laser_z = laser_z
             self.laser_y = laser_y
 
+        self.jet_x_pos = 0
+        self.jet_z_pos = 0
+        self.laser_z_pos = 0
+        self.laser_y_pos = 0
+
         self._motors = [self.jet_x, self.jet_z, self.laser_z, self.laser_y]
 
         for motor in self._motors:
-            motor.set_position(500, 'norm')
-            motor.set_display_null()
+            if motor is not None:
+                motor.set_display_null(500)
 
         self.phi = phi * pi / 180
         self.psi = psi * pi / 180
@@ -143,7 +148,7 @@ class JetEmulator:
         self.dark_exposure = 10000
 
         self._bg = cv2.imread(DATA_FOLDER+'hintg.bmp', 0)
-        self._bg[:,:] = 0.1*self._bg[:,:]
+        self._bg[:, :] = 0.1*self._bg[:, :]
         self._nozzle = cv2.imread(DATA_FOLDER + 'nozzle.bmp', 0)
 
         self.laser_on = False
@@ -170,16 +175,24 @@ class JetEmulator:
         self._drift_on = False
 
     def j_x(self):
-        return self.jet_x.position('displ')
+        if self.jet_x is not None:
+            self.jet_x_pos = self.jet_x.position('displ')
+        return self.jet_x_pos
 
     def j_z(self):
-        return self.jet_z.position('displ')
+        if self.jet_z is not None:
+            self.jet_z_pos = self.jet_z.position('displ')
+        return self.jet_z_pos
 
     def l_z(self):
-        return self.laser_z.position('displ')
+        if self.laser_z is not None:
+            self.laser_z_pos = self.laser_z.position('displ')
+        return self.laser_z_pos
 
     def l_y(self):
-        return self.laser_y.position('displ')
+        if self.laser_y is not None:
+            self.laser_y_pos = self.laser_y.position('displ')
+        return self.laser_y_pos
 
     def get_frame(self, camera_n: int):
         if camera_n not in [1, 2]:

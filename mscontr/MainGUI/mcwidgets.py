@@ -24,6 +24,7 @@ import motor_controller as mc
 from motor_controller.Phytron_MCC2 import MCC2BoxSerial
 from motor_controller.interface import StandardStopIndicator, StopIndicator, WaitReporter
 
+from mscontr.microwatcher.plasma_camera_emulator import JetEmulator, CameraEmulator
 from mscontr.microwatcher.plasma_watcher import PlasmaWatcher
 from tests.test_PlasmaWatcher import prepare_jet_watcher_to_test
 
@@ -657,6 +658,7 @@ class MicroscopeZone(GraphicZone):
     def set_activated(self, activated: bool):
         self.activated = activated
         self.axes.set_activated(activated)
+        self.micr_scheme.update()
 
     def mouse_enter_event(self):
         self.set_activated(True)
@@ -859,6 +861,8 @@ class ConnectionWidget(QHBoxLayout):
         self.name = name
         self.input_file = input_file
 
+        self.emulator: mc.Phytron_MCC2.BoxEmulator | None = None
+
         self.box: mc.Box | None = None
 
     def is_connected(self) -> bool:
@@ -904,8 +908,8 @@ class ConnectionWidget(QHBoxLayout):
         self.disconnect_box()
 
         if self.is_emulation():
-            emulator = mc.Phytron_MCC2.BoxEmulator(n_bus=5, n_axes=3, realtime=True)
-            self.box = mc.Box(emulator, input_file=self.input_file)
+            self.emulator = mc.Phytron_MCC2.BoxEmulator(n_bus=5, n_axes=3, realtime=True)
+            self.box = mc.Box(self.emulator, input_file=self.input_file)
         else:
             communicator = self.get_communicator()
             self.box = mc.Box(communicator, self.input_file)
@@ -1292,10 +1296,18 @@ class CalibrationWidget(QGroupBox):
 
         self.callibr_btn.setText("kalibrieren")
 
+        for conn_widg in self.calibr_wind.conn_wind.conn_widgets:
+            if conn_widg.emulator is not None:
+                conn_widg.emulator.realtime = True
+
     def calibrate(self):
 
         if self.callibr_btn.text() == "kalibrieren":
             self.callibr_btn.setText("Stop")
+
+            for conn_widg in self.calibr_wind.conn_wind.conn_widgets:
+                if conn_widg.emulator is not None:
+                    conn_widg.emulator.realtime = False
 
             motors_names_to_calibration = []
             for check_box in self.motors_check_boxes.values():
@@ -1569,8 +1581,14 @@ class PlasmaMotorWindow(MotorWindow):
     checkBox_laser: QCheckBox
     gainEdit: QLineEdit
     JetXBox: MotorWidget
+    JetZBox: MotorWidget
     comboBox_camera: QComboBox
     CalPlasmaBtn: QPushButton
+    CalEnlBtn: QPushButton
+    centreBtn: QPushButton
+    StopButton: QPushButton
+    plusBtn: QPushButton
+    minusBtn: QPushButton
 
     def __init__(self, conn_window: ConnectionWindow,
                  calibr_window: CalibrationWindow | None = None,
@@ -1578,18 +1596,22 @@ class PlasmaMotorWindow(MotorWindow):
 
         super().__init__(conn_window, calibr_window, name)
 
-        loadUi('GUI_form/PlasmaMotorWindow.ui', self)
+        loadUi('ui_forms/PlasmaMotorWindow.ui', self)
 
-        self.connected = False
         self.is_recording = False
         self.stop_indicator = StandardStopIndicator()
+
+        self.motors_widgets = {'JetX': self.JetXBox, 'JetZ': self.JetZBox,
+                               'LaserZ': self.LaserZBox, 'LaserY': self.LaserYBox}
+        self.plasma_watcher: PlasmaWatcher | None = None
+        self.discard_plasma_watcher()
+
+        self.jet_emulator: JetEmulator | None = None
 
         self.CalPlasmaBtn.clicked.connect(self.calibr_plasma)
         self.CalEnlBtn.clicked.connect(self.calibr_enl)
         self.centreBtn.clicked.connect(self.centre_nozzle)
         self.recordBtn.clicked.connect(self.record)
-        self.calJXBtn.clicked.connect(self.calibrate_JetX)
-        self.calJZBtn.clicked.connect(self.calibrate_JetZ)
         self.plusBtn.clicked.connect(self.plus_step)
         self.minusBtn.clicked.connect(self.minus_step)
         self.StopButton.clicked.connect(self.stop)
@@ -1608,12 +1630,21 @@ class PlasmaMotorWindow(MotorWindow):
         self._normal_gain = 10
 
         if MODE == "emulator":
-            self.plasma_watcher, self.jet_emulator, self.camera1, self.camera2 = prepare_jet_watcher_to_test(pl_cal=False,
-                                                                                                             shift=1500)
-            self.jet_emulator.realtime(True)
+            phi = 90
+            psi = 45
+            g1 = 10
+            g2 = 10
+            shift = 43
 
+            self.jet_emulator = JetEmulator(phi=phi, psi=psi, g1=g1, g2=g2, jet_d=g1 * 7, laser_jet_shift=1500, def_init=False)
+            self.camera1 = CameraEmulator(1, self.jet_emulator)
+            self.camera2 = CameraEmulator(2, self.jet_emulator)
+            # if jet_cal:
+            #     plasma_watcher.g1 = g1
+            #     plasma_watcher.g2 = g2
 
-            # self.test1()
+            self.jet_emulator.laser_on = True
+
         elif MODE == "real":
             from mscontr.microwatcher.vimba_camera import Camera, get_cameras_list
 
@@ -1625,47 +1656,68 @@ class PlasmaMotorWindow(MotorWindow):
             self.camera1 = Camera('DEV_000F314E840B', bandwidth=60000000)
             self.camera2 = Camera('DEV_000F314E840A', bandwidth=60000000)
 
-
-            print(serial.tools.list_ports.comports())
-            port = "COM5"
-            input_file = 'input/Jet_box_config.csv'
-            self.box = MCC2BoxSerial(port, input_file=input_file, baudrate=115200)
-
-            try:
-                self.box.motors_cluster.read_saved_session_data("data/saved_session_data_Jet.txt")
-            except FileNotFoundError:
-                pass
-
-            self.connected = True
-
-            phi = 80
-            psi = 50
-
-            jet_x = self.box.get_motor_by_name('JetX')
-            jet_z = self.box.get_motor_by_name('JetZ')
-            laser_z = plasma_watcher.laser_z
-            laser_y = plasma_watcher.laser_y
-            self.plasma_watcher = PlasmaWatcher(self.camera1, self.camera2, jet_x, jet_z, laser_z, laser_y, phi, psi)
-
-        self.JetXBox.init(self.plasma_watcher.jet_x)
-        self.JetZBox.init(self.plasma_watcher.jet_z)
+            self.init_plasma_watcher()
 
         self.camera = self.camera1
         self.change_camera()
 
-    def calibrate_JetX(self):
-        def in_thread():
-            self.plasma_watcher.jet_x.calibrate()
-            self.plasma_watcher.jet_x.go_to(500, 'norm')
+    def init_plasma_watcher(self) -> bool:
 
-        threading.Thread(target=in_thread).start()
+        jet_x = self.motors_widgets['JetX'].motor
+        jet_z = self.motors_widgets['JetZ'].motor
+        laser_z = self.motors_widgets['LaserZ'].motor
+        laser_y = self.motors_widgets['LaserY'].motor
 
-    def calibrate_JetZ(self):
-        def in_thread():
-            self.plasma_watcher.jet_z.calibrate()
-            self.plasma_watcher.jet_z.go_to(500, 'norm')
+        phi = 80
+        psi = 50
 
-        threading.Thread(target=in_thread).start()
+        if jet_x is not None and jet_z is not None:
+            self.plasma_watcher = PlasmaWatcher(self.camera1, self.camera2, jet_x=jet_x, jet_z=jet_z,
+                                                laser_z=laser_z, laser_y=laser_y,
+                                                phi=phi, psi=psi)
+            self.CalEnlBtn.setEnabled(True)
+            self.centreBtn.setEnabled(True)
+            self.CalPlasmaBtn.setEnabled(True)
+            self.StopButton.setEnabled(True)
+            self.plusBtn.setEnabled(True)
+            self.minusBtn.setEnabled(True)
+            return True
+        else:
+            return False
+
+    def discard_plasma_watcher(self):
+
+        self.plasma_watcher = None
+        self.CalEnlBtn.setEnabled(False)
+        self.centreBtn.setEnabled(False)
+        self.CalPlasmaBtn.setEnabled(False)
+        self.StopButton.setEnabled(False)
+        self.plusBtn.setEnabled(False)
+        self.minusBtn.setEnabled(False)
+
+    def __set_motoren_in_emulator(self):
+
+        if self.jet_emulator is not None:
+            self.jet_emulator.jet_x = self.motors_widgets['JetX'].motor
+            self.jet_emulator.jet_z = self.motors_widgets['JetZ'].motor
+            self.jet_emulator.laser_z = self.motors_widgets['LaserZ'].motor
+            self.jet_emulator.laser_y = self.motors_widgets['LaserY'].motor
+
+    def controller_connected_event(self, motors_dict: Dict[str, Motor]):
+
+        super(PlasmaMotorWindow, self).controller_connected_event(motors_dict)
+        if self.plasma_watcher is None:
+            self.init_plasma_watcher()
+        self.__set_motoren_in_emulator()
+
+    def controller_disconnected_event(self, motors_names: Tuple[str]):
+
+        super(PlasmaMotorWindow, self).controller_disconnected_event(motors_names)
+        if 'JetX' in motors_names or 'JetZ' in motors_names:
+            self.discard_plasma_watcher()
+        elif 'LaserZ' in motors_names or 'LaserY' in motors_names:
+            self.init_plasma_watcher()
+        self.__set_motoren_in_emulator()
 
     def change_camera(self):
 
