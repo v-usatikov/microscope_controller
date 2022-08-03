@@ -1,5 +1,6 @@
 import logging
 import threading
+import time
 import traceback
 from abc import ABC
 from typing import Tuple, Callable, List, Optional, Union, Dict, Collection, Set
@@ -30,6 +31,20 @@ from tests.test_PlasmaWatcher import prepare_jet_watcher_to_test
 
 point_n = Tuple[float, float]
 point_p = Tuple[int, int]
+
+
+def print_ex_time(f):
+
+    def timed(*args, **kw):
+
+        ts = time.time()
+        result = f(*args, **kw)
+        te = time.time()
+
+        print('func:%r args:[%r, %r] took: %2.3f ms' % (f.__name__, args, kw, 1000*(te-ts)))
+        return result
+
+    return timed
 
 
 class SampleNavigator(GraphicField):
@@ -165,8 +180,9 @@ class SamplePhoto(FoV):
 class AktPositionSlider(QScrollBar):
     def __init__(self, parent=None):
         super(AktPositionSlider, self).__init__(Qt.Orientation.Horizontal, parent)
-        self.low_x = 0
-        self.up_x = 100
+        self.low_x = -50
+        self.up_x = 1050
+        self.setEnabled(False)
         self.setInvertedAppearance(True)
 
     def paintEvent(self, e):
@@ -253,12 +269,30 @@ class AktPositionSlider(QScrollBar):
         # self.update()
 
 
+def m_err_handl_with_massage(func):
+    def inner(*args, **kwargs):
+        try:
+            func(*args, **kwargs)
+        except mc.interface.NoReplyError as err:
+            logging.exception(err)
+            QMessageBox.warning(None, "Aktion fehlgeschlagen!", "Kontroller antwortet nicht!")
+        except mc.interface.ControllerError as err:
+            logging.exception(err)
+            QMessageBox.warning(None, "Aktion fehlgeschlagen!", "Kontroller hat den Befehl nicht ausgeführt!")
+        except Exception as err:
+            logging.exception(err)
+            QMessageBox.warning(None, "Unerwartete Fehler!",
+                                traceback.format_exc())
+    return inner
+
+
 class MotorWidget(QGroupBox):
 
     motor: Motor | None = None
 
     def __init__(self, parent: Optional[QWidget], name: Optional[str] = None):
         super().__init__(parent)
+
         # self.setStyle()
         self.setupUi(self)
 
@@ -285,6 +319,8 @@ class MotorWidget(QGroupBox):
         self.plusBtn.clicked.connect(self.plus_step)
         self.NullBtn.clicked.connect(self.set_zero)
 
+        self.is_in_error_state: bool = False
+
         self.setEnabled(False)
 
     def init(self, motor: Motor, awake: bool = True):
@@ -294,10 +330,12 @@ class MotorWidget(QGroupBox):
         self.__first_position_read = True
         self.read_position()
         if not self.motor.is_calibratable():
-            self.APSlider.setEnabled(False)
+            self.APSlider.hide()
+            # self.APSlider.setEnabled(False)
             self.APSlider.setValue(0)
         else:
-            self.APSlider.setEnabled(True)
+            self.APSlider.show()
+            # self.APSlider.setEnabled(True)
             self.APSlider.setValue(round(self.position_NE))
 
         self.Units_label.setText(self.motor.config['display_units'])
@@ -311,16 +349,20 @@ class MotorWidget(QGroupBox):
         self.setEnabled(False)
         self.motor = None
 
-    def go_to(self):
+    @m_err_handl_with_massage
+    def go_to(self, checked=False):
         self.motor.go_to(float(self.GeheZuEdit.text()), 'displ')
 
-    def plus_step(self):
+    @m_err_handl_with_massage
+    def plus_step(self, checked=False):
         self.motor.go(float(self.SchrittEdit.text()), 'displ')
 
-    def minus_step(self):
+    @m_err_handl_with_massage
+    def minus_step(self, checked=False):
         self.motor.go(-float(self.SchrittEdit.text()), 'displ')
 
-    def stop(self):
+    @m_err_handl_with_massage
+    def stop(self, checked=False):
         self.motor.stop()
 
     def sleep(self):
@@ -334,10 +376,26 @@ class MotorWidget(QGroupBox):
             self.setEnabled(True)
             self.is_sleeping = False
 
-    def read_position(self, single_shot=False):
+    def read_position(self, single_shot: bool = False):
         if not self.is_sleeping and self.motor is not None:
             position0 = self.position
-            self.position = self.motor.position('displ')
+
+            if isinstance(self.parent(), MotorWindow):
+                try:
+                    self.position = self.motor.position('displ')
+                except mc.interface.ReplyError:
+                    conn_window: ConnectionWindow = self.parent().conn_window
+                    conn_window.motor_error_report(self.motor)
+                    self.AktPosEdit.setText("Error!")
+                    self.is_in_error_state = True
+                else:
+                    if self.is_in_error_state:
+                        conn_window: ConnectionWindow = self.parent().conn_window
+                        conn_window.cancel_motor_error_report(self.motor)
+                        self.is_in_error_state = False
+            else:
+                self.position = self.motor.position('displ')
+
             if self.__first_position_read:
                 position0 = self.position
                 self.__first_position_read = False
@@ -818,6 +876,38 @@ class ConnectionWindow(QWidget):
 
         self.boxes_cluster = mc.BoxesCluster()
 
+        self.error_reports: Dict[mc.Motor, int] = {}
+
+    def motor_error_report(self, motor: mc.Motor):
+
+        if motor in self.error_reports.keys():
+            self.error_reports[motor] += 1
+            if self.error_reports[motor] >= 3:
+                contr_name = self.disconnect_controller_by_motor(motor)
+                if contr_name is not None:
+                    QMessageBox.warning(None, "Fehler!",
+                                        f'Den Kontroller "{contr_name}" wurde wegen eines Fehlers getrennt!')
+        else:
+            self.error_reports[motor] = 1
+
+    def cancel_motor_error_report(self, motor: mc.Motor):
+
+        if motor in self.error_reports.keys():
+            del self.error_reports[motor]
+
+    def disconnect_controller_by_motor(self, motor: mc.Motor) -> str | None:
+        """Sucht den Kontroller, der angegebene Motor steuert, trennt den Kontroller
+        und gibt den Namen des Kontrollers zurück. Gibt None zurück, wenn kein Kontroller gefunden wurde."""
+
+        for conn_widget in self.conn_widgets:
+            box = conn_widget.box
+            if box is not None:
+                motors_in_box = [box.motors()]
+                if motor in motors_in_box:
+                    conn_widget.disconnect_box()
+                    return conn_widget.name
+        return None
+
     def add_connection_widget(self, connection_widget):
         """Fügt das angegebene connection_widget hinzu."""
 
@@ -914,6 +1004,11 @@ class ConnectionWidget(QHBoxLayout):
             communicator = self.get_communicator()
             self.box = mc.Box(communicator, self.input_file)
 
+        try:
+            self.box.motors_cluster.read_saved_session_data()
+        except FileNotFoundError:
+            pass
+
         self.conn_wind.boxes_cluster.add_box(self.box, self.name)
         self.conn_wind.controller_connected.emit(self.box.motors_cluster.motors)
 
@@ -925,7 +1020,10 @@ class ConnectionWidget(QHBoxLayout):
         if self.box is not None:
             self.conn_wind.controller_disconnected.emit(tuple(self.box.motors_cluster.motors.keys()))
             self.conn_wind.boxes_cluster.remove_box(self.box)
-            self.box.close()
+            try:
+                self.box.close()
+            except Exception:
+                pass
             self.box = None
 
     def connection_btn_click(self):
@@ -934,6 +1032,7 @@ class ConnectionWidget(QHBoxLayout):
             try:
                 self.connect_box()
             except Exception as err:
+                self.box = None
                 logging.exception(err)
                 QMessageBox.warning(self.conn_wind, "Verbindung fehlgeschlagen!",
                                     traceback.format_exc())
@@ -942,6 +1041,8 @@ class ConnectionWidget(QHBoxLayout):
                 QMessageBox.information(self.conn_wind, "Verbindung abgeschlossen!",
                                         self.box.report)
         else:
+            self.box.stop()
+            self.conn_wind.boxes_cluster.save_session_data()
             self.disconnect_box()
             self.VerbButton.setText("verbinden")
 
@@ -1295,6 +1396,7 @@ class CalibrationWidget(QGroupBox):
     def calibration_complete(self):
 
         self.callibr_btn.setText("kalibrieren")
+        self.calibr_wind.conn_wind.boxes_cluster.save_session_data()
 
         for conn_widg in self.calibr_wind.conn_wind.conn_widgets:
             if conn_widg.emulator is not None:
@@ -1390,13 +1492,20 @@ class GuiStopIndicator(StopIndicator):
         return self.kal_thread.stop
 
 
+# def motors_wdgs_place_generator():
+#
+#     yield 1, 0
+#     yield 2, 0
+#     yield 1, 1
+#     yield 2, 1
+#     for i in range(3, 10):
+#         for j in range(2):
+#             yield i, j
+
+
 def motors_wdgs_place_generator():
 
-    yield 1, 0
-    yield 2, 0
-    yield 1, 1
-    yield 2, 1
-    for i in range(3, 10):
+    for i in range(1, 10):
         for j in range(2):
             yield i, j
 
@@ -1429,6 +1538,20 @@ class MotorWindow(QWidget):
         if self.isHidden():
             self.show()
         self.raise_()
+
+    @print_ex_time
+    def update_saved_session_data(self, single_shot: bool = False):
+
+        motors = []
+        for m_widget in self.motors_widgets.values():
+            if m_widget.motor is not None and not m_widget.is_sleeping:
+                motors.append(m_widget.motor)
+        if motors:
+            motors_cluster = mc.MotorsCluster(motors)
+            motors_cluster.save_session_data()
+
+        if not single_shot and not self.isHidden():
+            QtCore.QTimer.singleShot(3000, self.update_saved_session_data)
 
     def controller_connected_event(self, motors_dict: Dict[str, Motor]):
 
@@ -1467,6 +1590,7 @@ class MotorWindow(QWidget):
         super(MotorWindow, self).showEvent(a0)
         for m_widg in self.motors_widgets.values():
             m_widg.awake()
+        self.update_saved_session_data()
 
 
 class StandardMotorWindow(MotorWindow):
@@ -1493,7 +1617,7 @@ class StandardMotorWindow(MotorWindow):
                 motor_widget.init(motor, awake=False)
 
         self.motor_scheme = MicroscopZoneChema(self)
-        if len(motors_names) > 2:
+        if len(motors_names) > 1:
             column_span = 2
         else:
             column_span = 1
@@ -1743,7 +1867,6 @@ class PlasmaMotorWindow(MotorWindow):
             self.camera.stop_video_record()
             self.recordBtn.setText("record video")
             self.is_recording = False
-
 
     def laser_status_changed(self):
         if self.checkBox_laser.isChecked():

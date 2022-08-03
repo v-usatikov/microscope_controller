@@ -651,6 +651,10 @@ class PlasmaWatcher:
 
         self.displ_units = self.jet_z.config['display_units']
 
+        # self.
+
+
+
     def laser_on_mode(self):
         """Passt die einstellungen für die eingeschaltete Laser an."""
 
@@ -882,9 +886,6 @@ class PlasmaWatcher:
             shift_x2, shift_z2 = self.camera2_coord.cc_to_mc(x_=0, z_=shift_z2)
 
             self.move_jet(shift_x1 + shift_x2, shift_z1 + shift_z2, units='displ', wait=True, stop_indicator=stop_indicator)
-
-
-
 
     def calibrate_enl(self, init_step: float = 1000, rel_err: float = 0.01, n_points: int = 10,
                       stop_indicator: Optional[StopIndicator] = None) -> str:
