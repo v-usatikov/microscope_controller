@@ -5,7 +5,7 @@ from PyQt6.QtGui import QWindow
 from PyQt6.QtWidgets import QMainWindow, QApplication, QPushButton
 from PyQt6.uic import loadUi
 
-from mscontr.MainGUI.arrows import Window
+# from mscontr.MainGUI.arrows import Window
 from mscontr.MainGUI.mcwidgets import MicroscopeScheme, MicroscopeZone, StandardMotorWindow, ConnectionWindow, \
     CalibrationWindow, PlasmaMotorWindow
 

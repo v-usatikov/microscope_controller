@@ -1,4 +1,5 @@
 import logging
+import platform
 import threading
 import time
 import traceback
@@ -29,6 +30,7 @@ from mscontr.microwatcher.plasma_camera_emulator import JetEmulator, CameraEmula
 from mscontr.microwatcher.plasma_watcher import PlasmaWatcher
 from tests.test_PlasmaWatcher import prepare_jet_watcher_to_test
 
+
 point_n = Tuple[float, float]
 point_p = Tuple[int, int]
 
@@ -45,6 +47,23 @@ def print_ex_time(f):
         return result
 
     return timed
+
+
+# def err_handl_with_massage(func):
+#     def inner(*args, **kwargs):
+#         try:
+#             func(*args, **kwargs)
+#         except mc.interface.NoReplyError as err:
+#             logging.exception(err)
+#             QMessageBox.warning(None, "Aktion fehlgeschlagen!", "Kontroller antwortet nicht!")
+#         except mc.interface.ControllerError as err:
+#             logging.exception(err)
+#             QMessageBox.warning(None, "Aktion fehlgeschlagen!", "Kontroller hat den Befehl nicht ausgeführt!")
+#         except Exception as err:
+#             logging.exception(err)
+#             QMessageBox.warning(None, "Unerwartete Fehler!",
+#                                 traceback.format_exc())
+#     return inner
 
 
 class SampleNavigator(GraphicField):
@@ -646,11 +665,23 @@ class VideoWidget(QLabel):
         sizePolicy = QtWidgets.QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.setSizePolicy(sizePolicy)
 
+        self.dark_bg_is_on = False
 
     def set_dark_bg(self):
         grey = QPixmap(self.width(), self.height())
         grey.fill(QColor('darkGray'))
         self.setPixmap(grey)
+
+    def resizeEvent(self, a0: QtGui.QResizeEvent) -> None:
+
+        super(VideoWidget, self).resizeEvent(a0)
+        if self.dark_bg_is_on:
+            self.set_dark_bg()
+
+    # def set_dark_bg(self):
+    #     grey = QPixmap(self.width(), self.height())
+    #     grey.fill(QColor('darkGray'))
+    #     self.setPixmap(grey)
 
 
 class MicroscopeScheme(GraphicField):
@@ -1539,7 +1570,7 @@ class MotorWindow(QWidget):
             self.show()
         self.raise_()
 
-    @print_ex_time
+    # @print_ex_time
     def update_saved_session_data(self, single_shot: bool = False):
 
         motors = []
@@ -1699,11 +1730,22 @@ MODE = "emulator"
 # MODE = "real"
 
 
+def vimba_is_available() -> bool:
+    """Gibt bool Wert zurück, ob Betriebsystem passt und kein Emulator Mode an ist."""
+
+    return platform.system() in ['Windows', 'Linux'] and MODE == 'real'
+
+
+if vimba_is_available():
+    from mscontr.microwatcher.vimba_camera import Camera, get_cameras_list
+
+
 class PlasmaMotorWindow(MotorWindow):
 
     VideoField: VideoWidget
     checkBox_laser: QCheckBox
     gainEdit: QLineEdit
+    exposeEdit: QLineEdit
     JetXBox: MotorWidget
     JetZBox: MotorWidget
     comboBox_camera: QComboBox
@@ -1713,6 +1755,8 @@ class PlasmaMotorWindow(MotorWindow):
     StopButton: QPushButton
     plusBtn: QPushButton
     minusBtn: QPushButton
+    cam_settings_btn: QPushButton
+    recordBtn: QPushButton
 
     def __init__(self, conn_window: ConnectionWindow,
                  calibr_window: CalibrationWindow | None = None,
@@ -1731,6 +1775,14 @@ class PlasmaMotorWindow(MotorWindow):
         self.discard_plasma_watcher()
 
         self.jet_emulator: JetEmulator | None = None
+        if MODE == "emulator":
+            phi = 90
+            psi = 45
+            g1 = 10
+            g2 = 10
+            shift = 43
+
+            self.jet_emulator = JetEmulator(phi=phi, psi=psi, g1=g1, g2=g2, jet_d=g1 * 7, laser_jet_shift=1500, def_init=False)
 
         self.CalPlasmaBtn.clicked.connect(self.calibr_plasma)
         self.CalEnlBtn.clicked.connect(self.calibr_enl)
@@ -1739,6 +1791,8 @@ class PlasmaMotorWindow(MotorWindow):
         self.plusBtn.clicked.connect(self.plus_step)
         self.minusBtn.clicked.connect(self.minus_step)
         self.StopButton.clicked.connect(self.stop)
+        self.cam_settings_btn.clicked.connect(self.cam_settings)
+
         self.checkBox_laser.stateChanged.connect(self.laser_status_changed)
         self.gainEdit.editingFinished.connect(self.set_gain)
         self.exposeEdit.editingFinished.connect(self.set_exposure)
@@ -1753,39 +1807,24 @@ class PlasmaMotorWindow(MotorWindow):
         self._dark_gain = 10
         self._normal_gain = 10
 
-        if MODE == "emulator":
-            phi = 90
-            psi = 45
-            g1 = 10
-            g2 = 10
-            shift = 43
+        self.camera1: Camera | None = None
+        self.camera2: Camera | None = None
+        self.camera: Camera | None = None
 
-            self.jet_emulator = JetEmulator(phi=phi, psi=psi, g1=g1, g2=g2, jet_d=g1 * 7, laser_jet_shift=1500, def_init=False)
-            self.camera1 = CameraEmulator(1, self.jet_emulator)
-            self.camera2 = CameraEmulator(2, self.jet_emulator)
-            # if jet_cal:
-            #     plasma_watcher.g1 = g1
-            #     plasma_watcher.g2 = g2
-
-            self.jet_emulator.laser_on = True
-
-        elif MODE == "real":
-            from mscontr.microwatcher.vimba_camera import Camera, get_cameras_list
-
-            plasma_watcher, self.jet_emulator, camera1, camera2 = prepare_jet_watcher_to_test(
-                pl_cal=False,
-                shift=1500)
-
-            print(get_cameras_list())
-            self.camera1 = Camera('DEV_000F314E840B', bandwidth=60000000)
-            self.camera2 = Camera('DEV_000F314E840A', bandwidth=60000000)
-
-            self.init_plasma_watcher()
+        self.get_cameras()
 
         self.camera = self.camera1
         self.change_camera()
 
-    def init_plasma_watcher(self) -> bool:
+        self.cam_settings_wind = CamerasDialog(self)
+
+    def cam_settings(self):
+
+        self.cam_settings_wind.show()
+
+    def init_plasma_watcher(self):
+
+        self.stop_all_tasks()
 
         jet_x = self.motors_widgets['JetX'].motor
         jet_z = self.motors_widgets['JetZ'].motor
@@ -1795,7 +1834,7 @@ class PlasmaMotorWindow(MotorWindow):
         phi = 80
         psi = 50
 
-        if jet_x is not None and jet_z is not None:
+        if None not in [jet_x, jet_z, self.camera1, self.camera2]:
             self.plasma_watcher = PlasmaWatcher(self.camera1, self.camera2, jet_x=jet_x, jet_z=jet_z,
                                                 laser_z=laser_z, laser_y=laser_y,
                                                 phi=phi, psi=psi)
@@ -1805,12 +1844,12 @@ class PlasmaMotorWindow(MotorWindow):
             self.StopButton.setEnabled(True)
             self.plusBtn.setEnabled(True)
             self.minusBtn.setEnabled(True)
-            return True
         else:
-            return False
+            self.plasma_watcher = None
 
     def discard_plasma_watcher(self):
 
+        self.stop_all_tasks()
         self.plasma_watcher = None
         self.CalEnlBtn.setEnabled(False)
         self.centreBtn.setEnabled(False)
@@ -1843,32 +1882,103 @@ class PlasmaMotorWindow(MotorWindow):
             self.init_plasma_watcher()
         self.__set_motoren_in_emulator()
 
+    def stop_all_tasks(self):
+
+        tasks_buttons = [self.CalPlasmaBtn, self.CalEnlBtn, self.centreBtn]
+        for btn in tasks_buttons:
+            if btn.text() == "stop":
+                btn.click()
+
+        if self.is_recording:
+            self.record()
+
     def change_camera(self):
 
-        self.camera.stop_stream()
-        self.camera.disconnect_from_stream(self.show_frame)
+        if self.camera is not None:
+            self.camera.stop_stream()
+            if self.is_recording:
+                self.record()
+            self.camera.disconnect_from_stream(self.show_frame)
+
         if self.comboBox_camera.currentText() == "camera 1":
             self.camera = self.camera1
         elif self.comboBox_camera.currentText() == "camera 2":
             self.camera = self.camera2
 
-        self.camera.connect_to_stream(self.show_frame)
-        self.camera.start_stream()
+        if self.camera is not None:
+            self.VideoField.dark_bg_is_on = False
+            self.camera.connect_to_stream(self.show_frame)
+            self.camera.start_stream()
+
+            self.recordBtn.setEnabled(True)
+            self.gainEdit.setEnabled(True)
+            self.exposeEdit.setEnabled(True)
+
+            self._set_gain_exposure()
+        else:
+            self.VideoField.dark_bg_is_on = True
+
+            self._set_gain_exposure()
+
+            self.recordBtn.setEnabled(False)
+            self.gainEdit.setEnabled(False)
+            self.exposeEdit.setEnabled(False)
+
+    def get_cameras(self):
+
+        self.stop_all_tasks()
+        if MODE == "emulator":
+
+            self.camera1 = CameraEmulator(1, self.jet_emulator)
+            self.camera2 = CameraEmulator(2, self.jet_emulator)
+            # if jet_cal:
+            #     plasma_watcher.g1 = g1
+            #     plasma_watcher.g2 = g2
+
+            self.jet_emulator.laser_on = True
+
+        elif vimba_is_available():
+
+            id1, id2 = self.cam_settings_wind.cameras_ids()
+            if id1:
+                self.camera1 = Camera(id1, bandwidth=60000000)
+            else:
+                self.camera1 = None
+
+            if id2:
+                self.camera2 = Camera(id2, bandwidth=60000000)
+            else:
+                self.camera2 = None
+        else:
+            self.camera1 = None
+            self.camera2 = None
+
+        self.change_camera()
+        self.init_plasma_watcher()
+
+        # self.camera1 = Camera('DEV_000F314E840B', bandwidth=60000000)
+        # self.camera2 = Camera('DEV_000F314E840A', bandwidth=60000000)
 
     def record(self):
-        if not self.is_recording:
-            address = QFileDialog.getSaveFileName(self, 'Save video', '', "AVI Movie File (*.avi)")[0]
-            if address == '':
-                return
-            self.camera.start_video_record(address, start_stream=True)
-            self.recordBtn.setText("stop recording")
-            self.is_recording = True
+
+        if self.camera is not None:
+            if not self.is_recording:
+                address = QFileDialog.getSaveFileName(self, 'Save video', '', "AVI Movie File (*.avi)")[0]
+                if address == '':
+                    return
+                self.camera.start_video_record(address, start_stream=True)
+                self.recordBtn.setText("stop recording")
+                self.is_recording = True
+            else:
+                self.camera.stop_video_record()
+                self.recordBtn.setText("record video")
+                self.is_recording = False
         else:
-            self.camera.stop_video_record()
-            self.recordBtn.setText("record video")
-            self.is_recording = False
+            QMessageBox.warning(None, "Fehler!",
+                                "Keine Kamera ist verbunden!")
 
     def laser_status_changed(self):
+
         if self.checkBox_laser.isChecked():
             self._normal_gain = int(self.gainEdit.text())
             self._normal_exposure = int(self.exposeEdit.text())
@@ -1881,8 +1991,10 @@ class PlasmaMotorWindow(MotorWindow):
 
             self.gainEdit.setText(str(self._normal_gain))
             self.exposeEdit.setText(str(self._normal_exposure))
-        self.set_gain()
-        self.set_exposure()
+
+        if self.camera is not None:
+            self.set_gain()
+            self.set_exposure()
 
     def set_gain(self):
         self.camera.set_gain(int(self.gainEdit.text()))
@@ -1890,12 +2002,26 @@ class PlasmaMotorWindow(MotorWindow):
     def set_exposure(self):
         self.camera.set_exposure(int(self.exposeEdit.text()))
 
+    def _set_gain_exposure(self):
+
+        if self.checkBox_laser.isChecked():
+            self.gainEdit.setText(str(self._dark_gain))
+            self.exposeEdit.setText(str(self._dark_exposure))
+        else:
+            self.gainEdit.setText(str(self._normal_gain))
+            self.exposeEdit.setText(str(self._normal_exposure))
+
+        if self.camera is not None:
+            self.set_gain()
+            self.set_exposure()
+
     def show_frame(self, frame):
         qt_img = self.convert_cv_qt(frame)
         self.VideoField.setPixmap(qt_img)
 
     def convert_cv_qt(self, cv_img):
         """Convert from an opencv image to QPixmap"""
+
         rgb_image = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
 
         if self.checkBox_cmark.isChecked():
@@ -1999,7 +2125,115 @@ class PlasmaMotorWindow(MotorWindow):
         self.plasma_watcher.jet_z.stop()
 
     def closeEvent(self, a0: QtGui.QCloseEvent):
-        self.camera1.stop_stream()
-        self.camera2.stop_stream()
+
+        if self.camera1 is not None:
+            self.camera1.stop_stream()
+        if self.camera2 is not None:
+            self.camera2.stop_stream()
         return super().closeEvent(a0)
+
+
+class CamerasDialog(QWidget):
+
+    def __init__(self, plasm_wind: PlasmaMotorWindow):
+        super().__init__()
+        self.plasm_wind = plasm_wind
+
+        self.setWindowTitle('Kameras Einstellung')
+
+        self.grid = QGridLayout(self)
+        self.grid.setVerticalSpacing(10)
+        self.setLayout(self.grid)
+
+        self.cam1_label = QLabel('Kamera 1:', self)
+        self.grid.addWidget(self.cam1_label, 0, 0)
+        self.cam1_box = QComboBox(self)
+        self.grid.addWidget(self.cam1_box, 0, 1)
+
+        self.cam2_label = QLabel('Kamera 2:', self)
+        self.grid.addWidget(self.cam2_label, 1, 0)
+        self.cam2_box = QComboBox(self)
+        self.grid.addWidget(self.cam2_box, 1, 1)
+
+        self.refr_btn = QtWidgets.QPushButton('⟲', self)
+        self.grid.addWidget(self.refr_btn, 0, 2, 2, 1)
+
+        self.apply_btn = QtWidgets.QPushButton('anwenden', self)
+        self.grid.addWidget(self.apply_btn, 2, 0, 1, 2)
+
+        self.saved_ids: List[str, str] = []
+
+        self.read_saved_ids()
+        self.refresh_list()
+
+        self.refr_btn.clicked.connect(self.refresh_list)
+        self.apply_btn.clicked.connect(self.apply)
+
+    def apply(self):
+
+        if vimba_is_available():
+            self.plasm_wind.get_cameras()
+
+            id1, id2 = self.cameras_ids()
+
+            if id1:
+                self.saved_ids[0] = id1
+            if id2:
+                self.saved_ids[1] = id2
+
+            if id1 or id2:
+                self.save_last_ids()
+
+    def cameras_ids(self) -> Tuple[str, str]:
+
+        return self.cam1_box.currentText(), self.cam2_box.currentText()
+
+    def refresh_list(self):
+
+        if vimba_is_available():
+            try:
+                cameras_list = get_cameras_list()
+                self.cam1_box.clear()
+                self.cam2_box.clear()
+                for camera_id in cameras_list:
+                    self.cam1_box.addItem(camera_id)
+                    self.cam2_box.addItem(camera_id)
+
+                if self.saved_ids:
+                    id1, id2 = self.saved_ids
+                    if id1 in cameras_list:
+                        self.cam1_box.setCurrentText(id1)
+                    if id2 in cameras_list:
+                        self.cam2_box.setCurrentText(id2)
+            except Exception as err:
+                logging.exception(err)
+                QMessageBox.warning(None, "Action fehlgeschlagen!",
+                                    traceback.format_exc())
+            else:
+                return
+
+        self.cam1_box.clear()
+        self.cam2_box.clear()
+
+    def save_last_ids(self):
+        """Speichert Data uber die letzte Verbindung in der Datei."""
+
+        if self.saved_ids:
+            with open('data/saved_camera_ids.txt', 'w') as f:
+                id1, id2 = self.saved_ids
+                f.write(id1 + '\n' + id2)
+
+    def read_saved_ids(self):
+        """Liest Data uber die letzte Verbindung aus der Datei."""
+
+        try:
+            with open('data/saved_camera_ids.txt', 'r') as f:
+                lines = f.read().splitlines()
+                if len(lines) != 2:
+                    logging.warning('saved_camera_ids Datei ist inkompatibel!')
+                    self.saved_ids = []
+                else:
+                    self.saved_ids = lines
+        except FileNotFoundError:
+            self.saved_ids = []
 
