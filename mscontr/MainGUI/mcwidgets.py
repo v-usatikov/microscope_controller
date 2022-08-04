@@ -1292,7 +1292,7 @@ class CalibrationWindow(QWidget):
         self.setWindowTitle('Kalibrierung')
 
         self.conn_wind = conn_wind
-        self.calibr_widgets: List[CalibrationWidget] = []
+        self.calibr_widgets: Dict[str, CalibrationWidget] = {}
 
         self.grid = QGridLayout(self)
         self.grid.setVerticalSpacing(10)
@@ -1301,7 +1301,7 @@ class CalibrationWindow(QWidget):
         last_row = 0
         for (zone_name, motors_names), place in zip(motors_zones.items(), calibr_wdgs_place_generator()):
             calibr_widget = CalibrationWidget(self, motors_names, zone_name)
-            self.calibr_widgets.append(calibr_widget)
+            self.calibr_widgets[zone_name] = calibr_widget
             self.grid.addWidget(calibr_widget, *place)
             last_row = place[0]
 
@@ -1327,6 +1327,8 @@ class CalibrationWindow(QWidget):
         self.all_stopp_btn.clicked.connect(self.stop_all)
         self.all_parallel_check.stateChanged.connect(self.select_all_parallel_event)
 
+        self.read_settings()
+
     def open(self):
 
         self.show()
@@ -1334,20 +1336,48 @@ class CalibrationWindow(QWidget):
 
     def calibrate_all(self):
 
-        for calibr_widgt in self.calibr_widgets:
+        for calibr_widgt in self.calibr_widgets.values():
             if calibr_widgt.callibr_btn.text() == 'kalibrieren':
                 calibr_widgt.callibr_btn.click()
 
     def stop_all(self):
-        for calibr_widgt in self.calibr_widgets:
+        for calibr_widgt in self.calibr_widgets.values():
             if calibr_widgt.callibr_btn.text() == 'Stop':
                 calibr_widgt.callibr_btn.click()
 
     def select_all_parallel_event(self):
 
-        for calibr_widget in self.calibr_widgets:
+        for calibr_widget in self.calibr_widgets.values():
             calibr_widget.parallel_calibr_check.setChecked(self.all_parallel_check.isChecked())
 
+    def save_settings(self):
+        """Speichert Data uber die letzte Verbindung in der Datei."""
+
+        with open('data/saved_calibr_settings.txt', 'w') as f:
+
+            for name, cal_wdg in self.calibr_widgets.items():
+                f.write(name + ';' + str(int(cal_wdg.parallel_calibr_check.isChecked())) + '\n')
+
+    def read_settings(self):
+        """Liest Data uber die letzte Verbindung aus der Datei."""
+
+        try:
+            with open('data/saved_calibr_settings.txt', 'r') as f:
+                lines = f.read().splitlines()
+                for line in lines:
+                    name, is_checked = line.split(';')
+                    is_checked = bool(int(is_checked))
+                    if name in self.calibr_widgets:
+                        self.calibr_widgets[name].parallel_calibr_check.setChecked(is_checked)
+        except ValueError:
+            logging.warning('saved_calibr_settings Datei ist inkompatibel!')
+        except FileNotFoundError:
+            pass
+
+    def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
+
+        self.save_settings()
+        super(CalibrationWindow, self).closeEvent(a0)
 
 class CalibrationWidget(QGroupBox):
 
