@@ -49,21 +49,16 @@ def print_ex_time(f):
     return timed
 
 
-# def err_handl_with_massage(func):
-#     def inner(*args, **kwargs):
-#         try:
-#             func(*args, **kwargs)
-#         except mc.interface.NoReplyError as err:
-#             logging.exception(err)
-#             QMessageBox.warning(None, "Aktion fehlgeschlagen!", "Kontroller antwortet nicht!")
-#         except mc.interface.ControllerError as err:
-#             logging.exception(err)
-#             QMessageBox.warning(None, "Aktion fehlgeschlagen!", "Kontroller hat den Befehl nicht ausgeführt!")
-#         except Exception as err:
-#             logging.exception(err)
-#             QMessageBox.warning(None, "Unerwartete Fehler!",
-#                                 traceback.format_exc())
-#     return inner
+def pass_all_errors_with_massage(mess: str = ''):
+    def decorator(func):
+        def inner(*args, **kwargs):
+            try:
+                func(*args, **kwargs)
+            except Exception as err:
+                logging.exception(err)
+                QMessageBox.warning(None, "Aktion fehlgeschlagen!", mess + " Fehler:\n" + traceback.format_exc())
+        return inner
+    return decorator
 
 
 class SampleNavigator(GraphicField):
@@ -1351,7 +1346,7 @@ class CalibrationWindow(QWidget):
             calibr_widget.parallel_calibr_check.setChecked(self.all_parallel_check.isChecked())
 
     def save_settings(self):
-        """Speichert Data uber die letzte Verbindung in der Datei."""
+        """Speichert die Auswahl, ob die Zonnen parallel kalibriert werden sollen."""
 
         with open('data/saved_calibr_settings.txt', 'w') as f:
 
@@ -1359,7 +1354,7 @@ class CalibrationWindow(QWidget):
                 f.write(name + ';' + str(int(cal_wdg.parallel_calibr_check.isChecked())) + '\n')
 
     def read_settings(self):
-        """Liest Data uber die letzte Verbindung aus der Datei."""
+        """Liest die gespeicherte Auswahl, ob die Zonnen parallel kalibriert werden sollen."""
 
         try:
             with open('data/saved_calibr_settings.txt', 'r') as f:
@@ -1378,6 +1373,7 @@ class CalibrationWindow(QWidget):
 
         self.save_settings()
         super(CalibrationWindow, self).closeEvent(a0)
+
 
 class CalibrationWidget(QGroupBox):
 
@@ -1851,6 +1847,7 @@ class PlasmaMotorWindow(MotorWindow):
     def cam_settings(self):
 
         self.cam_settings_wind.show()
+        self.cam_settings_wind.refresh_list()
 
     def init_plasma_watcher(self):
 
@@ -1925,7 +1922,12 @@ class PlasmaMotorWindow(MotorWindow):
     def change_camera(self):
 
         if self.camera is not None:
-            self.camera.stop_stream()
+            try:
+                self.camera.stop_stream()
+            except Exception as err:
+                logging.exception(err)
+                QMessageBox.warning(None, "Unerwartete Fehler!",
+                                    "Unerwartete Fehler:\n" + traceback.format_exc())
             if self.is_recording:
                 self.record()
             self.camera.disconnect_from_stream(self.show_frame)
@@ -1936,10 +1938,18 @@ class PlasmaMotorWindow(MotorWindow):
             self.camera = self.camera2
 
         if self.camera is not None:
-            self.VideoField.dark_bg_is_on = False
             self.camera.connect_to_stream(self.show_frame)
-            self.camera.start_stream()
+            try:
+                self.camera.start_stream()
+            except Exception as err:
+                logging.exception(err)
+                QMessageBox.warning(None, "Action fehlgeschlagen!",
+                                    "Es hat nicht geklappt, den Stream von der Kamera zu starten. "
+                                    "Fehler:\n" + traceback.format_exc())
+                return
 
+
+            self.VideoField.dark_bg_is_on = False
             self.recordBtn.setEnabled(True)
             self.gainEdit.setEnabled(True)
             self.exposeEdit.setEnabled(True)
@@ -1957,6 +1967,8 @@ class PlasmaMotorWindow(MotorWindow):
     def get_cameras(self):
 
         self.stop_all_tasks()
+        self.camera1 = None
+        self.camera2 = None
         if MODE == "emulator":
 
             self.camera1 = CameraEmulator(1, self.jet_emulator)
@@ -1970,18 +1982,16 @@ class PlasmaMotorWindow(MotorWindow):
         elif vimba_is_available():
 
             id1, id2 = self.cam_settings_wind.cameras_ids()
-            if id1:
-                self.camera1 = Camera(id1, bandwidth=60000000)
-            else:
-                self.camera1 = None
+            try:
+                if id1:
+                    self.camera1 = Camera(id1, bandwidth=60000000)
 
-            if id2:
-                self.camera2 = Camera(id2, bandwidth=60000000)
-            else:
-                self.camera2 = None
-        else:
-            self.camera1 = None
-            self.camera2 = None
+                if id2:
+                    self.camera2 = Camera(id2, bandwidth=60000000)
+            except Exception as err:
+                logging.exception(err)
+                QMessageBox.warning(None, "Action fehlgeschlagen!",
+                                    "Es hat nicht geklappt, Kameras zu verbinden. Fehler:\n" + traceback.format_exc())
 
         self.change_camera()
         self.init_plasma_watcher()
@@ -1989,6 +1999,7 @@ class PlasmaMotorWindow(MotorWindow):
         # self.camera1 = Camera('DEV_000F314E840B', bandwidth=60000000)
         # self.camera2 = Camera('DEV_000F314E840A', bandwidth=60000000)
 
+    @pass_all_errors_with_massage('Videoaufnahme ist fehlgeschlagen!')
     def record(self):
 
         if self.camera is not None:
@@ -2026,9 +2037,11 @@ class PlasmaMotorWindow(MotorWindow):
             self.set_gain()
             self.set_exposure()
 
+    @pass_all_errors_with_massage('gain Änderung ist fehlgeschlagen!')
     def set_gain(self):
         self.camera.set_gain(int(self.gainEdit.text()))
 
+    @pass_all_errors_with_massage('exposure Änderung ist fehlgeschlagen!')
     def set_exposure(self):
         self.camera.set_exposure(int(self.exposeEdit.text()))
 
@@ -2073,8 +2086,10 @@ class PlasmaMotorWindow(MotorWindow):
         convert_to_Qt_format = QtGui.QImage(rgb_image.data, w, h, bytes_per_line, QtGui.QImage.Format.Format_RGB888)
         return QPixmap.fromImage(convert_to_Qt_format)
 
+    @pass_all_errors_with_massage('Kalibrierung des Plasmas ist fehlgeschlagen!')
     def calibr_plasma(self):
 
+        @pass_all_errors_with_massage('Kalibrierung des Plasmas ist fehlgeschlagen!')
         def in_thread():
 
             self.plasma_watcher.calibrate_plasma(mess_per_point=mess_per_point, on_the_spot=True,
@@ -2099,6 +2114,7 @@ class PlasmaMotorWindow(MotorWindow):
 
     def centre_nozzle(self):
 
+        @pass_all_errors_with_massage('Zentrieren des Jets  ist fehlgeschlagen!')
         def in_thread():
 
             self.plasma_watcher.centre_the_nozzle(stop_indicator=self.stop_indicator)
@@ -2116,11 +2132,18 @@ class PlasmaMotorWindow(MotorWindow):
     def calibr_enl(self):
 
         def in_thread():
-
-            report = self.plasma_watcher.calibrate_enl(init_step=100, rel_err=0.01, n_points=10,
-                                                       stop_indicator=self.stop_indicator)
-            print(report)
-            self.CalEnlBtn.setText("calibr enl")
+            g1, g2 = self.plasma_watcher.g1, self.plasma_watcher.g2
+            try:
+                report = self.plasma_watcher.calibrate_enl(init_step=100, rel_err=0.01, n_points=10,
+                                                           stop_indicator=self.stop_indicator)
+                print(report)
+                self.CalEnlBtn.setText("calibr enl")
+            except Exception as err:
+                logging.exception(err)
+                QMessageBox.warning(None, "Aktion fehlgeschlagen!",
+                                    "Messung der Vergrößerungen der Kameras ist fehlgeschlagen! Fehler:\n"
+                                    + traceback.format_exc())
+                self.plasma_watcher.g1, self.plasma_watcher.g2 = g1, g2
 
         if self.CalEnlBtn.text() == "calibr enl":
             self.stop_indicator.restore()
@@ -2144,22 +2167,27 @@ class PlasmaMotorWindow(MotorWindow):
 
         self.plasma_watcher.move_jet(shift_x, shift_z, units='displ')
 
-    def plus_step(self):
+    @m_err_handl_with_massage
+    def plus_step(self, checked=False):
         self.move_in_cam_coord(float(self.SchrittEdit.text()))
 
-    def minus_step(self):
+    @m_err_handl_with_massage
+    def minus_step(self, checked=False):
         self.move_in_cam_coord(-float(self.SchrittEdit.text()))
 
-    def stop(self):
+    @m_err_handl_with_massage
+    def stop(self, checked=False):
         self.plasma_watcher.jet_x.stop()
         self.plasma_watcher.jet_z.stop()
 
     def closeEvent(self, a0: QtGui.QCloseEvent):
 
-        if self.camera1 is not None:
-            self.camera1.stop_stream()
-        if self.camera2 is not None:
-            self.camera2.stop_stream()
+        for camera in [self.camera1, self.camera2]:
+            try:
+                if camera is not None:
+                    camera.stop_stream()
+            except Exception as err:
+                logging.exception(err)
         return super().closeEvent(a0)
 
 
@@ -2222,9 +2250,9 @@ class CamerasDialog(QWidget):
 
         if vimba_is_available():
             try:
-                cameras_list = get_cameras_list()
                 self.cam1_box.clear()
                 self.cam2_box.clear()
+                cameras_list = get_cameras_list()
                 for camera_id in cameras_list:
                     self.cam1_box.addItem(camera_id)
                     self.cam2_box.addItem(camera_id)
@@ -2238,7 +2266,7 @@ class CamerasDialog(QWidget):
             except Exception as err:
                 logging.exception(err)
                 QMessageBox.warning(None, "Action fehlgeschlagen!",
-                                    traceback.format_exc())
+                                    "Es hat nicht geklappt, Kameras IDs zu bekommen. Fehler:\n" + traceback.format_exc())
             else:
                 return
 
