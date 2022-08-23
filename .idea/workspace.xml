@@ -4,26 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="af26340a-193a-4aa8-bbc7-a5c0e335b84c" name="Default Changelist" comment="Fehler von Kameras handhaben">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/experiments/TCP_IP.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/TCP_IP.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/experiments/TCP_IP_Telnet.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/TCP_IP_Telnet.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mscontr/Demo_GUI/Demo_GUI.py" beforeDir="false" afterPath="$PROJECT_DIR$/mscontr/Demo_GUI/Demo_GUI.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mscontr/Demo_GUI/input/Phytron_Motoren_config.numbers" beforeDir="false" afterPath="$PROJECT_DIR$/mscontr/Demo_GUI/input/Phytron_Motoren_config.numbers" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mscontr/MainGUI/build-MainGUI-Desktop_Qt_5_12_5_clang_64bit-Debug/Debug/MainGUI.6a6acc72/.tmp/MainGUI" beforeDir="false" afterPath="$PROJECT_DIR$/mscontr/MainGUI/build-MainGUI-Desktop_Qt_5_12_5_clang_64bit-Debug/Debug/MainGUI.6a6acc72/.tmp/MainGUI" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mscontr/MainGUI/build-MainGUI-Desktop_Qt_5_12_5_clang_64bit-Debug/Debug/MainGUI.6a6acc72/MainGUI.app/Contents/MacOS/MainGUI" beforeDir="false" afterPath="$PROJECT_DIR$/mscontr/MainGUI/build-MainGUI-Desktop_Qt_5_12_5_clang_64bit-Debug/Debug/MainGUI.6a6acc72/MainGUI.app/Contents/MacOS/MainGUI" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mscontr/MainGUI/build-MainGUI-Desktop_Qt_5_12_5_clang_64bit-Debug/Debug/install-root/usr/local/Applications/MainGUI.app/Contents/MacOS/MainGUI" beforeDir="false" afterPath="$PROJECT_DIR$/mscontr/MainGUI/build-MainGUI-Desktop_Qt_5_12_5_clang_64bit-Debug/Debug/install-root/usr/local/Applications/MainGUI.app/Contents/MacOS/MainGUI" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mscontr/MainGUI/input/Jet_box_config.csv" beforeDir="false" afterPath="$PROJECT_DIR$/mscontr/MainGUI/input/Jet_box_config.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mscontr/MainGUI/input/MCC2_Motoren_config.csv" beforeDir="false" afterPath="$PROJECT_DIR$/mscontr/MainGUI/input/MCC2_Motoren_config.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mscontr/MainGUI/input/MCS2_Motoren_config.csv" beforeDir="false" afterPath="$PROJECT_DIR$/mscontr/MainGUI/input/MCS2_Motoren_config.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mscontr/MainGUI/input/MCS_Motoren_config.csv" beforeDir="false" afterPath="$PROJECT_DIR$/mscontr/MainGUI/input/MCS_Motoren_config.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mscontr/MainGUI/input/Phytron_Motoren_config.numbers" beforeDir="false" afterPath="$PROJECT_DIR$/mscontr/MainGUI/input/Phytron_Motoren_config.numbers" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mscontr/MainGUI/mcwidgets.py" beforeDir="false" afterPath="$PROJECT_DIR$/mscontr/MainGUI/mcwidgets.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mscontr/microwatcher/camera_interface.py" beforeDir="false" afterPath="$PROJECT_DIR$/mscontr/microwatcher/camera_interface.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mscontr/microwatcher/plasma_camera_emulator.py" beforeDir="false" afterPath="$PROJECT_DIR$/mscontr/microwatcher/plasma_camera_emulator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mscontr/microwatcher/plasma_watcher.py" beforeDir="false" afterPath="$PROJECT_DIR$/mscontr/microwatcher/plasma_watcher.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mscontr/microwatcher/vimba_camera.py" beforeDir="false" afterPath="$PROJECT_DIR$/mscontr/microwatcher/vimba_camera.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
+    <list default="true" id="af26340a-193a-4aa8-bbc7-a5c0e335b84c" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/mscontr/MainGUI/img/ML.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/mscontr/MainGUI/img/jet_mask.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/mscontr/MainGUI/img/main_view.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/mscontr/MainGUI/img/mittenstop_mask.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/mscontr/MainGUI/img/ml_mask.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/mscontr/MainGUI/img/probe_mask.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/mscontr/MainGUI/img/zplatte_mask.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/mscontr/MainGUI/input/Jet_box_config_emulator.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/mscontr/microwatcher/vimba_camera_pymba.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -488,7 +478,14 @@
       <option name="project" value="LOCAL" />
       <updated>1659744493789</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="Bug fix und Verbesserungen">
+      <created>1661279228026</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1661279228026</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -524,7 +521,8 @@
     <MESSAGE value="CamerasDialog" />
     <MESSAGE value="CalibrationWindow save_settings" />
     <MESSAGE value="Fehler von Kameras handhaben" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fehler von Kameras handhaben" />
+    <MESSAGE value="Bug fix und Verbesserungen" />
+    <option name="LAST_COMMIT_MESSAGE" value="Bug fix und Verbesserungen" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
