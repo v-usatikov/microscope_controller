@@ -5,9 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="af26340a-193a-4aa8-bbc7-a5c0e335b84c" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/mscontr/MainGUI/ui_forms/PlasmaMotorWindow.ui" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mscontr/MainGUI/ui_forms/main_window.ui" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/mscontr/MainGUI/data/_.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -493,7 +491,14 @@
       <option name="project" value="LOCAL" />
       <updated>1661281145464</updated>
     </task>
-    <option name="localTasksCounter" value="22" />
+    <task id="LOCAL-00022" summary="add ui Dateien">
+      <created>1661282147938</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1661282147938</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -532,7 +537,8 @@
     <MESSAGE value="Bug fix und Verbesserungen" />
     <MESSAGE value="Add Bilder und andere nötige Dateien" />
     <MESSAGE value=".idea Dateien" />
-    <option name="LAST_COMMIT_MESSAGE" value=".idea Dateien" />
+    <MESSAGE value="add ui Dateien" />
+    <option name="LAST_COMMIT_MESSAGE" value="add ui Dateien" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
