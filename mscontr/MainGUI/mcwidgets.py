@@ -1,5 +1,6 @@
 import logging
 import platform
+import shutil
 import threading
 import time
 import traceback
@@ -24,7 +25,7 @@ from graphic_ext.gr_field import Axes, Axis, RoundAxis
 from motor_controller import Motor
 import motor_controller as mc
 from motor_controller.Phytron_MCC2 import MCC2BoxSerial
-from motor_controller.interface import StandardStopIndicator, StopIndicator, WaitReporter
+from motor_controller.interface import StandardStopIndicator, StopIndicator, WaitReporter, FileReadError
 
 from mscontr.microwatcher.plasma_camera_emulator import JetEmulator, CameraEmulator
 from mscontr.microwatcher.plasma_watcher import PlasmaWatcher
@@ -59,6 +60,30 @@ def pass_all_errors_with_massage(mess: str = ''):
                 QMessageBox.warning(None, "Aktion fehlgeschlagen!", mess + " Fehler:\n" + traceback.format_exc())
         return inner
     return decorator
+
+
+def pass_all_errors_in_thread_with_massage(mess: str = '', action: Callable = None):
+    def decorator(func):
+        def inner(self, *args, **kwargs):
+            try:
+                func(self, *args, **kwargs)
+            except Exception as err:
+                logging.exception(err)
+                self.massage_signal.emit("error", "Aktion fehlgeschlagen!", mess + " Fehler:\n" + traceback.format_exc())
+                if action is not None:
+                    action()
+        return inner
+    return decorator
+
+
+def show_message(type: str = 'info', header: str = '', text: str = ''):
+
+    if type == 'error':
+        QMessageBox.warning(None, header, text)
+    elif type == 'info':
+        QMessageBox.information(None, header, text)
+    else:
+        raise ValueError('type muss "info" oder "error" sein!')
 
 
 class SampleNavigator(GraphicField):
@@ -214,7 +239,7 @@ class AktPositionSlider(QScrollBar):
         d_icon = 8
         h_icon = 4
         rund_k = 1
-        h_hint = 7
+        h_hint = 20
         height = self.height()
         hcenter = round(height / 2)
         width = self.width()
@@ -410,15 +435,16 @@ class MotorWidget(QGroupBox):
             else:
                 self.position = self.motor.position('displ')
 
-            if self.__first_position_read:
-                position0 = self.position
-                self.__first_position_read = False
-            self.position_NE = self.motor.transform_units(self.position, 'displ', 'norm')
-            self.AktPosEdit.setText(str(round(self.position, 4)))
-            if self.motor.is_calibratable():
-                self.APSlider.setValue(int(self.position_NE))
+            if not self.is_in_error_state:
+                if self.__first_position_read:
+                    position0 = self.position
+                    self.__first_position_read = False
+                self.position_NE = self.motor.transform_units(self.position, 'displ', 'norm')
+                self.AktPosEdit.setText(str(round(self.position, 4)))
+                if self.motor.is_calibratable():
+                    self.APSlider.setValue(int(self.position_NE))
 
-            if self.axis_p is not None and self.axis_m is not None:
+            if self.axis_p is not None and self.axis_m is not None and self.motor is not None:
                 shift = self.position - position0
                 shift = self.motor.transform_units(shift, 'displ', 'contr', rel=True)
                 tol = self.motor.communicator.tolerance
@@ -869,7 +895,10 @@ class ConnectionWindow(QWidget):
         self.mcc2_cw = MCC2_SerialConnectionWidget(self, "Phytron Box (MCC2)", 'input/MCC2_Motoren_config.csv')
         self.add_connection_widget(self.mcc2_cw)
 
-        self.mcc2_jet_cw = MCC2_SerialConnectionWidget(self, "Phytron Jet  (MCC2)", 'input/Jet_box_config.csv')
+        if MODE == 'emulator':
+            self.mcc2_jet_cw = MCC2_SerialConnectionWidget(self, "Phytron Jet  (MCC2)", 'input/Jet_box_config_emulator.csv')
+        else:
+            self.mcc2_jet_cw = MCC2_SerialConnectionWidget(self, "Phytron Jet  (MCC2)", 'input/Jet_box_config.csv')
         self.add_connection_widget(self.mcc2_jet_cw)
 
         self.mcs_cw = MCS_SerialConnectionWidget(self, "SmarAct (MCS)", 'input/MCS_Motoren_config.csv')
@@ -904,6 +933,8 @@ class ConnectionWindow(QWidget):
 
         self.error_reports: Dict[mc.Motor, int] = {}
 
+        self.make_saved_session_data_backup()
+
     def motor_error_report(self, motor: mc.Motor):
 
         if motor in self.error_reports.keys():
@@ -928,7 +959,7 @@ class ConnectionWindow(QWidget):
         for conn_widget in self.conn_widgets:
             box = conn_widget.box
             if box is not None:
-                motors_in_box = [box.motors()]
+                motors_in_box = list(box.motors())
                 if motor in motors_in_box:
                     conn_widget.disconnect_box()
                     return conn_widget.name
@@ -959,6 +990,16 @@ class ConnectionWindow(QWidget):
         self.show()
         self.raise_()
 
+    @pass_all_errors_with_massage('Die Erstellung einer Sicherheitskopie von den Sitzungsdaten ist fehlgeschlagen!')
+    def make_saved_session_data_backup(self, single_shot: bool = False):
+        """Macht eine Sicherheitskopie von saved_session_data. Macht nichts, wenn kein Kontroller verbunden ist."""
+
+        if self.boxes_cluster.boxes:
+            shutil.copyfile("data/saved_session_data.txt", "data/saved_session_data_backup.txt")
+
+        if not single_shot:
+            QtCore.QTimer.singleShot(30000, self.make_saved_session_data_backup)
+
     # def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
     #
     #     super(ConnectionWindow, self).closeEvent(a0)
@@ -980,6 +1021,7 @@ class ConnectionWidget(QHBoxLayout):
         self.emulator: mc.Phytron_MCC2.BoxEmulator | None = None
 
         self.box: mc.Box | None = None
+        self.connector: mc.Connector | None = None
 
     def is_connected(self) -> bool:
         """Gibt zuruck, ob den Kontroller verbunden wurde."""
@@ -1034,6 +1076,22 @@ class ConnectionWidget(QHBoxLayout):
             self.box.motors_cluster.read_saved_session_data()
         except FileNotFoundError:
             pass
+        except FileReadError:
+            mess = "Die Datei mit den gespeicherten Sitzungsdaten ist defekt!"
+            try:
+                self.box.motors_cluster.read_saved_session_data("data/saved_session_data_backup.txt")
+                shutil.copyfile("data/saved_session_data_backup.txt", "data/saved_session_data.txt")
+            except FileNotFoundError:
+                mess += " Keine Sicherheitskopie gefunden."
+            except FileReadError:
+                mess += " Die Sicherheitskopie ist auch defekt."
+            else:
+                mess += " Die Sitzungsdaten wurden von der Sicherheitskopie geladen."
+            finally:
+                logging.warning(mess)
+                QMessageBox.warning(self.conn_wind, "Fehler!", mess)
+
+
 
         self.conn_wind.boxes_cluster.add_box(self.box, self.name)
         self.conn_wind.controller_connected.emit(self.box.motors_cluster.motors)
@@ -1049,8 +1107,22 @@ class ConnectionWidget(QHBoxLayout):
             try:
                 self.box.close()
             except Exception:
+                print('box not closed')
                 pass
             self.box = None
+        self._disconnect_connector()
+        self.VerbButton.setText("verbinden")
+
+    def _disconnect_connector(self):
+
+        if self.connector is not None:
+            try:
+                self.connector.close()
+            except Exception as err:
+                self.box = None
+                logging.exception(err)
+                QMessageBox.warning(self.conn_wind, "Fehler!",
+                                    "Den Connector wurde nicht getrennt. Fehler:\n" + traceback.format_exc())
 
     def connection_btn_click(self):
 
@@ -1059,18 +1131,23 @@ class ConnectionWidget(QHBoxLayout):
                 self.connect_box()
             except Exception as err:
                 self.box = None
+                self._disconnect_connector()
                 logging.exception(err)
                 QMessageBox.warning(self.conn_wind, "Verbindung fehlgeschlagen!",
                                     traceback.format_exc())
             else:
-                self.VerbButton.setText("trennen")
-                QMessageBox.information(self.conn_wind, "Verbindung abgeschlossen!",
-                                        self.box.report)
+                if self.box.motors_cluster.motors:
+                    self.VerbButton.setText("trennen")
+                    QMessageBox.information(self.conn_wind, "Verbindung abgeschlossen!",
+                                            self.box.report)
+                else:
+                    QMessageBox.information(self.conn_wind, "Kein Kontroller gefunden!",
+                                            self.box.report)
+                    self.disconnect_box()
         else:
             self.box.stop()
             self.conn_wind.boxes_cluster.save_session_data()
             self.disconnect_box()
-            self.VerbButton.setText("verbinden")
 
 
 class SerialConnectionWidget(ConnectionWidget):
@@ -1164,6 +1241,7 @@ class MCC2_SerialConnectionWidget(SerialConnectionWidget):
     def get_communicator(self) -> mc.ContrCommunicator:
 
         connector = mc.Phytron_MCC2.MCC2SerialConnector(port=self.PortBox.currentText())
+        self.connector = connector
         return mc.Phytron_MCC2.MCC2Communicator(connector)
 
 
@@ -1174,6 +1252,7 @@ class MCS_SerialConnectionWidget(SerialConnectionWidget):
 
     def get_communicator(self) -> mc.ContrCommunicator:
         connector = mc.SmarAct_MCS.MCS_SerialConnector(port=self.PortBox.currentText())
+        self.connector = connector
         return mc.SmarAct_MCS.MCSCommunicator(connector)
 
 
@@ -1265,6 +1344,7 @@ class MCS2_EthernetConnectionWidget(EthernetConnectionWidget):
 
     def get_communicator(self) -> mc.ContrCommunicator:
         connector = mc.SmarAct_MCS2.MCS2_EthernetConnector(self.ipLine.text(), self.PortLine.text())
+        self.connector = connector
         return mc.SmarAct_MCS2.MCS2Communicator(connector)
 
 
@@ -1280,6 +1360,7 @@ class CalibrationWindow(QWidget):
 
     calibration_started = pyqtSignal([tuple])
     motor_is_ready = pyqtSignal(str)
+    massage_signal = pyqtSignal(str, str, str)
 
     def __init__(self, conn_wind: ConnectionWindow, motors_zones: Dict[str, Collection[str]]):
         super().__init__()
@@ -1321,6 +1402,8 @@ class CalibrationWindow(QWidget):
         self.all_callibr_btn.clicked.connect(self.calibrate_all)
         self.all_stopp_btn.clicked.connect(self.stop_all)
         self.all_parallel_check.stateChanged.connect(self.select_all_parallel_event)
+
+        self.massage_signal.connect(show_message)
 
         self.read_settings()
 
@@ -1512,11 +1595,27 @@ class CalibrationThread(QThread):
         calibration_reporter = GuiCalibrationReporter(self)
         stop_indicator = GuiStopIndicator(self)
 
-        self.calibr_wind.conn_wind.boxes_cluster.calibrate_motors(names_to_calibration=self.motors_names_to_calibration,
-                                                                  stop_indicator=stop_indicator,
-                                                                  reporter=calibration_reporter,
-                                                                  parallel=self.parallel)
+        traceback_text = ''
+        try:
+            self.calibr_wind.conn_wind.boxes_cluster.calibrate_motors(names_to_calibration=self.motors_names_to_calibration,
+                                                                      stop_indicator=stop_indicator,
+                                                                      reporter=calibration_reporter,
+                                                                      parallel=self.parallel)
+        except Exception as err:
+            logging.exception(err)
+            traceback_text = traceback.format_exc()
+            if not self.motors_in_calibration:
+                self.calibr_wind.massage_signal.emit('error', "Fehler!",
+                                                     'Während der Kalibrierung ist ein Fehler aufgetreten:\n'
+                                                     + traceback_text)
 
+        if self.motors_in_calibration:
+            err_message = f'Kalibrieren der Motors {self.motors_in_calibration} ist fehlgeschlagen.'
+            if traceback_text:
+                err_message += ' Fehler:\n' + traceback_text
+            self.calibr_wind.massage_signal.emit('error', "Kalibrieren fehlgeschlagen!", err_message)
+            self.motors_in_calibration = []
+            self.calibration_status_changed.emit()
         self.calibration_complete.emit()
 
 
@@ -1605,7 +1704,10 @@ class MotorWindow(QWidget):
                 motors.append(m_widget.motor)
         if motors:
             motors_cluster = mc.MotorsCluster(motors)
-            motors_cluster.save_session_data()
+            try:
+                motors_cluster.save_session_data()
+            except:
+                print("update_saved_session_data fehlgeschlagen")
 
         if not single_shot and not self.isHidden():
             QtCore.QTimer.singleShot(3000, self.update_saved_session_data)
@@ -1753,7 +1855,7 @@ class MicroscopZoneChema(GraphicField):
 
 
 MODE = "emulator"
-# MODE = "real"
+MODE = "real"
 
 
 def vimba_is_available() -> bool:
@@ -1768,6 +1870,7 @@ if vimba_is_available():
 
 class PlasmaMotorWindow(MotorWindow):
 
+    massage_signal = pyqtSignal(str, str, str)
     VideoField: VideoWidget
     checkBox_laser: QCheckBox
     gainEdit: QLineEdit
@@ -1778,6 +1881,7 @@ class PlasmaMotorWindow(MotorWindow):
     CalPlasmaBtn: QPushButton
     CalEnlBtn: QPushButton
     centreBtn: QPushButton
+    CalEnlBtn: QPushButton
     StopButton: QPushButton
     plusBtn: QPushButton
     minusBtn: QPushButton
@@ -1824,6 +1928,8 @@ class PlasmaMotorWindow(MotorWindow):
         self.exposeEdit.editingFinished.connect(self.set_exposure)
         self.comboBox_camera.currentTextChanged.connect(self.change_camera)
 
+        self.massage_signal.connect(show_message)
+
         self.exposeEdit.setValidator(QtGui.QIntValidator())
         self.gainEdit.setValidator(QtGui.QIntValidator())
 
@@ -1837,12 +1943,12 @@ class PlasmaMotorWindow(MotorWindow):
         self.camera2: Camera | None = None
         self.camera: Camera | None = None
 
+        self.cam_settings_wind = CamerasDialog(self)
+
         self.get_cameras()
 
         self.camera = self.camera1
         self.change_camera()
-
-        self.cam_settings_wind = CamerasDialog(self)
 
     def cam_settings(self):
 
@@ -1939,20 +2045,20 @@ class PlasmaMotorWindow(MotorWindow):
 
         if self.camera is not None:
             self.camera.connect_to_stream(self.show_frame)
-            try:
-                self.camera.start_stream()
-            except Exception as err:
-                logging.exception(err)
-                QMessageBox.warning(None, "Action fehlgeschlagen!",
-                                    "Es hat nicht geklappt, den Stream von der Kamera zu starten. "
-                                    "Fehler:\n" + traceback.format_exc())
-                return
+            if not self.isHidden():
+                try:
+                    self.camera.start_stream()
+                except Exception as err:
+                    logging.exception(err)
+                    QMessageBox.warning(None, "Action fehlgeschlagen!",
+                                        "Es hat nicht geklappt, den Stream von der Kamera zu starten. "
+                                        "Fehler:\n" + traceback.format_exc())
+                    return
 
-
-            self.VideoField.dark_bg_is_on = False
-            self.recordBtn.setEnabled(True)
-            self.gainEdit.setEnabled(True)
-            self.exposeEdit.setEnabled(True)
+                self.VideoField.dark_bg_is_on = False
+                self.recordBtn.setEnabled(True)
+                self.gainEdit.setEnabled(True)
+                self.exposeEdit.setEnabled(True)
 
             self._set_gain_exposure()
         else:
@@ -2000,7 +2106,7 @@ class PlasmaMotorWindow(MotorWindow):
         # self.camera2 = Camera('DEV_000F314E840A', bandwidth=60000000)
 
     @pass_all_errors_with_massage('Videoaufnahme ist fehlgeschlagen!')
-    def record(self):
+    def record(self, cheked=False):
 
         if self.camera is not None:
             if not self.is_recording:
@@ -2087,47 +2193,63 @@ class PlasmaMotorWindow(MotorWindow):
         return QPixmap.fromImage(convert_to_Qt_format)
 
     @pass_all_errors_with_massage('Kalibrierung des Plasmas ist fehlgeschlagen!')
-    def calibr_plasma(self):
+    def calibr_plasma(self, cheked=False):
 
-        @pass_all_errors_with_massage('Kalibrierung des Plasmas ist fehlgeschlagen!')
-        def in_thread():
+        def final_action():
+
+            self.CalPlasmaBtn.setText("calibr plasma")
+            self.centreBtn.setEnabled(True)
+            self.CalEnlBtn.setEnabled(True)
+
+        @pass_all_errors_in_thread_with_massage('Kalibrierung des Plasmas ist fehlgeschlagen!', final_action)
+        def in_thread(self):
 
             self.plasma_watcher.calibrate_plasma(mess_per_point=mess_per_point, on_the_spot=True,
                                                  stop_indicator=self.stop_indicator)
-            self.CalPlasmaBtn.setText("calibr plasma")
+            final_action()
 
         if self.CalPlasmaBtn.text() == "calibr plasma":
 
+            self.centreBtn.setEnabled(False)
+            self.CalEnlBtn.setEnabled(False)
+
             mess_per_point = 5
-            self.jet_emulator.flicker_sigma = 0.1
+            if self.jet_emulator is not None:
+                self.jet_emulator.flicker_sigma = 0.1
             self.stop_indicator.restore()
 
             self.checkBox_laser.setChecked(True)
             self.camera1.start_stream()
             self.camera2.start_stream()
 
-            threading.Thread(target=in_thread).start()
+            threading.Thread(target=in_thread, args=[self]).start()
             self.CalPlasmaBtn.setText("stop")
         elif self.CalPlasmaBtn.text() == "stop":
             self.stop_indicator.stop()
-            self.CalPlasmaBtn.setText("calibr plasma")
 
     def centre_nozzle(self):
 
-        @pass_all_errors_with_massage('Zentrieren des Jets  ist fehlgeschlagen!')
-        def in_thread():
+        def final_action():
+
+            self.centreBtn.setText("zentrieren")
+            self.CalPlasmaBtn.setEnabled(True)
+            self.CalEnlBtn.setEnabled(True)
+
+        @pass_all_errors_in_thread_with_massage('Zentrieren des Jets  ist fehlgeschlagen!', final_action)
+        def in_thread(self):
 
             self.plasma_watcher.centre_the_nozzle(stop_indicator=self.stop_indicator)
-            self.centreBtn.setText("zentrieren")
+            final_action()
 
         if self.centreBtn.text() == "zentrieren":
+            self.CalPlasmaBtn.setEnabled(False)
+            self.CalEnlBtn.setEnabled(False)
             self.stop_indicator.restore()
             self.checkBox_laser.setChecked(False)
-            threading.Thread(target=in_thread).start()
+            threading.Thread(target=in_thread, args=[self]).start()
             self.centreBtn.setText("stop")
         elif self.centreBtn.text() == "stop":
             self.stop_indicator.stop()
-            self.centreBtn.setText("zentrieren")
 
     def calibr_enl(self):
 
@@ -2137,22 +2259,31 @@ class PlasmaMotorWindow(MotorWindow):
                 report = self.plasma_watcher.calibrate_enl(init_step=100, rel_err=0.01, n_points=10,
                                                            stop_indicator=self.stop_indicator)
                 print(report)
-                self.CalEnlBtn.setText("calibr enl")
+                self.massage_signal.emit("info", "Aktion abgeschlossen.",
+                                       "Die Messung der Vergrößerungen der Kameras ist abgeschlossen:\n"
+                                       + report)
+                if self.stop_indicator.has_stop_requested():
+                    self.plasma_watcher.g1, self.plasma_watcher.g2 = g1, g2
             except Exception as err:
                 logging.exception(err)
-                QMessageBox.warning(None, "Aktion fehlgeschlagen!",
-                                    "Messung der Vergrößerungen der Kameras ist fehlgeschlagen! Fehler:\n"
-                                    + traceback.format_exc())
+                self.massage_signal.emit("error", "Aktion fehlgeschlagen!",
+                                       "Messung der Vergrößerungen der Kameras ist fehlgeschlagen! Fehler:\n"
+                                       + traceback.format_exc())
                 self.plasma_watcher.g1, self.plasma_watcher.g2 = g1, g2
+            finally:
+                self.CalEnlBtn.setText("calibr enl")
+                self.CalPlasmaBtn.setEnabled(True)
+                self.centreBtn.setEnabled(True)
 
         if self.CalEnlBtn.text() == "calibr enl":
+            self.CalPlasmaBtn.setEnabled(True)
+            self.centreBtn.setEnabled(True)
             self.stop_indicator.restore()
             self.checkBox_laser.setChecked(False)
             threading.Thread(target=in_thread).start()
             self.CalEnlBtn.setText("stop")
         elif self.CalEnlBtn.text() == "stop":
             self.stop_indicator.stop()
-            self.CalEnlBtn.setText("calibr enl")
 
     def move_in_cam_coord(self, shift: float):
 
@@ -2182,6 +2313,7 @@ class PlasmaMotorWindow(MotorWindow):
 
     def closeEvent(self, a0: QtGui.QCloseEvent):
 
+        self.stop_all_tasks()
         for camera in [self.camera1, self.camera2]:
             try:
                 if camera is not None:
@@ -2189,6 +2321,11 @@ class PlasmaMotorWindow(MotorWindow):
             except Exception as err:
                 logging.exception(err)
         return super().closeEvent(a0)
+
+    def showEvent(self, a0: QtGui.QShowEvent) -> None:
+
+        super(PlasmaMotorWindow, self).showEvent(a0)
+        self.change_camera()
 
 
 class CamerasDialog(QWidget):
@@ -2219,7 +2356,7 @@ class CamerasDialog(QWidget):
         self.apply_btn = QtWidgets.QPushButton('anwenden', self)
         self.grid.addWidget(self.apply_btn, 2, 0, 1, 2)
 
-        self.saved_ids: List[str, str] = []
+        self.saved_ids: List[str, str] = ['', '']
 
         self.read_saved_ids()
         self.refresh_list()
@@ -2259,9 +2396,9 @@ class CamerasDialog(QWidget):
 
                 if self.saved_ids:
                     id1, id2 = self.saved_ids
-                    if id1 in cameras_list:
+                    if id1 and id1 in cameras_list:
                         self.cam1_box.setCurrentText(id1)
-                    if id2 in cameras_list:
+                    if id2 and id2 in cameras_list:
                         self.cam2_box.setCurrentText(id2)
             except Exception as err:
                 logging.exception(err)
@@ -2276,7 +2413,7 @@ class CamerasDialog(QWidget):
     def save_last_ids(self):
         """Speichert Data uber die letzte Verbindung in der Datei."""
 
-        if self.saved_ids:
+        if self.saved_ids != ['', '']:
             with open('data/saved_camera_ids.txt', 'w') as f:
                 id1, id2 = self.saved_ids
                 f.write(id1 + '\n' + id2)
@@ -2289,9 +2426,9 @@ class CamerasDialog(QWidget):
                 lines = f.read().splitlines()
                 if len(lines) != 2:
                     logging.warning('saved_camera_ids Datei ist inkompatibel!')
-                    self.saved_ids = []
+                    self.saved_ids = ['', '']
                 else:
                     self.saved_ids = lines
         except FileNotFoundError:
-            self.saved_ids = []
+            self.saved_ids = ['', '']
 

@@ -1,4 +1,4 @@
-Motor Name;Bus;Achse;Mit Initiatoren(0 oder 1);Mit Encoder(0 oder 1);Einheiten;Umrechnungsfaktor;Sensor Type;max Frequency;max move Speed
-ZPlatte_X;0;0;0;1;mum;1000000;1;;
-ZPlatte_Y;0;1;0;1;mum;1000000;1;;
-ZPlatte_Z;0;2;0;1;mum;1000000;1;;
+Motor Name;Bus;Achse;Mit Initiatoren(0 oder 1);Mit Encoder(0 oder 1);Inversion(0 oder 1);Einheiten;Umrechnungsfaktor;Sensor Type;max Frequency;max move Speed
+ZPlatte_X;0;2;0;1;;mum;0.001;1;;
+ZPlatte_Y;0;1;0;1;1;mum;0.001;1;;
+ZPlatte_Z;0;0;0;1;;mum;0.001;1;;

@@ -73,7 +73,7 @@ class CameraInterf:
         frame = frame.copy()
         self._frame = frame
         self.new_frame_signal.set()
-        for action in self._connected_to_stream:
+        for action in self._connected_to_stream.copy():
             action(frame)
         sleep(self.stream_delay)
 

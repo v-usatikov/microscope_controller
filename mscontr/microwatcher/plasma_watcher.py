@@ -368,8 +368,7 @@ def find_plasma(frame: np.ndarray, HG: int = 254, crop_top: int = 0,  error_rais
     # show(img)
     # cv2.imwrite('plasma_det_old.png', img)
 
-
-    if conts is None or conts == []:
+    if conts is None or conts == ():
         # print(None)
         if error_raise:
             cv2.imwrite('PW_errors/no_plasma_error.png', frame)
@@ -519,7 +518,7 @@ def fit_the_data(x: np.ndarray, y: np.ndarray, model: str = 'linear', n_sigma: f
     out = mod.fit(y, pars, x=x)  # das eigentliche Fitten passiert hier
 
     if plot:
-        fig, gs = out.plot(numpoints=100)
+        fig = out.plot(numpoints=100)
         fig.show()
 
     if out.covar is not None:
@@ -644,16 +643,12 @@ class PlasmaWatcher:
 
         self.plasma_holder = PlasmaHolder(self, freq=1/3, brightness_tol=0.1)
         self._hold_plasma_is_on = False
-        self.dont_move = False  # ein Marker um automatische bewegungen wehrend der Messung zu verbitten
+        self.dont_move = False  # ein Marker um automatische bewegungen während der Messung zu verbitten
 
         self.camera1.connect_to_stream(self._new_frame1_event)
         self.camera2.connect_to_stream(self._new_frame2_event)
 
         self.displ_units = self.jet_z.config['display_units']
-
-        # self.
-
-
 
     def laser_on_mode(self):
         """Passt die einstellungen für die eingeschaltete Laser an."""
@@ -918,6 +913,7 @@ class PlasmaWatcher:
         # zum Mittelpunkt gehen
         # self.jet_x.go_to(500, units='norm', wait=True)
         # self.jet_z.go_to(500, units='norm', wait=True)
+        self.centre_the_nozzle(stop_indicator=stop_indicator)
 
         # g1 und g2 grob abschätzen
         x1_0_pixel = self._get_j_x1(error_raise=True)
@@ -930,15 +926,17 @@ class PlasmaWatcher:
             if stop_indicator is not None:
                 if stop_indicator.has_stop_requested():
                     return "stopped"
-        self.jet_z.go(jet_z_0_pos - self.jet_z.position('displ'), units='displ', wait=True, stop_indicator=stop_indicator)
 
+        delta_z_displ = self.jet_z.position('displ') - jet_z_0_pos
+
+        self.g1 = self.camera1_coord.mc_to_cc(0, delta_z_displ)[1] / (self._get_j_x1(error_raise=True) - x1_0_pixel)
+        self.g2 = self.camera2_coord.mc_to_cc(0, delta_z_displ)[1] / (self._get_j_x2(error_raise=True) - x2_0_pixel)
+
+        self.jet_z.go(jet_z_0_pos - self.jet_z.position('displ'), units='displ', wait=True,
+                      stop_indicator=stop_indicator)
         if stop_indicator is not None:
             if stop_indicator.has_stop_requested():
                 return "stopped"
-
-        delta_z_displ = self.jet_z.position('displ') - jet_z_0_pos
-        self.g1 = self.camera1_coord.mc_to_cc(0, delta_z_displ)[1] / (self._get_j_x1(error_raise=True) - x1_0_pixel)
-        self.g2 = self.camera2_coord.mc_to_cc(0, delta_z_displ)[1] / (self._get_j_x2(error_raise=True) - x2_0_pixel)
 
         # Messungen durchführen
         m_targets = np.linspace(-1/10, 1/10, n_points) * self.res_x
@@ -967,11 +965,11 @@ class PlasmaWatcher:
         self.g2 = koef2[0]
 
         report = f'Koeffizienten ({self.displ_units}/pixel):\n' \
-                 f'g1 = {koef1[0]} +- {err1[0]}\n' \
-                 f'g2 = {koef2[0]} +- {err2[0]}\n' \
+                 f'g1 = {koef1[0]:.4g} +- {err1[0]:.2g}\n' \
+                 f'g2 = {koef2[0]:.4g} +- {err2[0]:.2g}\n' \
                  f'Abweichung der Cameras vor Zentralposition ({self.displ_units}):\n' \
-                 f'Kamera1: {koef1[1]} +- {err1[1]}\n' \
-                 f'Kamera2: {koef2[1]} +- {err2[1]}\n'
+                 f'Kamera1: {koef1[1]:.4g} +- {err1[1]:.4g}\n' \
+                 f'Kamera2: {koef2[1]:.4g} +- {err2[1]:.4g}\n'
         return report
 
     def calibrate_plasma(self, ray_d: float = 70,
@@ -1150,7 +1148,8 @@ class PlasmaWatcher:
 
         # alle nötige Daten speichern
         self.pl_r_max = self.find_plasma()[3]
-        self.jett_laser_dz = self.jet_z.position('displ') - self.laser_z.position('displ')
+        if self.laser_z is not  None:
+            self.jett_laser_dz = self.jet_z.position('displ') - self.laser_z.position('displ')
 
         # plasma Zurück verschieben, wenn nötig
         if keep_position:

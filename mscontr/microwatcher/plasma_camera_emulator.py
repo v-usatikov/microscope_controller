@@ -250,8 +250,16 @@ class CameraEmulator(CameraInterf):
         else:
             raise ValueError(f'Camera id muss 1 oder 2 sein und nicht "{camera_id}"')
 
+        self.mode = 'single'
         self.stream_on = False
         self.fps = fps
+
+    def is_streaming(self) -> bool:
+
+        if self.mode == "stream":
+            return True
+        else:
+            return False
 
     def get_resolution(self) -> (int, int):
         return 2048, 1088

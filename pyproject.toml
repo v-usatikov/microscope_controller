@@ -11,12 +11,12 @@ logscolor = {git = "https://github.com/v-usatikov/logscolor.git"}
 graphic-ext = {git = "https://github.com/v-usatikov/graphic_ext.git"}
 motor-controller = {git = "https://github.com/v-usatikov/motor_controller.git"}#, develop = true}
 numpy = "^1"
-opencv-python = "^4"
 pymba = "^0"
 lmfit = "^1"
 matplotlib = "^3"
 vimbapython = {git = "https://github.com/alliedvision/VimbaPython.git"}
 pyserial = "^3.5"
+opencv-python = "^4.6.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"

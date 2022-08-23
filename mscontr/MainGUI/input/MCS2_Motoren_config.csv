@@ -1,3 +1,6 @@
-Motor Name;Bus;Achse;Mit Initiatoren(0 oder 1);Mit Encoder(0 oder 1);Einheiten;Umrechnungsfaktor;Positioner Type;Velocity;Acceleration
-CStoppX;1;0;1;1;pm;1;300;;
-CStoppY;1;1;1;1;pm;1;300;;
+Motor Name;Bus;Achse;Mit Initiatoren(0 oder 1);Mit Encoder(0 oder 1);Inversion(0 oder 1);Einheiten;Umrechnungsfaktor;Positioner Type;Velocity;Acceleration
+CStoppX;1;0;1;1;;mum;0.000001;300;;
+CStoppY;1;1;1;1;;mum;0.000001;300;;
+MirrorX;0;0;1;1;1;mum;0.000001;300;;
+MirrorY;0;1;1;1;1;mum;0.000001;300;;
+MirrorZ;0;2;1;1;;mum;0.000001;300;;

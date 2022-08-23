@@ -46,6 +46,7 @@ def get_cameras_list():
 
 
 class Camera(CameraInterf):
+
     def __init__(self, camera_id: str, bandwidth: Optional[int] = None):
         super().__init__()
         self._id = camera_id
@@ -135,19 +136,19 @@ class Camera(CameraInterf):
         return frame_ndarray
 
     def _new_frame_event(self, cam: VimbaCamera, frame: VimbaFrame):
-        print(frame.get_id(), frame.get_status())
+
+        # print(frame.get_id(), frame.get_status())
         if not frame.get_status():
             numpy_frame = frame.as_numpy_ndarray().reshape((1088, 2048))
             self.new_frame_event(numpy_frame)
         cam.queue_frame(frame)
 
     def __del__(self):
-        print(1)
+
         # self.stop_stream()
         self.camera.__exit__(*sys.exc_info())
-        print(2)
         self._vimba.__exit__(*sys.exc_info())
-        print(3)
+
 
 
 if __name__ == '__main__':
